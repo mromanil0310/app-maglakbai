@@ -1,0 +1,35 @@
+{
+  "name": "skillforge",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "scripts": {
+    "dev": "node node_modules/.bin/vite --port 8082",
+    "build": "node node_modules/.bin/vite build --outDir dist",
+    "serve": "python3 -m http.server 8083 --directory dist --bind 0.0.0.0",
+    "build:serve": "npm run build && npm run serve",
+    "ios": "expo start --ios",
+    "android": "expo start --android"
+  },
+  "dependencies": {
+    "@react-navigation/bottom-tabs": "^7.16.1",
+    "@react-navigation/native": "^7.2.4",
+    "@react-navigation/native-stack": "^7.15.1",
+    "expo": "^55.0.24",
+    "expo-status-bar": "~55.0.6",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-native": "0.76.9",
+    "react-native-safe-area-context": "^5.7.0",
+    "react-native-screens": "^4.25.0",
+    "react-native-web": "~0.19.13",
+    "zustand": "^5.0.13"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.25.2",
+    "@types/react": "~18.3.0",
+    "@vitejs/plugin-react": "^4.7.0",
+    "typescript": "~5.9.2",
+    "vite": "^5.4.21"
+  },
+  "private": true
+}

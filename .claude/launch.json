@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "skillforge-web",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["vite"],
+      "port": 8082,
+      "autoPort": true
+    }
+  ]
+}

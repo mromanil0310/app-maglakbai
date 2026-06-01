@@ -1,0 +1,27 @@
+{
+  "expo": {
+    "name": "SkillForge",
+    "slug": "skillforge",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#080810",
+    "splash": {
+      "backgroundColor": "#080810"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.skillforge.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#080810"
+      },
+      "package": "com.skillforge.app"
+    },
+    "web": {
+      "bundler": "metro",
+      "favicon": "./public/icon-192.png"
+    }
+  }
+}

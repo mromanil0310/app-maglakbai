@@ -1,0 +1,336 @@
+import React, { useRef, useEffect } from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { Text, View, Animated, TouchableOpacity, StyleSheet } from 'react-native';
+import { useThemeColors, Colors, FontSize, Spacing } from '../utils/theme';
+
+import { useAppStore } from '../store/appStore';
+
+import OnboardingScreen from '../screens/OnboardingScreen';
+import DashboardScreen from '../screens/DashboardScreen';
+import EvolveScreen from '../screens/EvolveScreen';
+import FeedScreen from '../screens/FeedScreen';
+import ProfileScreen from '../screens/ProfileScreen';
+import LogOutputScreen from '../screens/LogOutputScreen';
+import MilestoneScreen from '../screens/MilestoneScreen';
+import SettingsScreen from '../screens/SettingsScreen';
+import PortfolioScreen from '../screens/PortfolioScreen';
+
+// OPS-002: per-screen error boundaries so one crashing tab doesn't kill the whole app
+interface ScreenErrorState { error: Error | null }
+class ScreenErrorBoundary extends React.Component<
+  { children: React.ReactNode; screenName: string },
+  ScreenErrorState
+> {
+  state: ScreenErrorState = { error: null };
+  static getDerivedStateFromError(error: Error) { return { error }; }
+  render() {
+    if (this.state.error) {
+      return (
+        <View style={screenErrorStyles.container}>
+          <Text style={screenErrorStyles.emoji}>⚠️</Text>
+          <Text style={screenErrorStyles.title}>{this.props.screenName} failed to load</Text>
+          <Text style={screenErrorStyles.msg}>{this.state.error.message}</Text>
+          <TouchableOpacity
+            style={screenErrorStyles.retryBtn}
+            onPress={() => this.setState({ error: null })}
+          >
+            <Text style={screenErrorStyles.retryText}>Try Again</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+function withScreenBoundary<P extends object>(
+  Component: React.ComponentType<P>,
+  screenName: string
+): React.ComponentType<P> {
+  return (props: P) => (
+    <ScreenErrorBoundary screenName={screenName}>
+      <Component {...props} />
+    </ScreenErrorBoundary>
+  );
+}
+
+export type RootStackParamList = {
+  Onboarding: undefined;
+  Main: undefined;
+  MilestoneDetail: {
+    skillId: string;
+    xpGained: number;
+    leveledUp: boolean;
+    newLevel: number;
+  };
+  Settings: undefined;
+  Portfolio: undefined;
+};
+
+export type MainTabParamList = {
+  Home: undefined;
+  Feed: undefined;
+  Log: undefined;
+  Map: undefined;
+  Profile: undefined;
+};
+
+const Stack = createNativeStackNavigator<RootStackParamList>();
+const Tab = createBottomTabNavigator<MainTabParamList>();
+
+const GuardedDashboard = withScreenBoundary(DashboardScreen, 'Home');
+const GuardedFeed = withScreenBoundary(FeedScreen, 'Community');
+const GuardedLog = withScreenBoundary(LogOutputScreen, 'Log');
+const GuardedEvolve = withScreenBoundary(EvolveScreen, 'Evolve');
+const GuardedProfile = withScreenBoundary(ProfileScreen, 'Profile');
+const GuardedSettings = withScreenBoundary(SettingsScreen, 'Settings');
+
+function TabIcon({
+  icon,
+  label,
+  focused,
+}: {
+  icon: string;
+  label: string;
+  focused: boolean;
+}) {
+  return (
+    <View style={{ alignItems: 'center', gap: 3, paddingTop: 4 }}>
+      <Text
+        style={{
+          fontSize: 20,
+          opacity: focused ? 1 : 0.38,
+        }}
+      >
+        {icon}
+      </Text>
+    </View>
+  );
+}
+
+function LogTabIcon({ focused, isStreakAtRisk }: { focused: boolean; isStreakAtRisk: boolean }) {
+  const Colors = useThemeColors();
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    if (isStreakAtRisk) {
+      const loop = Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulseAnim, { toValue: 1.5, duration: 700, useNativeDriver: false }),
+          Animated.timing(pulseAnim, { toValue: 0.85, duration: 700, useNativeDriver: false }),
+        ])
+      );
+      loop.start();
+      return () => loop.stop();
+    } else {
+      pulseAnim.setValue(1);
+    }
+  }, [isStreakAtRisk]);
+
+  return (
+    <View style={{ position: 'relative', alignItems: 'center', justifyContent: 'center' }}>
+      <View
+        style={{
+          width: 46,
+          height: 46,
+          borderRadius: 23,
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginBottom: 10,
+          // @ts-ignore - web gradient
+          background: focused
+            ? 'linear-gradient(135deg, #A855F7, #4F46E5)'
+            : 'linear-gradient(135deg, #7C3AED, #4F46E5)',
+          backgroundColor: focused ? Colors.primaryLight : Colors.primary,
+          // @ts-ignore
+          boxShadow: focused
+            ? '0 0 20px rgba(168,85,247,0.7)'
+            : '0 0 12px rgba(124,58,237,0.4)',
+          shadowColor: Colors.primary,
+          shadowOffset: { width: 0, height: 0 },
+          shadowRadius: 12,
+          shadowOpacity: focused ? 0.8 : 0.4,
+          elevation: 8,
+        }}
+      >
+        <Text style={{ fontSize: 24, color: '#fff', fontWeight: '300', lineHeight: 28 }}>+</Text>
+      </View>
+      {isStreakAtRisk && (
+        <Animated.View
+          style={{
+            position: 'absolute',
+            top: 1,
+            right: 1,
+            width: 11,
+            height: 11,
+            borderRadius: 5.5,
+            backgroundColor: '#EF4444',
+            borderWidth: 1.5,
+            borderColor: Colors.bg,
+            transform: [{ scale: pulseAnim }],
+          }}
+        />
+      )}
+    </View>
+  );
+}
+
+function MainTabs() {
+  const Colors = useThemeColors();
+  const user = useAppStore((s) => s.user);
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const hasLoggedToday = user?.lastActiveDate === todayStr;
+  const isStreakAtRisk = !hasLoggedToday && (user?.streak ?? 0) > 0;
+
+  return (
+    <Tab.Navigator
+      screenOptions={{
+        headerShown: false,
+        tabBarStyle: {
+          backgroundColor: Colors.surface + 'D6',
+          borderTopColor: Colors.border,
+          borderTopWidth: 1,
+          height: 78,
+          paddingBottom: 'env(safe-area-inset-bottom, 10px)' as any,
+          paddingTop: 6,
+          // @ts-ignore - web only glassmorphism
+          backdropFilter: 'blur(24px)',
+          WebkitBackdropFilter: 'blur(24px)',
+        },
+        tabBarActiveTintColor: Colors.primaryLight,
+        tabBarInactiveTintColor: Colors.textMuted,
+        tabBarLabelStyle: {
+          fontSize: 10,
+          fontWeight: '600',
+          letterSpacing: 0.5,
+        },
+      }}
+    >
+      <Tab.Screen
+        name="Home"
+        component={GuardedDashboard}
+        options={{
+          tabBarLabel: 'Home',
+          tabBarAccessibilityLabel: 'Home tab',
+          tabBarIcon: ({ focused }) => (
+            <TabIcon icon="🏠" label="Home" focused={focused} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Feed"
+        component={GuardedFeed}
+        options={{
+          tabBarLabel: 'Community',
+          tabBarAccessibilityLabel: 'Community feed tab',
+          tabBarIcon: ({ focused }) => (
+            <TabIcon icon="🌐" label="Community" focused={focused} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Log"
+        component={GuardedLog}
+        options={{
+          tabBarLabel: '',
+          tabBarAccessibilityLabel: isStreakAtRisk ? 'Log output — streak at risk!' : 'Log output',
+          tabBarIcon: ({ focused }) => <LogTabIcon focused={focused} isStreakAtRisk={isStreakAtRisk} />,
+        }}
+      />
+      <Tab.Screen
+        name="Map"
+        component={GuardedEvolve}
+        options={{
+          tabBarLabel: 'Evolve',
+          tabBarAccessibilityLabel: 'Evolve — career milestone map',
+          tabBarIcon: ({ focused }) => (
+            <TabIcon icon="⚡" label="Evolve" focused={focused} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Profile"
+        component={GuardedProfile}
+        options={{
+          tabBarLabel: 'Profile',
+          tabBarAccessibilityLabel: 'Profile tab',
+          tabBarIcon: ({ focused }) => (
+            <TabIcon icon="👤" label="Profile" focused={focused} />
+          ),
+        }}
+      />
+    </Tab.Navigator>
+  );
+}
+
+export default function AppNavigator() {
+  const hasOnboarded = useAppStore((s) => s.hasOnboarded);
+
+  return (
+    <NavigationContainer>
+      <Stack.Navigator screenOptions={{ headerShown: false, animation: 'fade' }}>
+        {!hasOnboarded ? (
+          <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+        ) : (
+          <>
+            <Stack.Screen name="Main" component={MainTabs} />
+            <Stack.Screen
+              name="MilestoneDetail"
+              component={MilestoneScreen}
+              options={{ animation: 'slide_from_bottom', presentation: 'modal' }}
+            />
+            <Stack.Screen
+              name="Settings"
+              component={GuardedSettings}
+              options={{ animation: 'slide_from_bottom', presentation: 'modal' }}
+            />
+            <Stack.Screen
+              name="Portfolio"
+              component={PortfolioScreen}
+              options={{ animation: 'slide_from_right' }}
+            />
+          </>
+        )}
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}
+
+const screenErrorStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: Colors.bg,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: Spacing.xl,
+  },
+  emoji: { fontSize: 40, marginBottom: Spacing.md },
+  title: {
+    fontSize: FontSize.md,
+    fontWeight: '700',
+    color: Colors.text,
+    textAlign: 'center',
+    marginBottom: Spacing.sm,
+  },
+  msg: {
+    fontSize: FontSize.sm,
+    color: Colors.textSub,
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: Spacing.lg,
+    fontFamily: 'monospace',
+  },
+  retryBtn: {
+    backgroundColor: Colors.primary,
+    borderRadius: 999,
+    paddingHorizontal: Spacing.xl,
+    paddingVertical: 12,
+  },
+  retryText: {
+    fontSize: FontSize.base,
+    fontWeight: '700',
+    color: Colors.white,
+  },
+});

@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EvolveXP — Career Evolution Tracker</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #080810;
+  --bg-card: #11111C;
+  --bg-card2: #17172A;
+  --border: rgba(255,255,255,0.07);
+  --accent: #7C3AED;
+  --accent-light: #A855F7;
+  --accent-glow: rgba(124,58,237,0.22);
+  --accent2: #4F46E5;
+  --gold: #F59E0B;
+  --green: #10B981;
+  --text: #EEEEF8;
+  --text2: #8888AA;
+  --text3: #44446A;
+  --r: 16px;
+  --r-sm: 10px;
+}
+
+body {
+  background: #050508;
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.app {
+  width: 390px;
+  height: 844px;
+  background: var(--bg);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  border-radius: 48px;
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 60px 160px rgba(0,0,0,0.9), 0 0 0 1px rgba(255,255,255,0.03), inset 0 1px 0 rgba(255,255,255,0.06);
+}
+
+/* Screens */
+.screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  transform: translateX(16px);
+}
+.screen.active {
+  opacity: 1;
+  pointer-events: all;
+  transform: translateX(0);
+}
+
+.scroll-area {
+  flex: 1;
+  overflow-y: auto;
+  padding-bottom: 90px;
+}
+.scroll-area::-webkit-scrollbar { width: 0; }
+
+/* Header */
+.hdr {
+  padding: 52px 22px 14px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 10;
+}
+
+/* Bottom Nav */
+.bnav {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 82px;
+  background: rgba(8,8,16,0.92);
+  backdrop-filter: blur(24px);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-around;
+  padding: 10px 0 0;
+  z-index: 100;
+}
+.ni {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  cursor: pointer; padding: 8px 14px; border-radius: 12px;
+  transition: all 0.2s; opacity: 0.38;
+}
+.ni.active { opacity: 1; }
+.ni-icon { font-size: 22px; line-height: 1; }
+.ni-lbl { font-size: 10px; font-weight: 600; color: var(--text2); letter-spacing: 0.01em; }
+.ni.active .ni-lbl { color: var(--accent-light); }
+.ni.active .ni-icon { filter: drop-shadow(0 0 8px rgba(168,85,247,0.6)); }
+
+/* Cards */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 16px;
+  margin: 0 20px 10px;
+}
+
+/* XP Bar */
+.xptrack { width:100%; height:5px; background:rgba(255,255,255,0.07); border-radius:100px; overflow:hidden; }
+.xpfill { height:100%; background:linear-gradient(90deg,var(--accent2),var(--accent-light)); border-radius:100px; transition:width 1s cubic-bezier(0.22,1,0.36,1); box-shadow:0 0 10px var(--accent-glow); }
+
+/* Chips */
+.chip { display:inline-flex; align-items:center; gap:5px; background:rgba(255,255,255,0.05); border:1px solid var(--border); border-radius:100px; padding:3px 10px; font-size:11px; color:var(--text2); font-weight:500; }
+.chip.gold { background:rgba(245,158,11,0.1); border-color:rgba(245,158,11,0.2); color:var(--gold); }
+.chip.green { background:rgba(16,185,129,0.1); border-color:rgba(16,185,129,0.2); color:var(--green); }
+.chip.purple { background:var(--accent-glow); border-color:rgba(124,58,237,0.3); color:var(--accent-light); }
+
+/* Glow text */
+.gt { background:linear-gradient(135deg,#A855F7,#818CF8); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+
+/* Section headers */
+.sh { padding:2px 22px 10px; display:flex; align-items:center; justify-content:space-between; }
+.sh-title { font-size:15px; font-weight:700; }
+.sh-action { font-size:12px; color:var(--accent-light); cursor:pointer; font-weight:600; }
+
+/* Map nodes */
+.mnode { display:flex; align-items:center; gap:10px; margin-bottom:7px; position:relative; z-index:1; }
+.nicon { width:46px; height:46px; border-radius:13px; display:flex; align-items:center; justify-content:center; font-size:21px; flex-shrink:0; border:1px solid var(--border); transition:all 0.3s; cursor:pointer; }
+.nicon.done { background:linear-gradient(135deg,rgba(16,185,129,0.18),rgba(16,185,129,0.08)); border-color:rgba(16,185,129,0.35); box-shadow:0 0 18px rgba(16,185,129,0.12); }
+.nicon.prog { background:linear-gradient(135deg,rgba(124,58,237,0.2),rgba(124,58,237,0.08)); border-color:rgba(124,58,237,0.45); box-shadow:0 0 18px var(--accent-glow); animation:pglow 2.2s infinite; }
+.nicon.lock { background:rgba(255,255,255,0.025); border-color:rgba(255,255,255,0.04); filter:grayscale(1) opacity(0.35); }
+
+@keyframes pglow { 0%,100%{box-shadow:0 0 18px var(--accent-glow);}50%{box-shadow:0 0 32px rgba(124,58,237,0.38);} }
+
+.ncontent { flex:1; background:var(--bg-card); border:1px solid var(--border); border-radius:var(--r-sm); padding:11px 13px; transition:border-color 0.2s; cursor:pointer; }
+.ncontent:hover { border-color:rgba(124,58,237,0.25); }
+.ntitle { font-size:13px; font-weight:700; margin-bottom:3px; }
+.nsub { font-size:11px; color:var(--text2); }
+.nprog { display:flex; align-items:center; gap:8px; margin-top:7px; }
+.connector { width:2px; height:13px; margin:0 0 0 42px; }
+
+/* Buttons */
+.btn { display:inline-flex; align-items:center; gap:7px; padding:11px 18px; border-radius:11px; font-size:13px; font-weight:700; cursor:pointer; transition:all 0.18s; border:none; outline:none; font-family:inherit; }
+.btn-p { background:linear-gradient(135deg,var(--accent),var(--accent2)); color:#fff; box-shadow:0 4px 18px var(--accent-glow); }
+.btn-p:hover { transform:translateY(-1px); box-shadow:0 8px 28px var(--accent-glow); }
+.btn-p:active { transform:translateY(0); }
+.btn-s { background:rgba(255,255,255,0.05); border:1px solid var(--border); color:var(--text); }
+.btn-full { width:100%; justify-content:center; }
+
+/* Avatar */
+.av { width:38px; height:38px; border-radius:50%; background:linear-gradient(135deg,var(--accent),var(--accent2)); display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:800; flex-shrink:0; }
+
+/* Progress ring */
+.pring { position:relative; width:62px; height:62px; flex-shrink:0; }
+.pring svg { transform:rotate(-90deg); }
+.pring .tr { stroke:rgba(255,255,255,0.07); }
+.pring .fi { stroke:url(#grad); stroke-linecap:round; transition:stroke-dashoffset 1.2s cubic-bezier(0.22,1,0.36,1); }
+.pring-txt { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:800; }
+
+/* Feed post */
+.fpost { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--r); padding:15px; margin:0 20px 10px; transition:border-color 0.2s; }
+.fpost:hover { border-color:rgba(124,58,237,0.18); }
+.ph { display:flex; align-items:center; gap:10px; margin-bottom:11px; }
+.pname { font-size:13px; font-weight:700; }
+.pmeta { font-size:11px; color:var(--text2); margin-top:1px; }
+.pcard { background:linear-gradient(135deg,rgba(124,58,237,0.14),rgba(79,70,229,0.08)); border:1px solid rgba(124,58,237,0.18); border-radius:10px; padding:13px; margin:9px 0; }
+.pactions { display:flex; gap:14px; margin-top:11px; padding-top:11px; border-top:1px solid var(--border); }
+.abtn { display:flex; align-items:center; gap:5px; font-size:12px; color:var(--text2); cursor:pointer; padding:4px 7px; border-radius:7px; transition:all 0.18s; background:none; border:none; outline:none; font-family:inherit; }
+.abtn:hover { background:rgba(255,255,255,0.05); color:var(--text); }
+.abtn.on { color:var(--accent-light); }
+
+/* Form */
+.fgrp { margin:0 20px 14px; }
+.flbl { font-size:11px; font-weight:700; color:var(--text2); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:7px; display:block; }
+.finput, .fsel, .fta { width:100%; background:var(--bg-card); border:1px solid var(--border); border-radius:var(--r-sm); padding:11px 13px; font-size:13px; color:var(--text); outline:none; transition:border-color 0.18s; font-family:inherit; resize:none; }
+.finput:focus, .fsel:focus, .fta:focus { border-color:rgba(124,58,237,0.45); }
+.finput::placeholder, .fta::placeholder { color:var(--text3); }
+.fsel option { background:#1a1a28; }
+
+/* Type grid */
+.tgrid { display:grid; grid-template-columns:repeat(3,1fr); gap:7px; margin:0 20px 14px; }
+.tchip { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--r-sm); padding:9px 6px; text-align:center; cursor:pointer; transition:all 0.18s; font-size:11px; font-weight:600; color:var(--text2); }
+.tchip:hover { border-color:rgba(124,58,237,0.28); color:var(--text); }
+.tchip.sel { background:var(--accent-glow); border-color:rgba(124,58,237,0.45); color:var(--accent-light); }
+.tci { font-size:19px; display:block; margin-bottom:4px; }
+
+/* XP popup */
+.xp-ov { position:absolute; inset:0; background:rgba(0,0,0,0.72); z-index:400; opacity:0; pointer-events:none; transition:opacity 0.25s; backdrop-filter:blur(6px); border-radius:48px; }
+.xp-ov.show { opacity:1; pointer-events:all; }
+.xp-pop { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%) scale(0.5); background:var(--bg-card2); border:1px solid rgba(124,58,237,0.45); border-radius:22px; padding:28px 24px; text-align:center; z-index:401; opacity:0; pointer-events:none; transition:all 0.35s cubic-bezier(0.34,1.56,0.64,1); box-shadow:0 24px 80px rgba(0,0,0,0.9),0 0 60px var(--accent-glow); width:280px; }
+.xp-pop.show { opacity:1; pointer-events:all; transform:translate(-50%,-50%) scale(1); }
+
+/* Celebration */
+.cel-ov { position:absolute; inset:0; background:linear-gradient(160deg,rgba(109,40,217,0.97),rgba(67,56,202,0.99)); z-index:300; display:flex; flex-direction:column; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.4s; padding:36px 28px; text-align:center; border-radius:48px; }
+.cel-ov.show { opacity:1; pointer-events:all; }
+
+/* Confetti */
+.cp { position:absolute; border-radius:2px; animation:cfall 2.2s ease-in forwards; pointer-events:none; }
+@keyframes cfall { 0%{transform:translateY(-20px) rotate(0deg);opacity:1;} 100%{transform:translateY(500px) rotate(800deg);opacity:0;} }
+
+/* Notif dot */
+.ndot { width:8px; height:8px; background:var(--accent); border-radius:50%; position:absolute; top:1px; right:1px; box-shadow:0 0 7px var(--accent); border:1px solid var(--bg); }
+
+/* Tag */
+.tag { display:inline-block; padding:2px 7px; border-radius:5px; font-size:10px; font-weight:700; background:rgba(124,58,237,0.14); color:var(--accent-light); border:1px solid rgba(124,58,237,0.2); }
+.tag.rare { background:rgba(245,158,11,0.12); color:var(--gold); border-color:rgba(245,158,11,0.2); }
+.tag.green { background:rgba(16,185,129,0.12); color:var(--green); border-color:rgba(16,185,129,0.2); }
+
+/* Profile stat */
+.ps { text-align:center; flex:1; }
+.ps-val { font-size:22px; font-weight:900; }
+.ps-lbl { font-size:10px; color:var(--text2); margin-top:2px; font-weight:500; }
+
+/* LB item */
+.lbi { display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--border); }
+.lbi:last-child { border-bottom:none; }
+
+/* Divider */
+.div { height:1px; background:var(--border); margin:4px 20px 10px; }
+
+/* XP float */
+@keyframes fup { 0%{transform:translateY(0);opacity:1;} 100%{transform:translateY(-50px);opacity:0;} }
+.xpf { position:absolute; color:#A855F7; font-weight:900; font-size:16px; pointer-events:none; animation:fup 1.4s ease-out forwards; z-index:500; }
+
+/* Node modal */
+.nmodal-ov { position:absolute; inset:0; background:rgba(0,0,0,0.7); z-index:200; opacity:0; pointer-events:none; transition:opacity 0.2s; backdrop-filter:blur(6px); border-radius:48px; }
+.nmodal-ov.show { opacity:1; pointer-events:all; }
+.nmodal { position:absolute; bottom:0; left:0; right:0; background:var(--bg-card2); border:1px solid var(--border); border-radius:28px 28px 0 0; padding:24px 22px 100px; z-index:201; transform:translateY(100%); transition:transform 0.3s cubic-bezier(0.22,1,0.36,1); }
+.nmodal.show { transform:translateY(0); }
+
+@keyframes bounce { from{transform:scale(1) translateY(0);} to{transform:scale(1.08) translateY(-6px);} }
+</style>
+</head>
+<body>
+
+<!-- SVG gradient -->
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#4F46E5"/>
+      <stop offset="100%" style="stop-color:#A855F7"/>
+    </linearGradient>
+  </defs>
+</svg>
+
+<div class="app" id="app">
+
+  <!-- ═══════════ SCREEN: HOME ═══════════ -->
+  <div class="screen active" id="screen-home">
+    <div class="hdr" style="padding-bottom:0">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div>
+          <div style="font-size:11px;color:var(--text2);font-weight:500;margin-bottom:2px">Good morning, Biboy 👋</div>
+          <div style="font-size:21px;font-weight:900;letter-spacing:-0.02em">Career Evolution</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="chip gold">🔥 14 streak</div>
+          <div style="position:relative">
+            <div class="av">B</div>
+            <div class="ndot"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- XP Hero Card -->
+      <div style="background:var(--bg-card2);border:1px solid rgba(124,58,237,0.2);border-radius:var(--r);padding:15px;margin-bottom:14px;background:linear-gradient(135deg,rgba(124,58,237,0.1) 0%,var(--bg-card2) 100%)">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:11px">
+          <div>
+            <div style="font-size:11px;color:var(--text2);font-weight:600;margin-bottom:3px">LEVEL 8 · DATA ENGINEER</div>
+            <div style="font-size:26px;font-weight:900;letter-spacing:-0.02em" class="gt">2,450 XP</div>
+          </div>
+          <div class="pring">
+            <svg width="62" height="62">
+              <circle class="tr" cx="31" cy="31" r="25" fill="none" stroke-width="4"/>
+              <circle class="fi" cx="31" cy="31" r="25" fill="none" stroke-width="4" stroke-dasharray="157" stroke-dashoffset="55"/>
+            </svg>
+            <div class="pring-txt">65%</div>
+          </div>
+        </div>
+        <div class="xptrack"><div class="xpfill" style="width:65%"></div></div>
+        <div style="display:flex;justify-content:space-between;margin-top:5px">
+          <span style="font-size:11px;color:var(--text2)">2,450 / 3,800 XP → Level 9</span>
+          <span style="font-size:11px;color:var(--accent-light);font-weight:600">+150 XP today ↑</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="scroll-area">
+      <div class="sh">
+        <div>
+          <div class="sh-title">Data Architect Path</div>
+          <div style="font-size:11px;color:var(--text2);margin-top:2px">32% complete · 4 skills remaining</div>
+        </div>
+        <div class="chip purple">32% ▲</div>
+      </div>
+
+      <!-- Evolution Map -->
+      <div style="padding:0 20px">
+
+        <!-- Node 1: Complete -->
+        <div class="mnode">
+          <div class="nicon done" onclick="openNodeModal('sql')">🗄️</div>
+          <div class="ncontent" onclick="openNodeModal('sql')">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <div class="ntitle">SQL Foundations</div>
+              <div class="chip green" style="font-size:10px;padding:2px 8px">✅ Complete</div>
+            </div>
+            <div class="nsub">3 projects logged · 450 XP earned</div>
+          </div>
+        </div>
+        <div class="connector" style="background:linear-gradient(180deg,var(--green),var(--border));opacity:0.4"></div>
+
+        <!-- Node 2: In Progress -->
+        <div class="mnode">
+          <div class="nicon prog" onclick="openNodeModal('python')">🐍</div>
+          <div class="ncontent" onclick="openNodeModal('python')" style="border-color:rgba(124,58,237,0.3)">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <div class="ntitle">Python Automation</div>
+              <div class="chip purple" style="font-size:10px;padding:2px 8px">🔄 In Progress</div>
+            </div>
+            <div class="nsub">2 of 5 outputs logged</div>
+            <div class="nprog">
+              <div class="xptrack" style="flex:1"><div class="xpfill" style="width:40%"></div></div>
+              <span style="font-size:11px;color:var(--text2)">40%</span>
+            </div>
+          </div>
+        </div>
+        <div class="connector" style="background:var(--border)"></div>
+
+        <!-- Node 3: In Progress -->
+        <div class="mnode">
+          <div class="nicon prog" onclick="openNodeModal('modeling')" style="animation-delay:0.8s">🏗️</div>
+          <div class="ncontent" onclick="openNodeModal('modeling')" style="border-color:rgba(124,58,237,0.18)">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <div class="ntitle">Data Modeling</div>
+              <div class="chip purple" style="font-size:10px;padding:2px 8px">🔄 In Progress</div>
+            </div>
+            <div class="nsub">📖 Reading: Data Warehouse Toolkit</div>
+            <div class="nprog">
+              <div class="xptrack" style="flex:1"><div class="xpfill" style="width:25%"></div></div>
+              <span style="font-size:11px;color:var(--text2)">25%</span>
+            </div>
+          </div>
+        </div>
+        <div class="connector" style="background:var(--border)"></div>
+
+        <!-- Node 4: Locked -->
+        <div class="mnode">
+          <div class="nicon lock">❄️</div>
+          <div class="ncontent" style="opacity:0.45;cursor:default">
+            <div class="ntitle">Snowflake Engineering</div>
+            <div class="nsub">🔒 Unlock after Python Automation</div>
+          </div>
+        </div>
+        <div class="connector" style="background:var(--border)"></div>
+
+        <!-- Node 5: Locked -->
+        <div class="mnode" style="margin-bottom:18px">
+          <div class="nicon lock">🤖</div>
+          <div class="ncontent" style="opacity:0.45;cursor:default">
+            <div class="ntitle">AI Workflow Design</div>
+            <div class="nsub">🔒 Complete Data Modeling first</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="div"></div>
+
+      <!-- Recent Outputs -->
+      <div class="sh">
+        <div class="sh-title">Recent Outputs</div>
+        <div class="sh-action" onclick="navigate('log')">+ Log New</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:7px;padding:0 20px;margin-bottom:8px">
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-sm);padding:11px 13px;display:flex;align-items:center;gap:10px">
+          <div style="font-size:21px">🐍</div>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:700">ETL Pipeline with Pandas</div>
+            <div style="font-size:11px;color:var(--text2)">Python Automation · 2h ago · <span style="color:var(--accent-light);font-weight:700">+75 XP</span></div>
+          </div>
+          <div class="tag">Project</div>
+        </div>
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-sm);padding:11px 13px;display:flex;align-items:center;gap:10px">
+          <div style="font-size:21px">📖</div>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:700">Atomic Habits — Chapter 12</div>
+            <div style="font-size:11px;color:var(--text2)">Books · 1d ago · <span style="color:var(--accent-light);font-weight:700">+30 XP</span></div>
+          </div>
+          <div class="tag">Book</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ SCREEN: LOG OUTPUT ═══════════ -->
+  <div class="screen" id="screen-log">
+    <div class="hdr">
+      <div style="font-size:21px;font-weight:900;letter-spacing:-0.02em;margin-bottom:3px">Log Output</div>
+      <div style="font-size:13px;color:var(--text2)">What did you build or learn today?</div>
+    </div>
+    <div class="scroll-area" style="padding-top:6px">
+
+      <div style="padding:0 20px;margin-bottom:6px">
+        <span class="flbl">Output Type</span>
+      </div>
+      <div class="tgrid">
+        <div class="tchip sel" onclick="selType(this)"><span class="tci">🛠️</span>Project</div>
+        <div class="tchip" onclick="selType(this)"><span class="tci">📖</span>Book</div>
+        <div class="tchip" onclick="selType(this)"><span class="tci">🏆</span>Cert</div>
+        <div class="tchip" onclick="selType(this)"><span class="tci">💻</span>Script</div>
+        <div class="tchip" onclick="selType(this)"><span class="tci">🏗️</span>Design</div>
+        <div class="tchip" onclick="selType(this)"><span class="tci">🔗</span>GitHub</div>
+      </div>
+
+      <div class="fgrp">
+        <label class="flbl">Title</label>
+        <input class="finput" id="otitle" placeholder="e.g. Snowflake Data Pipeline…">
+      </div>
+      <div class="fgrp">
+        <label class="flbl">Skill Area</label>
+        <select class="fsel">
+          <option>Python Automation</option>
+          <option>SQL Foundations</option>
+          <option>Data Modeling</option>
+          <option>Snowflake Engineering</option>
+          <option>AI Workflow Design</option>
+        </select>
+      </div>
+      <div class="fgrp">
+        <label class="flbl">Description</label>
+        <textarea class="fta" rows="3" placeholder="Describe what you built, learned, or completed…"></textarea>
+      </div>
+      <div class="fgrp">
+        <label class="flbl">Link (optional)</label>
+        <input class="finput" placeholder="GitHub, Notion, or portfolio link…">
+      </div>
+
+      <!-- XP preview -->
+      <div style="margin:0 20px 18px;padding:13px 15px;background:linear-gradient(135deg,rgba(124,58,237,0.14),rgba(79,70,229,0.08));border:1px solid rgba(124,58,237,0.2);border-radius:var(--r-sm);display:flex;align-items:center;gap:12px">
+        <div style="font-size:28px">⚡</div>
+        <div>
+          <div style="font-size:14px;font-weight:800">+75 XP</div>
+          <div style="font-size:11px;color:var(--text2)">Project output reward</div>
+        </div>
+        <div style="margin-left:auto;text-align:right">
+          <div style="font-size:11px;color:var(--accent-light);font-weight:700">Streak bonus</div>
+          <div style="font-size:11px;color:var(--text2)">+25 XP</div>
+        </div>
+      </div>
+
+      <div style="padding:0 20px 20px">
+        <button class="btn btn-p btn-full" onclick="logOutput()">🚀 Log Output &amp; Earn XP</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ SCREEN: MILESTONES ═══════════ -->
+  <div class="screen" id="screen-milestones">
+    <div class="hdr">
+      <div style="font-size:21px;font-weight:900;letter-spacing:-0.02em;margin-bottom:3px">Milestones</div>
+      <div style="font-size:13px;color:var(--text2)">Your proof-of-work gallery</div>
+    </div>
+    <div class="scroll-area" style="padding-top:6px">
+
+      <div class="card" style="display:flex;gap:0;padding:14px 10px">
+        <div class="ps"><div class="ps-val gt">12</div><div class="ps-lbl">Milestones</div></div>
+        <div style="width:1px;background:var(--border)"></div>
+        <div class="ps"><div class="ps-val" style="color:var(--gold)">2,450</div><div class="ps-lbl">Total XP</div></div>
+        <div style="width:1px;background:var(--border)"></div>
+        <div class="ps"><div class="ps-val" style="color:var(--green)">14</div><div class="ps-lbl">Day Streak</div></div>
+      </div>
+
+      <div class="sh" style="padding-top:6px">
+        <div class="sh-title">Earned Milestones</div>
+        <div class="sh-action">Filter ▾</div>
+      </div>
+
+      <!-- Milestone: SQL Complete -->
+      <div class="card" style="cursor:pointer;background:linear-gradient(135deg,rgba(16,185,129,0.09),var(--bg-card))" onclick="triggerCelebration('sql')">
+        <div style="display:flex;align-items:flex-start;gap:11px">
+          <div style="font-size:34px;margin-top:2px">🏆</div>
+          <div style="flex:1">
+            <div style="display:flex;align-items:center;gap:7px;margin-bottom:4px">
+              <div style="font-size:14px;font-weight:800">SQL Foundations Master</div>
+              <div class="tag rare">Rare</div>
+            </div>
+            <div style="font-size:11px;color:var(--text2);margin-bottom:9px;line-height:1.5">Completed all SQL Foundations skills with 3 proof-of-work projects and query optimizations.</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <div class="chip" style="font-size:10px">📅 May 10, 2026</div>
+              <div class="chip gold" style="font-size:10px">⚡ 450 XP</div>
+              <div class="chip" style="font-size:10px">👁 128 views</div>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:11px;padding-top:11px;border-top:1px solid var(--border);display:flex;gap:7px">
+          <button class="btn btn-s" style="flex:1;font-size:11px;padding:7px 10px" onclick="event.stopPropagation();genPost()">✨ Generate Post</button>
+          <button class="btn btn-p" style="flex:1;font-size:11px;padding:7px 10px" onclick="event.stopPropagation()">📤 Share</button>
+        </div>
+      </div>
+
+      <!-- Milestone: Python Builder -->
+      <div class="card" onclick="triggerCelebration('python')" style="cursor:pointer">
+        <div style="display:flex;align-items:flex-start;gap:11px">
+          <div style="font-size:34px;margin-top:2px">🐍</div>
+          <div style="flex:1">
+            <div style="display:flex;align-items:center;gap:7px;margin-bottom:4px">
+              <div style="font-size:14px;font-weight:800">Python Builder</div>
+              <div class="tag">Uncommon</div>
+            </div>
+            <div style="font-size:11px;color:var(--text2);margin-bottom:9px;line-height:1.5">Built 2 automation scripts and completed Python fundamentals path.</div>
+            <div style="display:flex;gap:6px">
+              <div class="chip" style="font-size:10px">📅 May 8, 2026</div>
+              <div class="chip gold" style="font-size:10px">⚡ 200 XP</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Milestone: Streak -->
+      <div class="card">
+        <div style="display:flex;align-items:flex-start;gap:11px">
+          <div style="font-size:34px;margin-top:2px">🔥</div>
+          <div style="flex:1">
+            <div style="display:flex;align-items:center;gap:7px;margin-bottom:4px">
+              <div style="font-size:14px;font-weight:800">7-Day Streak</div>
+              <div class="tag" style="background:rgba(245,158,11,0.1);color:var(--gold);border-color:rgba(245,158,11,0.2)">Common</div>
+            </div>
+            <div style="font-size:11px;color:var(--text2);margin-bottom:9px">Logged outputs consistently for 7 days straight.</div>
+            <div style="display:flex;gap:6px">
+              <div class="chip" style="font-size:10px">📅 May 4, 2026</div>
+              <div class="chip gold" style="font-size:10px">⚡ 100 XP</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════ SCREEN: FEED ═══════════ -->
+  <div class="screen" id="screen-feed">
+    <div class="hdr">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div style="font-size:21px;font-weight:900;letter-spacing:-0.02em">Community Feed</div>
+          <div style="font-size:12px;color:var(--text2);margin-top:2px">See who's leveling up</div>
+        </div>
+        <div class="chip purple" style="animation:pglow 2s infinite">🟣 Live</div>
+      </div>
+    </div>
+    <div class="scroll-area" style="padding-top:6px">
+
+      <!-- Leaderboard -->
+      <div class="card" style="background:linear-gradient(135deg,rgba(245,158,11,0.08),var(--bg-card))">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:11px">
+          <div style="font-size:13px;font-weight:800">🏅 Weekly Leaderboard</div>
+          <div class="sh-action" style="font-size:11px">View All →</div>
+        </div>
+        <div class="lbi">
+          <div style="width:22px;font-size:14px;font-weight:800;color:var(--gold)">🥇</div>
+          <div class="av" style="width:30px;height:30px;font-size:12px;background:linear-gradient(135deg,#10B981,#059669)">J</div>
+          <div style="flex:1"><div style="font-size:12px;font-weight:700">Janelle P.</div><div style="font-size:10px;color:var(--text2)">AI Engineer Path</div></div>
+          <div style="font-size:13px;font-weight:800;color:var(--gold)">1,240 XP</div>
+        </div>
+        <div class="lbi">
+          <div style="width:22px;font-size:14px;font-weight:800;color:var(--text2)">🥈</div>
+          <div class="av" style="width:30px;height:30px;font-size:12px;background:linear-gradient(135deg,#0EA5E9,#2563EB)">M</div>
+          <div style="flex:1"><div style="font-size:12px;font-weight:700">Marco D.</div><div style="font-size:10px;color:var(--text2)">Data Architect</div></div>
+          <div style="font-size:13px;font-weight:800;color:var(--text2)">980 XP</div>
+        </div>
+        <div class="lbi" style="background:rgba(124,58,237,0.07);border-radius:8px;padding:8px 6px;border-bottom:none;margin:-1px -1px 0">
+          <div style="width:22px;font-size:11px;font-weight:800;color:var(--accent-light)">4th</div>
+          <div class="av" style="width:30px;height:30px;font-size:12px">B</div>
+          <div style="flex:1"><div style="font-size:12px;font-weight:700">You</div><div style="font-size:10px;color:var(--text2)">Data Architect</div></div>
+          <div style="font-size:13px;font-weight:800;color:var(--accent-light)">750 XP</div>
+        </div>
+      </div>
+
+      <!-- Post 1 -->
+      <div class="fpost">
+        <div class="ph">
+          <div class="av" style="background:linear-gradient(135deg,#10B981,#059669)">J</div>
+          <div>
+            <div class="pname">Janelle Patricio</div>
+            <div class="pmeta">AI Engineer · Level 11 · 2h ago</div>
+          </div>
+          <button class="btn btn-s" style="padding:5px 11px;font-size:11px;margin-left:auto">Follow</button>
+        </div>
+        <div class="pcard">
+          <div style="font-size:10px;color:var(--accent-light);font-weight:800;letter-spacing:0.1em;margin-bottom:5px">🚀 MILESTONE UNLOCKED</div>
+          <div style="font-size:14px;font-weight:800;margin-bottom:6px">Prompt Engineering Complete</div>
+          <div style="font-size:12px;color:var(--text2);line-height:1.55">Built 4 production-ready AI agents using GPT-4 and Claude. Deployed a RAG chatbot for customer support with 87% deflection rate.</div>
+          <div style="margin-top:9px;display:flex;gap:6px;flex-wrap:wrap">
+            <div class="tag">#AIEngineering</div>
+            <div class="tag">#PromptEng</div>
+            <div class="tag">#LLMs</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
+          <div class="chip" style="font-size:10px">AI Engineer 68% ⚡</div>
+          <div class="chip gold" style="font-size:10px">🔥 21-day streak</div>
+        </div>
+        <div class="pactions">
+          <button class="abtn" id="react-1" onclick="toggleReact('1','react-1','rc1')"><span>⚡</span><span id="rc1">47</span></button>
+          <button class="abtn"><span>💬</span><span>12</span></button>
+          <button class="abtn"><span>🔁</span><span>8</span></button>
+          <button class="abtn" style="margin-left:auto"><span>↗️</span></button>
+        </div>
+      </div>
+
+      <!-- Post 2 -->
+      <div class="fpost">
+        <div class="ph">
+          <div class="av" style="background:linear-gradient(135deg,#F59E0B,#D97706)">R</div>
+          <div>
+            <div class="pname">Rogelio Santos</div>
+            <div class="pmeta">Data Architect · Level 9 · 5h ago</div>
+          </div>
+        </div>
+        <div class="pcard" style="background:linear-gradient(135deg,rgba(245,158,11,0.13),rgba(245,158,11,0.05));border-color:rgba(245,158,11,0.2)">
+          <div style="font-size:10px;color:var(--gold);font-weight:800;letter-spacing:0.1em;margin-bottom:5px">📖 BOOK COMPLETED</div>
+          <div style="font-size:14px;font-weight:800;margin-bottom:6px">The Data Warehouse Toolkit</div>
+          <div style="font-size:12px;color:var(--text2);line-height:1.55">Extracted 18 actionable insights on dimensional modeling. Key: slowly changing dimensions are the foundation of robust data architecture.</div>
+        </div>
+        <div class="pactions">
+          <button class="abtn" id="react-2" onclick="toggleReact('2','react-2','rc2')"><span>⚡</span><span id="rc2">23</span></button>
+          <button class="abtn"><span>💬</span><span>5</span></button>
+          <button class="abtn"><span>🔁</span><span>3</span></button>
+        </div>
+      </div>
+
+      <!-- Post 3 -->
+      <div class="fpost">
+        <div class="ph">
+          <div class="av" style="background:linear-gradient(135deg,#EC4899,#DB2777)">A</div>
+          <div>
+            <div class="pname">Ana Cruz</div>
+            <div class="pmeta">ML Engineer · Level 7 · 1d ago</div>
+          </div>
+          <button class="btn btn-s" style="padding:5px 11px;font-size:11px;margin-left:auto">Follow</button>
+        </div>
+        <div class="pcard" style="background:linear-gradient(135deg,rgba(236,72,153,0.13),rgba(236,72,153,0.05));border-color:rgba(236,72,153,0.2)">
+          <div style="font-size:10px;color:#EC4899;font-weight:800;letter-spacing:0.1em;margin-bottom:5px">🏆 CERTIFICATION EARNED</div>
+          <div style="font-size:14px;font-weight:800;margin-bottom:6px">AWS Cloud Practitioner</div>
+          <div style="font-size:12px;color:var(--text2);line-height:1.55">Passed on my first attempt! Spent 3 weeks studying cloud fundamentals alongside my ML coursework.</div>
+        </div>
+        <div class="pactions">
+          <button class="abtn" id="react-3" onclick="toggleReact('3','react-3','rc3')"><span>⚡</span><span id="rc3">61</span></button>
+          <button class="abtn"><span>💬</span><span>19</span></button>
+          <button class="abtn"><span>🔁</span><span>14</span></button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════ SCREEN: PROFILE ═══════════ -->
+  <div class="screen" id="screen-profile">
+    <div class="hdr" style="text-align:center;padding-top:56px;padding-bottom:16px">
+      <div class="av" style="width:70px;height:70px;font-size:26px;font-weight:900;margin:0 auto 11px;border:2.5px solid rgba(124,58,237,0.5);box-shadow:0 0 36px var(--accent-glow)">B</div>
+      <div style="font-size:20px;font-weight:900;letter-spacing:-0.01em">Biboy Romanillos</div>
+      <div style="font-size:12px;color:var(--text2);margin:3px 0 10px">Data Architect Path · Level 8</div>
+      <div style="display:flex;justify-content:center;gap:7px">
+        <div class="chip purple">Data Engineer</div>
+        <div class="chip gold">🔥 14-day streak</div>
+      </div>
+    </div>
+    <div class="scroll-area" style="padding-top:2px">
+      <div class="card" style="display:flex;gap:0;padding:13px 8px">
+        <div class="ps"><div class="ps-val gt">2,450</div><div class="ps-lbl">Total XP</div></div>
+        <div style="width:1px;background:var(--border)"></div>
+        <div class="ps"><div class="ps-val" style="color:var(--green)">12</div><div class="ps-lbl">Milestones</div></div>
+        <div style="width:1px;background:var(--border)"></div>
+        <div class="ps"><div class="ps-val" style="color:var(--gold)">38</div><div class="ps-lbl">Followers</div></div>
+      </div>
+
+      <div class="sh" style="padding-top:6px">
+        <div class="sh-title">Career Progress</div>
+        <div class="sh-action" onclick="navigate('home')">View Map →</div>
+      </div>
+      <div class="card">
+        <div style="margin-bottom:13px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+            <div style="font-size:12px;font-weight:700">🗄️ SQL Foundations</div>
+            <div style="font-size:11px;color:var(--green);font-weight:700">100% ✅</div>
+          </div>
+          <div class="xptrack"><div class="xpfill" style="width:100%;background:linear-gradient(90deg,var(--green),#34D399)"></div></div>
+        </div>
+        <div style="margin-bottom:13px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+            <div style="font-size:12px;font-weight:700">🐍 Python Automation</div>
+            <div style="font-size:11px;color:var(--accent-light);font-weight:700">40%</div>
+          </div>
+          <div class="xptrack"><div class="xpfill" style="width:40%"></div></div>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+            <div style="font-size:12px;font-weight:700">🏗️ Data Modeling</div>
+            <div style="font-size:11px;color:var(--accent-light);font-weight:700">25%</div>
+          </div>
+          <div class="xptrack"><div class="xpfill" style="width:25%"></div></div>
+        </div>
+      </div>
+
+      <div class="sh">
+        <div class="sh-title">Proof of Work</div>
+        <div class="sh-action">Gallery →</div>
+      </div>
+      <div style="padding:0 20px;display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:8px">
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-sm);padding:13px;text-align:center">
+          <div style="font-size:22px;margin-bottom:4px">🛠️</div>
+          <div style="font-size:22px;font-weight:900;color:var(--accent-light)">7</div>
+          <div style="font-size:10px;color:var(--text2);font-weight:600">Projects</div>
+        </div>
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-sm);padding:13px;text-align:center">
+          <div style="font-size:22px;margin-bottom:4px">📖</div>
+          <div style="font-size:22px;font-weight:900;color:var(--gold)">4</div>
+          <div style="font-size:10px;color:var(--text2);font-weight:600">Books Read</div>
+        </div>
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-sm);padding:13px;text-align:center">
+          <div style="font-size:22px;margin-bottom:4px">🏆</div>
+          <div style="font-size:22px;font-weight:900;color:var(--green)">2</div>
+          <div style="font-size:10px;color:var(--text2);font-weight:600">Certifications</div>
+        </div>
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-sm);padding:13px;text-align:center">
+          <div style="font-size:22px;margin-bottom:4px">💻</div>
+          <div style="font-size:22px;font-weight:900">12</div>
+          <div style="font-size:10px;color:var(--text2);font-weight:600">Scripts</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ XP POPUP ═══════════ -->
+  <div class="xp-ov" id="xpov" onclick="closeXP()"></div>
+  <div class="xp-pop" id="xppop">
+    <div style="font-size:46px;margin-bottom:6px">⚡</div>
+    <div style="font-size:30px;font-weight:900;margin-bottom:3px" class="gt">+100 XP</div>
+    <div style="font-size:16px;font-weight:800;margin-bottom:5px" id="pp-title">Output Logged!</div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:16px" id="pp-sub">Added to Python Automation</div>
+    <div style="display:flex;gap:7px;margin-bottom:16px;justify-content:center;flex-wrap:wrap">
+      <div class="chip purple">🐍 Python Automation</div>
+      <div class="chip gold">🔥 Streak +1</div>
+    </div>
+    <div style="background:rgba(255,255,255,0.04);border-radius:9px;padding:11px;margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text2);margin-bottom:5px"><span>Level 8</span><span>Level 9</span></div>
+      <div class="xptrack"><div class="xpfill" id="ppbar" style="width:65%"></div></div>
+      <div style="font-size:10px;color:var(--text2);margin-top:5px;text-align:center">2,450 → 2,550 XP</div>
+    </div>
+    <button class="btn btn-p btn-full" onclick="closeXP()">🚀 Keep Building!</button>
+  </div>
+
+  <!-- ═══════════ MILESTONE CELEBRATION ═══════════ -->
+  <div class="cel-ov" id="celeb" onclick="closeCeleb()">
+    <div id="confetti-wrap" style="position:absolute;inset:0;pointer-events:none;overflow:hidden;border-radius:48px"></div>
+    <div style="position:relative;z-index:1;width:100%">
+      <div style="font-size:68px;margin-bottom:12px;animation:bounce 0.6s ease infinite alternate" id="cel-icon">🏆</div>
+      <div style="font-size:10px;letter-spacing:0.15em;color:rgba(255,255,255,0.55);margin-bottom:6px;font-weight:800">MILESTONE UNLOCKED</div>
+      <div style="font-size:26px;font-weight:900;color:#fff;margin-bottom:6px;letter-spacing:-0.02em" id="cel-title">SQL Foundations Master</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.65);margin-bottom:22px;line-height:1.5" id="cel-desc">Completed all SQL skills with proof-of-work!</div>
+      <div style="display:flex;gap:10px;justify-content:center;margin-bottom:22px">
+        <div style="background:rgba(255,255,255,0.14);border-radius:10px;padding:11px 18px;text-align:center;flex:1">
+          <div style="font-size:22px;font-weight:900;color:#fff" id="cel-xp">+450 XP</div>
+          <div style="font-size:10px;color:rgba(255,255,255,0.55);font-weight:600">Earned</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.14);border-radius:10px;padding:11px 18px;text-align:center;flex:1">
+          <div style="font-size:22px;font-weight:900;color:#fff" id="cel-rarity">Rare</div>
+          <div style="font-size:10px;color:rgba(255,255,255,0.55);font-weight:600">Rarity</div>
+        </div>
+      </div>
+      <!-- AI-generated post preview -->
+      <div style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.18);border-radius:14px;padding:14px;text-align:left;margin-bottom:20px;backdrop-filter:blur(10px)">
+        <div style="font-size:10px;font-weight:800;color:rgba(255,255,255,0.5);margin-bottom:7px;letter-spacing:0.08em">✨ AI-GENERATED LINKEDIN POST</div>
+        <div style="font-size:12px;color:#fff;line-height:1.6" id="cel-post">🚀 Milestone Unlocked: SQL Foundations Master<br><br>Just completed my SQL Foundations path with 3 real-world projects. Key skills: Advanced JOINs, Window Functions, CTEs, Query Optimization.<br><br>Data Architect Path — 32% Complete 📊<br>Streak: 14 days 🔥<br><br>#DataEngineering #SQL #CareerGrowth</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-s" style="flex:1;background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.2);color:#fff" onclick="event.stopPropagation();closeCeleb()">Later</button>
+        <button class="btn btn-p" style="flex:1" onclick="event.stopPropagation();closeCeleb()">📤 Share to LinkedIn</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ NODE DETAIL MODAL ═══════════ -->
+  <div class="nmodal-ov" id="nmod-ov" onclick="closeNodeModal()">
+    <div class="nmodal" id="nmod" onclick="event.stopPropagation()">
+      <div style="width:40px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 18px"></div>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+        <div style="font-size:36px" id="nm-icon">🗄️</div>
+        <div>
+          <div style="font-size:17px;font-weight:900" id="nm-title">SQL Foundations</div>
+          <div id="nm-status"></div>
+        </div>
+      </div>
+      <div id="nm-body"></div>
+      <button class="btn btn-p btn-full" style="margin-top:16px" onclick="closeNodeModal();navigate('log')">+ Log Output for This Skill</button>
+    </div>
+  </div>
+
+  <!-- ═══════════ BOTTOM NAV ═══════════ -->
+  <div class="bnav">
+    <div class="ni active" id="nav-home" onclick="navigate('home')">
+      <div class="ni-icon">🗺️</div><div class="ni-lbl">Map</div>
+    </div>
+    <div class="ni" id="nav-log" onclick="navigate('log')">
+      <div class="ni-icon">➕</div><div class="ni-lbl">Log</div>
+    </div>
+    <div class="ni" id="nav-milestones" onclick="navigate('milestones')">
+      <div class="ni-icon">🏆</div><div class="ni-lbl">Milestones</div>
+    </div>
+    <div class="ni" id="nav-feed" onclick="navigate('feed')">
+      <div class="ni-icon">⚡</div><div class="ni-lbl">Feed</div>
+    </div>
+    <div class="ni" id="nav-profile" onclick="navigate('profile')">
+      <div class="ni-icon">👤</div><div class="ni-lbl">Profile</div>
+    </div>
+  </div>
+
+</div><!-- /app -->
+
+<script>
+// ── Navigation ──────────────────────────────────────────────
+function navigate(s) {
+  document.querySelectorAll('.screen').forEach(x => x.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(x => x.classList.remove('active'));
+  document.getElementById('screen-' + s).classList.add('active');
+  document.getElementById('nav-' + s).classList.add('active');
+}
+
+// ── Type chip ───────────────────────────────────────────────
+function selType(el) {
+  document.querySelectorAll('.tchip').forEach(c => c.classList.remove('sel'));
+  el.classList.add('sel');
+}
+
+// ── Log Output → XP Popup ───────────────────────────────────
+function logOutput() {
+  const t = document.getElementById('otitle').value.trim() || 'New Output';
+  document.getElementById('pp-title').textContent = 'Output Logged! 🎉';
+  document.getElementById('pp-sub').textContent = '"' + t + '" added to Python Automation';
+  document.getElementById('xpov').classList.add('show');
+  document.getElementById('xppop').classList.add('show');
+  setTimeout(() => { document.getElementById('ppbar').style.width = '79%'; }, 300);
+}
+function closeXP() {
+  document.getElementById('xpov').classList.remove('show');
+  document.getElementById('xppop').classList.remove('show');
+  navigate('home');
+}
+
+// ── Milestone Celebration ────────────────────────────────────
+const milestoneData = {
+  sql: {
+    icon:'🏆', title:'SQL Foundations Master', desc:'Completed all SQL skills with 3 proof-of-work projects.',
+    xp:'+450 XP', rarity:'Rare',
+    post:'🚀 Milestone Unlocked: SQL Foundations Master\n\nCompleted my SQL path with 3 real projects. Key skills: Advanced JOINs, Window Functions, CTEs, Query Optimization.\n\nData Architect — 32% Complete 📊 | 14-day streak 🔥\n\n#DataEngineering #SQL #CareerGrowth'
+  },
+  python: {
+    icon:'🐍', title:'Python Builder', desc:'Built 2 automation scripts and completed Python fundamentals.',
+    xp:'+200 XP', rarity:'Uncommon',
+    post:'🐍 Milestone Unlocked: Python Builder\n\nCompleted Python Automation milestone with 2 scripts in production. Automated 4 hours of manual data work.\n\nData Architect — 40% Complete 📊 | 14-day streak 🔥\n\n#Python #DataEngineering #Automation'
+  }
+};
+
+function triggerCelebration(type) {
+  const d = milestoneData[type] || milestoneData.sql;
+  document.getElementById('cel-icon').textContent = d.icon;
+  document.getElementById('cel-title').textContent = d.title;
+  document.getElementById('cel-desc').textContent = d.desc;
+  document.getElementById('cel-xp').textContent = d.xp;
+  document.getElementById('cel-rarity').textContent = d.rarity;
+  document.getElementById('cel-post').innerHTML = d.post.replace(/\n/g,'<br>');
+  document.getElementById('celeb').classList.add('show');
+  spawnConfetti();
+}
+function closeCeleb() { document.getElementById('celeb').classList.remove('show'); }
+
+function spawnConfetti() {
+  const wrap = document.getElementById('confetti-wrap');
+  wrap.innerHTML = '';
+  const cols = ['#A855F7','#818CF8','#F59E0B','#10B981','#EC4899','#fff','#60A5FA','#F472B6'];
+  for (let i = 0; i < 70; i++) {
+    const p = document.createElement('div');
+    p.className = 'cp';
+    const sz = 5 + Math.random()*8;
+    p.style.cssText = `left:${Math.random()*100}%;top:-12px;width:${sz}px;height:${sz}px;background:${cols[~~(Math.random()*cols.length)]};animation-delay:${Math.random()*1.6}s;animation-duration:${1.8+Math.random()*1}s;`;
+    wrap.appendChild(p);
+  }
+}
+
+// ── React buttons ────────────────────────────────────────────
+const reactState = {};
+function toggleReact(id, btnId, countId) {
+  const btn = document.getElementById(btnId);
+  const cnt = document.getElementById(countId);
+  const on = reactState[id];
+  reactState[id] = !on;
+  btn.classList.toggle('on', !on);
+  cnt.textContent = parseInt(cnt.textContent) + (on ? -1 : 1);
+  if (!on) floatXP(btn, '+5 XP');
+}
+
+function floatXP(el, label) {
+  const app = document.getElementById('app');
+  const ar = app.getBoundingClientRect();
+  const er = el.getBoundingClientRect();
+  const f = document.createElement('div');
+  f.className = 'xpf';
+  f.textContent = label;
+  f.style.left = (er.left - ar.left + 10) + 'px';
+  f.style.top = (er.top - ar.top - 8) + 'px';
+  app.appendChild(f);
+  setTimeout(() => f.remove(), 1500);
+}
+
+// ── Node Detail Modal ────────────────────────────────────────
+const nodeData = {
+  sql: {
+    icon:'🗄️', title:'SQL Foundations',
+    statusHtml:'<div class="chip green" style="font-size:11px">✅ Complete · 450 XP Earned</div>',
+    body:`<div style="margin-bottom:12px;font-size:13px;color:var(--text2);line-height:1.6">Mastered SQL querying for data engineering. This skill is a core prerequisite for the Data Architect path.</div>
+    <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">Proof-of-Work Outputs</div>
+    <div style="display:flex;flex-direction:column;gap:7px">
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;font-size:12px">✅ Complex JOINs Sales Dashboard</div>
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;font-size:12px">✅ Window Functions Revenue Report</div>
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;font-size:12px">✅ Query Optimization Case Study</div>
+    </div>`
+  },
+  python: {
+    icon:'🐍', title:'Python Automation',
+    statusHtml:'<div class="chip purple" style="font-size:11px">🔄 In Progress · 40%</div>',
+    body:`<div style="margin-bottom:12px;font-size:13px;color:var(--text2);line-height:1.6">Build automation scripts to process, transform, and move data. 2 of 5 outputs needed.</div>
+    <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">Your Outputs (2/5)</div>
+    <div style="display:flex;flex-direction:column;gap:7px">
+      <div style="background:var(--bg);border:1px solid rgba(16,185,129,0.2);border-radius:8px;padding:10px;font-size:12px">✅ ETL Pipeline with Pandas</div>
+      <div style="background:var(--bg);border:1px solid rgba(16,185,129,0.2);border-radius:8px;padding:10px;font-size:12px">✅ API Data Fetcher</div>
+      <div style="background:var(--bg);border:1px solid rgba(255,255,255,0.05);border-radius:8px;padding:10px;font-size:12px;color:var(--text3)">⬜ Log 3 more outputs to complete…</div>
+    </div>`
+  },
+  modeling: {
+    icon:'🏗️', title:'Data Modeling',
+    statusHtml:'<div class="chip purple" style="font-size:11px">🔄 In Progress · 25%</div>',
+    body:`<div style="margin-bottom:12px;font-size:13px;color:var(--text2);line-height:1.6">Design dimensional models, star schemas, and data vault patterns for enterprise data warehouses.</div>
+    <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">Currently Reading</div>
+    <div style="background:linear-gradient(135deg,rgba(245,158,11,0.1),var(--bg));border:1px solid rgba(245,158,11,0.2);border-radius:8px;padding:12px;display:flex;align-items:center;gap:10px">
+      <div style="font-size:24px">📖</div>
+      <div>
+        <div style="font-size:13px;font-weight:700">The Data Warehouse Toolkit</div>
+        <div style="font-size:11px;color:var(--text2)">Chapter 4 of 18 · Progress: 22%</div>
+      </div>
+    </div>`
+  }
+};
+
+function openNodeModal(key) {
+  const d = nodeData[key];
+  if (!d) return;
+  document.getElementById('nm-icon').textContent = d.icon;
+  document.getElementById('nm-title').textContent = d.title;
+  document.getElementById('nm-status').innerHTML = d.statusHtml;
+  document.getElementById('nm-body').innerHTML = d.body;
+  document.getElementById('nmod-ov').classList.add('show');
+  document.getElementById('nmod').classList.add('show');
+}
+function closeNodeModal() {
+  document.getElementById('nmod-ov').classList.remove('show');
+  document.getElementById('nmod').classList.remove('show');
+}
+
+// ── Generate Post (placeholder) ──────────────────────────────
+function genPost() {
+  triggerCelebration('sql');
+}
+
+// Bounce keyframe injection
+document.head.insertAdjacentHTML('beforeend','<style>@keyframes bounce{from{transform:scale(1) translateY(0);}to{transform:scale(1.1) translateY(-8px);}}</style>');
+</script>
+</body>
+</html>

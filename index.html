@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>SkillForge — Proof-Based Career Growth</title>
+    <meta name="description" content="The Strava for professional growth. Log real proof-of-work outputs, earn XP, unlock skill milestones, and share your progress with a community of builders." />
+
+    <!-- PWA / iPhone install support -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#7C3AED" />
+
+    <!-- iOS Safari "Add to Home Screen" -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="SkillForge" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png" />
+
+    <!-- Open Graph — controls preview when link is shared on Slack, WhatsApp, LinkedIn, etc. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="SkillForge — Proof-Based Career Growth" />
+    <meta property="og:description" content="The Strava for professional growth. Log real outputs, earn XP, unlock skill milestones, and track your evolution as a tech professional." />
+    <meta property="og:image" content="/icon-512.png" />
+    <meta property="og:image:width" content="512" />
+    <meta property="og:image:height" content="512" />
+
+    <!-- Twitter / X card -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="SkillForge — Proof-Based Career Growth" />
+    <meta name="twitter:description" content="Log real outputs, earn XP, unlock skill milestones." />
+    <meta name="twitter:image" content="/icon-512.png" />
+
+    <!-- Prevent zoom on input focus (iOS) -->
+    <meta name="format-detection" content="telephone=no" />
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { height: 100%; background: #080810; }
+      #root {
+        width: 100%;
+        max-width: 430px;
+        height: 100%;
+        background: #080810;
+        margin: 0 auto;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/web-index.tsx"></script>
+  </body>
+</html>
