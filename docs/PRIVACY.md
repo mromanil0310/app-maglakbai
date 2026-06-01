@@ -20,5 +20,4 @@ If you choose to add an email in onboarding or Settings, it is stored **only on 
 Use **Settings → Reset** to clear everything from this device. Because data is device-local, resetting (or clearing your browser data) removes it permanently.
 
 ## Contact
-Questions about privacy: `privacy@skillforge.app`
-> ⚠️ Placeholder contact — replace with a monitored inbox before external release (PRIV-002).
+Questions about privacy: `marlo.romanillos@gmail.com`

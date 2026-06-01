@@ -4,8 +4,7 @@
 
 If you discover a security or privacy issue in SkillForge, please report it privately — do **not** open a public GitHub issue.
 
-- **Contact:** `privacy@skillforge.app`
-  > ⚠️ This is currently a placeholder address (tracked as PRIV-002 in `reports/skillforge-audit-report.md`). Replace it with a monitored inbox before any wider/external release.
+- **Contact:** `marlo.romanillos@gmail.com`
 
 Please include: what you found, steps to reproduce, and the impact. We'll acknowledge the report and keep you updated on the fix.
 

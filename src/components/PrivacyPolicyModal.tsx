@@ -4,8 +4,7 @@ import { useThemeColors, ColorsType, Spacing, Radius, FontSize } from '../utils/
 
 export const PRIVACY_POLICY_EFFECTIVE = 'June 1, 2026';
 
-// ⚠️ PILOT PLACEHOLDER — replace with your real contact before public launch.
-export const PRIVACY_CONTACT = 'privacy@skillforge.app';
+export const PRIVACY_CONTACT = 'marlo.romanillos@gmail.com';
 
 interface Section { heading: string; body: string }
 
