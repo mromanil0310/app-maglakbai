@@ -7,6 +7,8 @@
     "build": "node node_modules/.bin/vite build --outDir dist",
     "serve": "python3 -m http.server 8083 --directory dist --bind 0.0.0.0",
     "build:serve": "npm run build && npm run serve",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "ios": "expo start --ios",
     "android": "expo start --android"
   },
@@ -29,7 +31,8 @@
     "@types/react": "~18.3.0",
     "@vitejs/plugin-react": "^4.7.0",
     "typescript": "~5.9.2",
-    "vite": "^5.4.21"
+    "vite": "^5.4.21",
+    "vitest": "^2.1.9"
   },
   "private": true
 }

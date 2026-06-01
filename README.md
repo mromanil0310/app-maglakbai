@@ -5,7 +5,7 @@
 
 SkillForge is a career-gamification app for tech professionals. You log real proof-of-work outputs — projects, scripts, books, certifications, diagrams, GitHub repos — to earn XP, unlock milestone achievements, and share your progress. XP comes from **building, not watching.**
 
-**📖 User guide:** https://mromanil0310.github.io/SkillForge/USER_GUIDE.html
+**📖 User guide:** https://mromanil0310.github.io/skillforge/USER_GUIDE.html
 
 ---
 

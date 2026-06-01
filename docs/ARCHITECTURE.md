@@ -1,6 +1,6 @@
 # SkillForge — Architecture & Technical Decisions
 
-> This document describes the **current implemented architecture** (pilot-ready as of sprint 26) and the **planned Phase 2 backend migration** to Supabase.
+> Describes the **current implemented architecture** (web/PWA pilot, as of sprint 33 — post the ARCH-002 store decomposition) and the **planned Phase 2 backend migration** to Supabase. This is the BAEF Phase 3 artifact; it must match the code. If you change structure, update this doc (see DOC-002 history in `reports/skillforge-audit-report.md`).
 
 ---
 
@@ -8,14 +8,15 @@
 
 | Concern | Choice | Notes |
 |---|---|---|
-| Framework | React Native 0.76.9 + Expo SDK 55 | iOS + Android from one codebase |
+| Framework | React Native 0.76.9 + Expo SDK 55 | One codebase; **only the web/PWA target ships today** (no native build — see REL-001/ARCH-007) |
 | Web bundler | Vite 5 | Powers the web/PWA build; Metro handles native |
 | Navigation | React Navigation 7 (Native Stack + Bottom Tabs) | Manual stack config; no Expo Router |
-| State | Zustand 5 — single store (`src/store/appStore.ts`) | All state, actions, and static catalog in one file |
+| State | Zustand 5 — **one store composed from slices** (`src/store/appStore.ts`) | Actions split into 4 slices; catalog + pure logic extracted (see Module Map) |
 | Styling | `StyleSheet.create()` with design tokens | No NativeWind/Tailwind; all colors in `src/utils/theme.ts` |
 | Animations | React Native `Animated` API | No Reanimated; no Lottie; confetti via injected CSS keyframes |
-| Persistence | `localStorage` via `src/utils/asyncStorageWeb.ts` shim | No Supabase yet; single-device only |
-| Analytics | PostHog-compatible HTTP API (`src/utils/analytics.ts`) | Gracefully no-ops without `VITE_POSTHOG_API_KEY` |
+| Persistence | `localStorage` key `skillforge_v1` (`src/store/persistence.ts`) | No backend yet; single-device. ⚠️ No schema versioning/migration (ARCH-003) |
+| Testing | Vitest — 46 unit + integration tests (`npm test`) | Pure domain + store-action coverage (see Testing) |
+| Analytics | PostHog-compatible HTTP API (`src/utils/analytics.ts`) | **Opt-in + PII-scrubbed**; no-ops without consent or `VITE_POSTHOG_API_KEY` |
 | Icons | Unicode emoji only | No icon library dependency |
 
 ### Web entry points
@@ -28,186 +29,167 @@ App.tsx             ← SafeAreaProvider + ErrorBoundary + ToastProvider + AppNa
 
 ---
 
+## Module Map (post ARCH-002)
+
+The store was decomposed from a single ~4,400-line file into focused modules. `appStore.ts` is now ~270 lines of state-init + slice composition + wiring.
+
+```
+src/
+├── store/
+│   ├── appStore.ts            ← state init (hydration), AppState type, slice composition, persistence wiring
+│   ├── persistence.ts         ← loadFromStorage / getPersistable / attachPersistence(subscribe)
+│   └── slices/
+│       ├── coreSlice.ts       ← progression: completeOnboarding, logOutput, validateSkill,
+│       │                         logCareerOutcome, deletes, useStreakFreeze, celebration/selection
+│       ├── roadmapSlice.ts    ← custom paths + roadmap lifecycle (enroll/switch/pause/archive/…)
+│       ├── feedSlice.ts       ← reactToPost, toggleSavePost, addComment
+│       └── profileSlice.ts    ← avatar/bio/name/targetRole/pace/email/theme setters
+├── data/                      ← pure static catalog (no logic, type-only imports)
+│   ├── careerPaths.ts         ← CAREER_PATHS (19 paths)
+│   ├── skills.ts              ← ALL_SKILLS
+│   ├── achievements.ts        ← ALL_ACHIEVEMENTS (8)
+│   └── mockFeed.ts            ← MOCK_FEED (seed/PREVIEW posts — not live data)
+├── domain/                    ← pure, unit-tested calculators (no store/React deps)
+│   ├── progression.ts         ← decay, burnout, evidence tier, skill/career mastery, OUTCOME_XP
+│   ├── skillGraph.ts          ← initUserSkills, unlockDependentSkills, checkAchievements
+│   └── __tests__/             ← progression / leveling / skillGraph suites
+└── utils/
+    ├── theme.ts               ← Colors, PathColors, typography, getLevelFromXP(), getLevelTitle()
+    ├── analytics.ts           ← opt-in PostHog capture + PII scrub
+    └── asyncStorageWeb.ts     ← localStorage shim (aliased in vite.config.ts)
+```
+
+`appStore.ts` re-exports the moved symbols (`CAREER_PATHS`, `ALL_SKILLS`, `ALL_ACHIEVEMENTS`, the domain calculators, etc.) so existing `from '../store/appStore'` imports in screens are unchanged.
+
+---
+
 ## Navigation Structure
 
 ```
 Stack.Navigator (headerShown: false, animation: fade)
-├── Onboarding          ← OnboardingScreen  (when hasOnboarded === false)
-└── Main                ← Bottom Tab Navigator
-    ├── Home            ← DashboardScreen
-    ├── Community       ← FeedScreen
-    ├── Log (+ button)  ← LogOutputScreen
-    ├── Evolve          ← EvolveScreen
-    └── Profile         ← ProfileScreen
-MilestoneDetail (modal, slide_from_bottom) ← MilestoneScreen
+├── Onboarding              ← OnboardingScreen  (when hasOnboarded === false)
+├── Main                    ← Bottom Tab Navigator
+│   ├── Home                ← DashboardScreen
+│   ├── Community           ← FeedScreen
+│   ├── Log (+ button)      ← LogOutputScreen
+│   ├── Evolve              ← EvolveScreen
+│   └── Profile             ← ProfileScreen
+├── MilestoneDetail (modal, slide_from_bottom) ← MilestoneScreen
+├── Settings  (stack)       ← SettingsScreen
+└── Portfolio (stack)       ← PortfolioScreen
 ```
 
-Auth gate lives in `AppNavigator.tsx`:
-```tsx
-const hasOnboarded = useAppStore((s) => s.hasOnboarded);
-// ...
-<Stack.Screen name={hasOnboarded ? 'Main' : 'Onboarding'} />
-```
+Every screen is wrapped with `withScreenBoundary(Component, name)` — a per-screen ErrorBoundary (friendly fallback; stack shown in dev only).
+Auth gate in `AppNavigator.tsx`: `const hasOnboarded = useAppStore((s) => s.hasOnboarded)` selects Onboarding vs Main.
 
 ---
 
-## State — Single Zustand Store
+## State — Zustand Store (sliced)
 
-All app state lives in `src/store/appStore.ts`. There is **one store**, not per-domain stores.
-
-### Persisted fields (saved to `localStorage` key `skillforge_v1`)
+There is **one store**, composed from slices:
 
 ```typescript
-hasOnboarded: boolean
-user: User | null
-userSkills: Record<string, UserSkill>
-outputs: Output[]
-unlockedAchievementIds: string[]
-customPaths: CustomPath[]
-prioritizedPathId: string | null
-roadmaps: RoadmapEntry[]
-celebratedMilestones: string[]
-userFeedPosts: FeedPost[]   // user-created posts; reconstructed into communityFeed on load
+export const useAppStore = create<AppState>((set, get) => ({
+  ...initialState,            // hydrated from localStorage in appStore.ts
+  ...createCoreSlice(set, get),
+  ...createRoadmapSlice(set, get),
+  ...createFeedSlice(set, get),
+  ...createProfileSlice(set, get),
+}));
+attachPersistence(useAppStore);
+```
+
+Slices add **actions only**; all state fields are initialized in `appStore.ts` (so `tsc` enforces a complete `AppState`). Actions read full state via `get()` and update via `set()` — a `logOutput` call still mutates skills, XP, achievements, streak, and feed in a single transaction.
+
+### Persisted fields (13) — `localStorage` key `skillforge_v1`
+
+`getPersistable()` in `src/store/persistence.ts` persists exactly:
+
+```typescript
+hasOnboarded, user, userSkills, outputs, unlockedAchievementIds,
+customPaths, prioritizedPathId, roadmaps, celebratedMilestones,
+userFeedPosts, savedPostIds, colorScheme, careerOutcomes
 ```
 
 ### Ephemeral fields (in-memory only)
 
 ```typescript
 communityFeed: FeedPost[]        // reconstructed from [...userFeedPosts, ...MOCK_FEED] on load
-pendingCelebration: PendingCelebration | null
+pendingCelebration | null
 selectedSkillId: string | null
-showWelcomeCard: boolean          // ephemeral — fires once per new-user session
+showWelcomeCard: boolean          // fires once per new-user session
 ```
 
-### Persistence mechanism
+### Persistence mechanism — `src/store/persistence.ts`
 
-A single `useAppStore.subscribe()` listener at module level (not per-action `saveToStorage` calls):
+`attachPersistence(store)` registers a single `store.subscribe()` listener (not per-action `saveToStorage` calls). It diffs the persistable slice by reference equality and writes only when a persisted field changed. `saveToStorage` swallows quota errors and dispatches a `skillforge:storage-quota-exceeded` event for the UI. On load, `loadFromStorage()` + module-level rehydration in `appStore.ts` heal achievements/XP against the restored state.
 
-```typescript
-function getPersistable(state: AppState) { /* 10 persisted fields */ }
-
-useAppStore.subscribe((state) => {
-  const p = getPersistable(state);
-  // Reference-equality short-circuit — only writes when a persisted field changed
-  if (_lastPersisted !== null && /* all fields === */) return;
-  _lastPersisted = p;
-  saveToStorage(p);
-});
-```
-
-### Static catalog (defined in appStore.ts, not DB-driven)
-
-- `CAREER_PATHS` — 19 built-in paths with color themes and ordered skill IDs
-- `ALL_SKILLS` — ~100 skill nodes with prerequisites, XP rewards, required output counts
-- `ALL_ACHIEVEMENTS` — 8 achievement definitions
-- `MOCK_FEED` — 24 seed community posts across all 19 paths
+> ⚠️ **ARCH-003:** there is no schema version field or migration path yet — a breaking shape change would silently drop or fail to load saved data. Tracked as P1.
 
 ---
 
 ## XP & Leveling
 
-```typescript
-OUTPUT_XP = 50           // flat XP per output logged
-skill.xpReward           // bonus XP on skill completion (75–400 by rarity)
-achievement.xpGranted    // bonus XP on achievement unlock
+XP is awarded per output **by type**, plus quality and takeaway bonuses, computed in `coreSlice.logOutput`:
 
-// Streak milestone bonuses (applied in logOutput)
-STREAK_MILESTONES = [
-  { days: 7,  bonusXP: 25 },
-  { days: 14, bonusXP: 50 },
-  { days: 30, bonusXP: 100 },
-]
+```typescript
+// base XP by output type
+project 75 · cert 200 · github 60 · book 50 · script 50 ·
+diagram 75 · reflection 30 · event 65 · other 50          // default 50
+
+qualityBonus  = description.length >= 120 ? 20 : >= 50 ? 10 : 0
+takeawayBonus = keyTakeaway?.trim() ? 15 : 0
+
+OUTPUT_XP   = baseXP + qualityBonus + takeawayBonus
+skill.xpReward         // bonus on skill completion (gated by the evidence rule below)
+achievement.xpGranted  // bonus on achievement unlock
+validateSkill          // +50 XP for passing a skill's knowledge check
+OUTCOME_XP             // career-outcome bonuses (src/domain/progression.ts): offer 500, role_change 500,
+                       // promotion 400, certification 300, salary_increase 300, freelance 250, portfolio 200, interview 150
+
+// Streak milestone bonuses (one-time, in logOutput)
+day 7 → +25 · day 14 → +50 · day 30 → +100   // a streak freeze is also granted every 7 days
 ```
 
-Level thresholds live in `getLevelFromXP()` in `src/utils/theme.ts`.
+**Evidence gate:** a built-in skill can only reach `completed` once at least one of its outputs is `verified` (has a link) or `documented` (description ≥ 50 chars). Logging-only entries can't fake mastery. See `getEvidenceTier` in `src/domain/progression.ts`.
 
-Skill rarity XP rewards:
-- `common` — 75–100 XP
-- `uncommon` — 125–150 XP
-- `rare` — 200–250 XP
-- `epic` — 300–350 XP
-- `legendary` — 400 XP
+Level thresholds: `getLevelFromXP()` in `src/utils/theme.ts` (cumulative `level*200`: L1 0, L2 200, L3 600, L4 1200, …). Skill rarity rewards range common (75–100) → legendary (400).
+
+---
+
+## Testing — Vitest (`npm test`)
+
+46 tests; node environment; runs `src/**/*.test.ts`. Two layers:
+
+- **Pure domain** (`src/domain/__tests__/`): `progression` (decay stages, burnout window, evidence tiers, skill/career mastery ladder, OUTCOME_XP), `leveling` (XP→level/title/bounds), `skillGraph` (achievement unlock thresholds + dedupe).
+- **Store-action integration** (`src/store/__tests__/appStore.test.ts`): exercises the real store — `completeOnboarding` (init + experienced pre-credit), `logOutput` (XP-by-type + bonuses, evidence gate, completion + prerequisite unlock, first-steps achievement, streak), `validateSkill`.
+
+Convention: new pure logic in `src/domain/` ships with a test. Known gap: the roadmap/feed/profile slices were moved verbatim and are build-verified but lack per-action tests.
 
 ---
 
 ## Animation Patterns
 
-All animations use React Native's `Animated` API. No Reanimated 3.
+All animations use React Native's `Animated` API (no Reanimated). `useNativeDriver: false` for web compatibility.
 
-### XP Float (LogOutputScreen)
-```tsx
-// "+75 XP" floats upward from submit button on successful log
-const floatAnim = useRef(new Animated.Value(0)).current;
-Animated.sequence([
-  Animated.timing(floatAnim, { toValue: -60, duration: 700, useNativeDriver: false }),
-  Animated.timing(floatAnim, { toValue: -90, duration: 400, useNativeDriver: false }),
-]).start();
-```
-
-### XP Bar Fill (DashboardScreen)
-```tsx
-const xpBarAnim = useRef(new Animated.Value(prevProgress)).current;
-Animated.timing(xpBarAnim, { toValue: newProgress, duration: 800, useNativeDriver: false }).start();
-```
-
-### Skill Node Pulse (CareerNode — in-progress status)
-```tsx
-// Infinite alternating opacity pulse on the glow ring
-Animated.loop(
-  Animated.sequence([
-    Animated.timing(pulseAnim, { toValue: 1, duration: 1100, useNativeDriver: false }),
-    Animated.timing(pulseAnim, { toValue: 0.3, duration: 1100, useNativeDriver: false }),
-  ])
-).start();
-```
-
-### Streak-risk badge pulse (AppNavigator — Log tab)
-```tsx
-Animated.loop(
-  Animated.sequence([
-    Animated.timing(badgePulse, { toValue: 1.5, duration: 700, useNativeDriver: false }),
-    Animated.timing(badgePulse, { toValue: 0.85, duration: 700, useNativeDriver: false }),
-  ])
-).start();
-```
-
-### Milestone Confetti (MilestoneScreen)
-Full-screen confetti uses CSS `@keyframes` injected into `<head>` (web-only). 26 pieces fall from top with `msConfFall` animation. Platform: web only (`pointerEvents="none"`).
-
-### Level-Up Overlay (LevelUpOverlay.tsx)
-```tsx
-// Spring entrance + pulsing glow ring + scale-in level number
-Animated.spring(cardScale, { toValue: 1, tension: 65, friction: 8, useNativeDriver: false }).start();
-Animated.loop(
-  Animated.sequence([
-    Animated.timing(glowAnim, { toValue: 1, duration: 900 }),
-    Animated.timing(glowAnim, { toValue: 0.4, duration: 900 }),
-  ])
-).start();
-```
+- **XP Float** (LogOutputScreen) — "+XP" rises from the submit button via an `Animated.sequence`.
+- **XP Bar Fill** (DashboardScreen / XPBar) — `Animated.timing` from previous → new progress over 800ms.
+- **Skill Node Pulse** (CareerNode) — infinite alternating opacity loop on the in-progress glow ring.
+- **Streak-risk badge pulse** (AppNavigator Log tab) — looping scale pulse.
+- **Milestone Confetti** (MilestoneScreen) — web-only CSS `@keyframes` injected into `<head>` (`pointerEvents="none"`).
+- **Level-Up Overlay** (LevelUpOverlay) — spring entrance + looping glow ring.
 
 ---
 
-## Design Tokens — `src/utils/theme.ts`
+## Design Tokens
 
-```typescript
-Colors.bg            = '#080810'
-Colors.surface       = '#0D0D1A'
-Colors.card          = '#11111C'
-Colors.border        = 'rgba(255,255,255,0.07)'
-Colors.primary       = '#7C3AED'
-Colors.primaryLight  = '#A855F7'
-Colors.gold          = '#F59E0B'
-Colors.success       = '#10B981'
-Colors.danger        = '#EF4444'
-Colors.text          = '#EEEEF8'
-Colors.textSub       = '#8888AA'
-Colors.textMuted     = '#7070A0'   // ≥4.6:1 contrast on card bg — WCAG AA compliant
-```
+`src/utils/theme.ts` is the **single source of truth** — never hardcode hex values in components; import from `Colors` / `PathColors`.
 
-`PathColors` record maps all 19 `CareerPathId` values to `{ primary, dim, text, border }`.
+- `Colors` — dark-theme palette (bg/surface/card/border, primary/primaryLight, gold/success/danger, text/textSub/textMuted). `textMuted` is tuned for WCAG AA contrast on card backgrounds.
+- `PathColors` — maps all 19 `CareerPathId` values to `{ primary, dim, text, border }`.
+- `getColors(scheme)` returns the dark or light palette based on `colorScheme`.
 
-Never hardcode hex values in components — always import from `theme.ts`.
+(Exact values intentionally not duplicated here to prevent drift — read them from `theme.ts`.)
 
 ---
 
@@ -221,71 +203,48 @@ resolve.alias: {
 }
 
 build.rollupOptions.output.manualChunks: {
-  vendor: ['react', 'react-dom', 'react-native-web'],           // 542KB — cached across deploys
-  navigation: ['@react-navigation/*'],                           // 163KB — cached across deploys
-  // App code chunk: ~230KB — the only chunk that changes per deploy
+  vendor: ['react', 'react-dom', 'react-native-web'],   // ~545KB — cached across deploys
+  navigation: ['@react-navigation/*'],                   // ~163KB — cached across deploys
+  // app chunk: ~415KB — changes per deploy
 }
 ```
+
+`public/` assets (PWA manifest, icons, `USER_GUIDE.html`) are copied to `dist/` on build. `vercel.json` provides SPA rewrites + security headers. See `docs/DEPLOYMENT.md` (DOC-005) for the full deploy path.
 
 ---
 
 ## Analytics — `src/utils/analytics.ts`
 
-PostHog-compatible HTTP capture. Gracefully no-ops when `VITE_POSTHOG_API_KEY` is unset.
+PostHog-compatible HTTP capture. **Opt-in only**: every `track()`/`identify()` is a hard no-op until the user grants consent (persisted as `sf_analytics_consent`), and also no-ops without `VITE_POSTHOG_API_KEY`. **No PII** — users are identified by an anonymous id; a defensive scrub strips `name`/`email`/free-text keys from payloads.
 
-**16 instrumented events:**
+Instrumented events include: `onboarding_started/step_completed/step_skipped/completed`, `first_output_logged`, `output_logged`, `skill_completed`, `level_up`, `achievement_unlocked`, `streak_milestone`, `post_reacted`, `comment_posted`, `milestone_screen_viewed`, `path_switched`, `custom_path_created`, `screen_viewed`, `log_screen_abandoned`, `session_started/ended`, and retention markers (`retention_d1_activated/d7/d30`).
 
-| Event | When fired |
-|---|---|
-| `onboarding_started` | OnboardingScreen mount |
-| `onboarding_step_completed` | Each step advance |
-| `onboarding_step_skipped` | Skip link tapped |
-| `onboarding_completed` | `completeOnboarding` action |
-| `first_output_logged` | Store — `logOutput` when `outputs.length === 1`; includes `time_to_first_output_minutes` |
-| `output_logged` | Every `logOutput` call |
-| `skill_completed` | Skill reaches `completed` status |
-| `level_up` | User crosses level threshold |
-| `achievement_unlocked` | Achievement badge granted |
-| `streak_milestone` | 7/14/30-day streak hit |
-| `post_reacted` | Emoji reaction toggled |
-| `comment_posted` | Comment submitted on a post |
-| `milestone_screen_viewed` | MilestoneScreen opened |
-| `path_switched` | User switches career path |
-| `custom_path_created` | User creates a custom roadmap |
-| `screen_viewed` | Any tab navigation |
-| `log_screen_abandoned` | LogOutputScreen unmounted without submit |
-| `session_started` | App.tsx visibility change → visible |
-| `session_ended` | App.tsx visibility change → hidden; includes `duration_seconds` |
-
-**Retention events** (also fired from `output_logged`):
-- `retention_d1_activated`, `retention_d7`, `retention_d30`
-
-**Activation:** Set `VITE_POSTHOG_API_KEY=phc_xxx` in a `.env` file.
+**Activation:** set `VITE_POSTHOG_API_KEY` (and optional `VITE_POSTHOG_HOST`) — see `.env.example` (DOC-004).
 
 ---
 
 ## Key Architectural Decisions
 
-### Why one Zustand store (not per-domain stores)
-All state is deeply interrelated: logging an output affects skills, XP, achievements, streaks, and the feed simultaneously. Per-domain stores would require cross-store subscriptions. A single store keeps `logOutput` as a single transaction with no inter-store coordination.
+### One store, composed from slices (not per-domain stores)
+State is deeply interrelated — `logOutput` touches skills, XP, achievements, streak, and the feed in one transaction. Per-domain stores would need cross-store subscriptions. We keep a single store but split the **actions** into cohesive slices (`core`/`roadmap`/`feed`/`profile`) combined in `create()`, so the transaction model is unchanged while the file is reviewable (ARCH-002).
 
-### Why static career path data (not DB-driven)
-Career paths are curated, not user-generated — changes deploy with code. Avoids a CMS integration for MVP. All path definitions live in `appStore.ts`; adding a path requires no schema change.
+### Catalog in `src/data/`, pure logic in `src/domain/`
+Static catalog (paths/skills/achievements/seed feed) is curated and deploys with code — no CMS for the pilot. Extracting it (and the pure calculators) out of the store made both independently importable and unit-testable, and shrank `appStore.ts` by ~94%.
 
-### Why `userFeedPosts` instead of persisting full `communityFeed`
-`MOCK_FEED` is static and reconstructed from source on every load. Persisting only user-generated posts minimizes localStorage footprint. On load: `communityFeed = [...savedUserFeedPosts, ...MOCK_FEED]`.
+### Persistence as a subscriber (not per-action saves)
+A single `subscribe()` with reference-equality short-circuiting auto-persists every mutation; adding a persisted field touches only `getPersistable()`. Lives in `persistence.ts`.
 
-### Why a persistence subscriber instead of per-action `saveToStorage` calls
-A single `useAppStore.subscribe()` with reference-equality short-circuiting ensures every state mutation is automatically persisted without manually maintaining a list of call sites. Adding a new persisted field requires only updating `getPersistable()`.
+### `userFeedPosts` persisted, `communityFeed` reconstructed
+`MOCK_FEED` is static and clearly labeled preview data; only user-created posts are persisted. On load: `communityFeed = [...userFeedPosts, ...MOCK_FEED]`.
 
 ### Optimistic reactions
-`reactToPost` updates local state immediately. No rollback needed for a single-user local prototype; Supabase will add server-side sync in Phase 2.
+`reactToPost` updates local state immediately — acceptable for a single-user local pilot; Supabase adds server sync in Phase 2.
 
 ---
 
 ## Phase 2 — Supabase Migration (Planned)
 
-The following are **not yet implemented** and require a Supabase project with credentials.
+**Not yet implemented.** Requires a Supabase project + credentials.
 
 ### Required environment variables
 ```bash
@@ -294,42 +253,34 @@ VITE_SUPABASE_ANON_KEY=your-anon-key
 ```
 
 ### Migration plan
-
-1. **Auth** — Replace `hasOnboarded` localStorage flag with Supabase Magic Link auth. Gate: read session from `supabase.auth.getSession()` instead of Zustand `hasOnboarded`.
-
-2. **Profiles table** — Migrate `user: User` to `profiles` Supabase table. Schema in `docs/DATABASE.md`.
-
-3. **Outputs + skill_progress** — Persist `outputs[]` and `userSkills` to Supabase. `logOutput` becomes an async action calling the DB.
-
-4. **Community feed** — Replace `MOCK_FEED` + `userFeedPosts` with a live Supabase query. Add follow graph for personalized feed.
-
-5. **Real leaderboard** — Replace the merged-mock leaderboard in FeedScreen with a live `SELECT user_id, SUM(xp) GROUP BY user_id ORDER BY xp DESC LIMIT 10` query on a weekly window.
-
-6. **AI LinkedIn post** — OpenAI GPT-4o mini via Supabase Edge Function triggered on skill completion. Spec preserved below.
+1. **Auth** — replace the `hasOnboarded` localStorage flag with Supabase Magic Link; gate on `supabase.auth.getSession()`.
+2. **Profiles** — migrate `user` → `profiles` table (schema in `docs/DATABASE.md`).
+3. **Outputs + skill_progress** — persist `outputs[]` and `userSkills` to Supabase; `logOutput` becomes async.
+4. **Community feed** — replace `MOCK_FEED` + `userFeedPosts` with a live query + follow graph.
+5. **Real leaderboard** — replace the mocked FeedScreen leaderboard with a weekly `SUM(xp)` query.
+6. **AI LinkedIn post** — OpenAI `gpt-4o-mini` via a Supabase Edge Function on skill completion.
 
 ### OpenAI Edge Function (planned)
-
 ```typescript
 // supabase/functions/generate-milestone-post/index.ts
 serve(async (req) => {
   const { skillName, careerPath, evolutionPercent, streakDays, outputs } = await req.json();
   const completion = await openai.chat.completions.create({
     model: 'gpt-4o-mini',
-    messages: [{ role: 'user', content: `Generate a LinkedIn milestone post for a tech professional 
+    messages: [{ role: 'user', content: `Generate a LinkedIn milestone post for a tech professional
     who just completed "${skillName}" on their ${careerPath} path...` }],
     max_tokens: 300,
   });
   return new Response(JSON.stringify({ post: completion.choices[0].message.content }));
 });
 ```
-
-Client call via `supabase.functions.invoke('generate-milestone-post', { body: params })`.
+Client: `supabase.functions.invoke('generate-milestone-post', { body: params })`.
 
 ---
 
 ## Performance Notes
 
-- Vite `manualChunks`: vendor (542KB) and navigation (163KB) are highly cacheable; only the ~230KB app chunk changes per deploy.
-- `buildInsights()` and `buildWeekGrid()` in DashboardScreen are wrapped in `useMemo([outputs])` — not recomputed on every render.
-- Feed uses a flat `FlatList` with `keyExtractor`; no custom canvas.
-- `getSkillStreak()` in EvolveScreen scans up to 60 days of output history per skill node — bounded and fast for pilot-scale output counts.
+- Vite `manualChunks`: vendor (~545KB) + navigation (~163KB) are highly cacheable; only the ~415KB app chunk changes per deploy.
+- DashboardScreen insight/week-grid builders are wrapped in `useMemo([outputs])`.
+- Feed uses a flat `FlatList` with `keyExtractor`.
+- `getSkillStreak()` (EvolveScreen) scans up to 60 days of history per node — bounded for pilot-scale data.

@@ -1,0 +1,146 @@
+// ─── Progression Domain Logic ──────────────────────────────────────────────────
+// Pure, dependency-free calculators for the SkillForge progression system:
+// motivation decay, burnout protection, evidence tiers, and skill/career mastery.
+//
+// Extracted from appStore.ts (ARCH-002) so this logic can be unit-tested in
+// isolation — these functions take plain data in and return plain data out,
+// with no React, Zustand, theme, or storage dependencies. Presentation metadata
+// that needs theme colors (MASTERY_TIERS, CAREER_MASTERY_META) stays in appStore.ts.
+
+import type { Output, UserSkill, EvidenceTier, PaceMode, OutcomeType } from '../types';
+
+// ─── Motivation Decay Model ───────────────────────────────────────────────────
+// Maps days since last output → 5 behavioral stages.
+// 'active'   0–1 d  — engaged, no signal needed
+// 'coasting' 2–3 d  — subtle nudge: keep the flow going
+// 'drifting' 4–6 d  — visible nudge: one log brings you back
+// 'fading'   7–13 d — DormancyCard (at_risk tier)
+// 'recovery' 14+ d  — DormancyCard (dormant/lapsed tier)
+
+export type DecayStage = 'active' | 'coasting' | 'drifting' | 'fading' | 'recovery';
+
+export function getDecayStage(daysSinceLastOutput: number, hasStarted: boolean): DecayStage {
+  if (!hasStarted || daysSinceLastOutput <= 1) return 'active';
+  if (daysSinceLastOutput <= 3) return 'coasting';
+  if (daysSinceLastOutput <= 6) return 'drifting';
+  if (daysSinceLastOutput <= 13) return 'fading';
+  return 'recovery';
+}
+
+// ─── Burnout Protection ───────────────────────────────────────────────────────
+// Detects a sprint-then-drop pattern: ≥4 outputs in the 14-day window before
+// the current gap started, combined with a gap of ≥2 days. Signal clears when
+// the user sets paceMode to 'recovery'.
+
+export type BurnoutSignal = 'sprint_followed_by_drop' | null;
+
+export function getBurnoutSignal(
+  outputs: Output[],
+  daysSinceLastOutput: number,
+  paceMode: PaceMode | undefined,
+): BurnoutSignal {
+  if (paceMode === 'recovery') return null;
+  if (daysSinceLastOutput < 2 || outputs.length < 4) return null;
+
+  const now = Date.now();
+  const gapStartMs = now - daysSinceLastOutput * 24 * 60 * 60 * 1000;
+  const windowStartMs = gapStartMs - 14 * 24 * 60 * 60 * 1000;
+
+  const sprintOutputCount = outputs.filter((o) => {
+    const t = new Date(o.createdAt).getTime();
+    return t >= windowStartMs && t < gapStartMs;
+  }).length;
+
+  return sprintOutputCount >= 4 ? 'sprint_followed_by_drop' : null;
+}
+
+// ─── Evidence Tier ────────────────────────────────────────────────────────────
+// Classifies an output's proof quality:
+//   verified   — has a link (they put it online)
+//   documented — description ≥ 50 chars (thoughtful writeup)
+//   logged     — anything else (may be fake / too vague)
+//
+// Skill completion is gated: at least ONE output for the skill must be
+// 'verified' or 'documented'. Logging-only skills can never complete.
+
+export function getEvidenceTier(link: string | undefined, description: string): EvidenceTier {
+  if (link && link.trim().length > 0) return 'verified';
+  if (description.trim().length >= 50) return 'documented'; // 50 chars ≈ 1–2 sentences — accessible for all users
+  return 'logged';
+}
+
+// ─── Mastery Framework ───────────────────────────────────────────────────────
+// Per-skill mastery tiers derived from existing UserSkill state — no new user
+// actions required for levels 0-2. Level 3 (Validated) requires the quiz.
+//
+// Tier model:
+//   0 Not Started  — no outputs logged yet
+//   1 Practicing   — outputs in progress, skill not yet completed
+//   2 Competent    — skill completed (evidence gate passed)
+//   3 Validated    — competent + knowledge-check quiz passed
+
+export type MasteryLevel = 0 | 1 | 2 | 3;
+
+export function getSkillMasteryLevel(us: UserSkill | undefined): MasteryLevel {
+  if (!us || us.outputCount === 0) return 0;
+  if (us.status === 'completed' && us.validated) return 3;
+  if (us.status === 'completed') return 2;
+  return 1; // in_progress
+}
+
+// Career-level mastery title derived from skill distribution across a path
+export const CAREER_MASTERY_LADDER = ['Beginner', 'Developing', 'Competent', 'Advanced', 'Expert'] as const;
+export type CareerMasteryTitle = typeof CAREER_MASTERY_LADDER[number];
+
+export function getCareerMastery(
+  userSkills: Record<string, UserSkill>,
+  pathSkillIds: string[]
+): {
+  title: CareerMasteryTitle;
+  competentCount: number;
+  validatedCount: number;
+  practicingCount: number;
+  totalPathSkills: number;
+} {
+  const totalPathSkills = pathSkillIds.length;
+  if (totalPathSkills === 0) {
+    return { title: 'Beginner', competentCount: 0, validatedCount: 0, practicingCount: 0, totalPathSkills: 0 };
+  }
+
+  let competentCount = 0;
+  let validatedCount = 0;
+  let practicingCount = 0;
+
+  pathSkillIds.forEach((id) => {
+    const ml = getSkillMasteryLevel(userSkills[id]);
+    if (ml === 1) practicingCount++;
+    if (ml >= 2) competentCount++;
+    if (ml >= 3) validatedCount++;
+  });
+
+  const competentPct = (competentCount / totalPathSkills) * 100;
+  const validatedPct = (validatedCount / totalPathSkills) * 100;
+
+  let title: CareerMasteryTitle;
+  if (competentPct === 0 && practicingCount === 0) title = 'Beginner';
+  else if (competentPct < 30)                      title = 'Developing';
+  else if (competentPct < 70)                      title = 'Competent';
+  else if (validatedPct < 60)                      title = 'Advanced';
+  else                                             title = 'Expert';
+
+  return { title, competentCount, validatedCount, practicingCount, totalPathSkills };
+}
+
+// ─── Career Outcome XP ───────────────────────────────────────────────────────
+// Generous awards — these are real-world proof that SkillForge is working.
+
+export const OUTCOME_XP: Record<OutcomeType, number> = {
+  interview:       150,
+  offer:           500,
+  promotion:       400,
+  role_change:     500,
+  certification:   300,
+  salary_increase: 300,
+  portfolio:       200,
+  freelance:       250,
+};
