@@ -15,7 +15,7 @@ import { CAREER_PATHS } from '../../data/careerPaths';
 import { ALL_SKILLS } from '../../data/skills';
 import { ALL_ACHIEVEMENTS } from '../../data/achievements';
 import { MOCK_FEED } from '../../data/mockFeed';
-import { getEvidenceTier, OUTCOME_XP, getCareerMastery } from '../../domain/progression';
+import { getEvidenceTier, OUTCOME_XP, getCareerMastery, calculateOutputXP } from '../../domain/progression';
 import { initUserSkills, unlockDependentSkills, checkAchievements } from '../../domain/skillGraph';
 
 type Set = StoreApi<AppState>['setState'];
@@ -42,7 +42,9 @@ export const createCoreSlice = (set: Set, get: Get): Pick<AppState, 'completeOnb
       level: 1,
       streak: 0,
       longestStreak: 0,
-      lastActiveDate: new Date().toISOString().slice(0, 10),
+      // Intentionally NOT set here (BUG-012): pre-seeding today's date made the
+      // first output land in the "already logged today" branch and leave the
+      // streak at 0. Leaving it undefined lets the first logOutput start it at 1.
       bio: '',
       avatarEmoji: pathMeta?.icon ?? customPathMeta?.icon ?? '⚡',
       avatarColor: pathMeta?.dimColor ?? '#0A0A0F',
@@ -131,24 +133,13 @@ export const createCoreSlice = (set: Set, get: Get): Pick<AppState, 'completeOnb
     }
     const skillName = skill?.name ?? customSkillName!;
 
-    const OUTPUT_XP_BY_TYPE: Record<string, number> = {
-      project:    75,
-      cert:       200,
-      github:     60,
-      book:       50,
-      script:     50,
-      diagram:    75,
-      reflection: 30, // lighter-weight — recovery-mode engagement
-      event:      65, // workshops, activities, events organised — real-world execution
-      other:      50, // catch-all for anything that doesn't fit another category
-    };
-    const baseXP = OUTPUT_XP_BY_TYPE[payload.type] ?? 50;
-    // ISSUE-010: quality bonuses — reward detailed descriptions and key takeaways
-    const qualityBonus = payload.description.length >= 120 ? 20
-      : payload.description.length >= 50 ? 10
-      : 0;
-    const takeawayBonus = (payload.keyTakeaway?.trim().length ?? 0) > 0 ? 15 : 0;
-    const OUTPUT_XP = baseXP + qualityBonus + takeawayBonus;
+    // ISSUE-010: XP = base (by type) + quality bonus + takeaway bonus.
+    // Calculation delegated to domain/progression.ts (ARCH-006 — single source of truth).
+    const OUTPUT_XP = calculateOutputXP(
+      payload.type,
+      payload.description.length,
+      (payload.keyTakeaway?.trim().length ?? 0) > 0,
+    );
     const existingUserSkill = state.userSkills[payload.skillId] ?? {
       skillId: payload.skillId,
       status: 'available' as SkillStatus,

@@ -105,7 +105,7 @@ SkillForge/
     │   └── AppNavigator.tsx         ← Onboarding → Main tabs → modal/stack screens; per-screen ErrorBoundary
     │
     ├── screens/                     ← 9 screens
-    │   ├── OnboardingScreen.tsx     ← 4-step onboarding: welcome → name → path → first output
+    │   ├── OnboardingScreen.tsx     ← 5-step onboarding: welcome → name/email → path → experience level → first output
     │   ├── DashboardScreen.tsx      ← Home tab: path ring, XP bar, coaching, decay/burnout nudges
     │   ├── EvolveScreen.tsx         ← Evolve tab: milestone map, path switcher, custom roadmaps
     │   ├── LogOutputScreen.tsx      ← Log tab: proof-of-work output (6 types + XP float)
@@ -265,7 +265,7 @@ npm test
 ## Build Status
 
 ### ✅ Already Built (Pilot-Ready)
-- Onboarding — 4-step flow: welcome → name → path selection → first output log
+- Onboarding — 5-step flow: welcome → name/email → path selection → experience level (Fresh Start / Some Foundation / Bringing Experience, with skill pre-crediting) → first output log
 - Career Evolution Map (`EvolveScreen`) with skill nodes (locked / available / in-progress / completed)
 - Custom roadmaps — users can create personal skill paths beyond the 3 built-in ones
 - Path switching — users can switch between built-in and custom paths

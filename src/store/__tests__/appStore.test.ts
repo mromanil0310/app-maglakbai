@@ -113,12 +113,21 @@ describe('logOutput', () => {
     expect(get().user!.streak).toBe(4);
   });
 
+  it('starts the streak at 1 on the day-1 first output (BUG-012)', () => {
+    reset();
+    onboard(); // does NOT pre-set lastActiveDate (BUG-012 fix)
+    const r = log();
+    expect(r.newStreak).toBe(1);
+    expect(get().user!.streak).toBe(1);
+  });
+
   it('does not increment the streak twice within the same day', () => {
     reset();
-    onboard(); // onboarding sets lastActiveDate = today, streak = 0
-    log();
-    const r = log();
-    expect(r.newStreak).toBe(0);
+    onboard();
+    log();           // day-1 first output → streak 1
+    const r = log(); // same day again → unchanged
+    expect(r.newStreak).toBe(1);
+    expect(get().user!.streak).toBe(1);
   });
 });
 

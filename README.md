@@ -25,7 +25,7 @@ The differentiator is **proof-based progression**: you don't earn XP for consumi
 
 ## Features
 
-- **4-step onboarding** — pick a career path and log your first output
+- **5-step onboarding** — set your name, pick a career path, choose your experience level, and log your first output
 - **Career Evolution Map** — skill nodes that unlock as prerequisites complete (locked → available → in-progress → completed)
 - **Custom roadmaps** — build your own path beyond the 3 built-in ones
 - **Log outputs** — 6 types (project, book, certification, script, diagram, GitHub repo) with XP rewards

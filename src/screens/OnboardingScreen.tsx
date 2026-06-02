@@ -779,11 +779,17 @@ function FirstOutputStep({
       {/* CTA */}
       <TouchableOpacity
         style={[styles.primaryBtn, !canSubmit && styles.btnDisabled]}
-        onPress={() => canSubmit && onSubmit(selectedType, title, desc)}
+        onPress={() => onSubmit(selectedType, title, desc)}
+        disabled={!canSubmit}
         activeOpacity={0.85}
+        accessibilityRole="button"
+        accessibilityState={{ disabled: !canSubmit }}
       >
         <Text style={styles.primaryBtnText}>Log It &amp; Start My Journey ⚡</Text>
       </TouchableOpacity>
+      {!canSubmit && (
+        <Text style={styles.submitHint}>Add a title and a short description to continue.</Text>
+      )}
 
       {/* Skip */}
       <TouchableOpacity
@@ -1154,6 +1160,12 @@ const makeStyles = (Colors: ColorsType) => StyleSheet.create({
   },
   btnDisabled: {
     opacity: 0.35,
+  },
+  submitHint: {
+    textAlign: 'center',
+    color: Colors.textMuted,
+    fontSize: 12,
+    marginTop: 8,
   },
   primaryBtnText: {
     fontSize: FontSize.md,

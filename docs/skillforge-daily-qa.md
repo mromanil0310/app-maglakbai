@@ -22,7 +22,7 @@ You are performing a daily QA audit and improvement pass on the SkillForge app �
 - src/screens/LogOutputScreen.tsx — Log tab (➕)
 - src/screens/EvolveScreen.tsx — Evolve tab (⚡)
 - src/screens/ProfileScreen.tsx — Profile tab (👤)
-- src/screens/OnboardingScreen.tsx — 4-step onboarding
+- src/screens/OnboardingScreen.tsx — 5-step onboarding (welcome → name/email → path → experience level → first output)
 - src/screens/MilestoneScreen.tsx — stack modal after skill completion
 - src/store/appStore.ts — Zustand store
 - src/utils/theme.ts — design tokens
