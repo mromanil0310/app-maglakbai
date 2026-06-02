@@ -87,7 +87,7 @@ import { MOCK_FEED } from '../data/mockFeed';
 
 // Re-exported so existing `from '../store/appStore'` imports keep working.
 export { CAREER_PATHS, ALL_SKILLS, ALL_ACHIEVEMENTS };
-import { initUserSkills, unlockDependentSkills, checkAchievements } from '../domain/skillGraph';
+import { reconcileAchievementsAndXP } from '../domain/hydration';
 import { loadFromStorage, attachPersistence } from './persistence';
 import { createCoreSlice } from './slices/coreSlice';
 import { createRoadmapSlice } from './slices/roadmapSlice';
@@ -160,76 +160,26 @@ export interface AppState {
 
 const saved = loadFromStorage();
 
-// Re-evaluate achievements against restored state.
-// 1. Add any that were earned but not recorded (e.g. pre-fix accounts).
-// 2. Remove any that are no longer valid (e.g. output deleted without revoking the badge).
-const _savedOutputs: Output[]      = saved?.outputs ?? [];
-const _savedUnlocked: string[]      = saved?.unlockedAchievementIds ?? [];
-const _savedUser                    = saved?.user ?? null;
-const _savedUserSkills              = saved?.userSkills ?? {};
-const _savedCompletedSkillCount     = Object.values(_savedUserSkills).filter((us) => us.status === 'completed').length;
-
-// Checks whether a given achievement id is still valid given the current saved state
-function _achievementStillValid(id: string): boolean {
-  if (id === 'first-steps')    return _savedOutputs.length >= 1;
-  if (id === 'builder')        return _savedOutputs.length >= 5;
-  if (id === 'skill-mastered') return _savedCompletedSkillCount >= 1;
-  if (id === 'triple-master')  return _savedCompletedSkillCount >= 3;
-  // Streak and XP-threshold achievements are persistent once earned
-  return true;
-}
-
-const _rehydratedAchievements: string[] = _savedUser
-  ? (() => {
-      // Step 1: remove any that are no longer valid
-      const stillValid = _savedUnlocked.filter(_achievementStillValid);
-      // Step 2: add any that were missed (positive rehydration)
-      const missed = checkAchievements(
-        _savedOutputs.length,
-        _savedCompletedSkillCount,
-        _savedUser.xp,
-        _savedUser.streak,
-        stillValid,
-      );
-      return [...stillValid, ...missed];
-    })()
-  : _savedUnlocked;
-
-// Heal orphaned XP: if the rehydration revoked achievements, deduct their XP
-// so user.xp stays consistent with what the achievements actually granted.
-const _revokedOnLoad = _savedUser
-  ? _savedUnlocked.filter((id) => !_rehydratedAchievements.includes(id))
-  : [];
-const _revokedXPOnLoad = _revokedOnLoad.reduce((sum, id) => {
-  const ach = ALL_ACHIEVEMENTS.find((a) => a.id === id);
-  return sum + (ach?.xpGranted ?? 0);
-}, 0);
-
-// Also heal NaN in xpGained on stored outputs (guard against corrupt data)
-const _savedOutputsHealed = _savedOutputs.map((o) => ({
+// Re-evaluate achievements + heal XP against restored state (see src/domain/hydration.ts).
+const _savedUser            = saved?.user ?? null;
+const _savedUserSkills      = saved?.userSkills ?? {};
+// Heal NaN in xpGained on stored outputs (guard against corrupt data)
+const _savedOutputsHealed: Output[] = (saved?.outputs ?? []).map((o) => ({
   ...o,
   xpGained: Number.isFinite(o.xpGained) ? o.xpGained : 0,
 }));
 
-// Hard-floor: if there are no outputs AND no streak history (streak + longestStreak both 0),
-// ALL earned XP must come from achievements only — there's no way streak milestone bonuses
-// accumulated. Strip any phantom output XP from deleted/lost records.
-const _validAchievementXP = _rehydratedAchievements.reduce((sum, id) => {
-  const ach = ALL_ACHIEVEMENTS.find((a) => a.id === id);
-  return sum + (ach?.xpGranted ?? 0);
-}, 0);
-const _healedXP = _savedUser
-  ? (() => {
-      const afterRevoke = Math.max(0, _savedUser.xp - _revokedXPOnLoad);
-      const hasNoHistory =
-        _savedOutputsHealed.length === 0 &&
-        (_savedUser.streak ?? 0) === 0 &&
-        (_savedUser.longestStreak ?? 0) === 0;
-      // For users with no outputs and no streak history, cap XP to what valid
-      // achievements can account for. Preserves streak milestone XP for active users.
-      return hasNoHistory ? Math.min(afterRevoke, _validAchievementXP) : afterRevoke;
-    })()
-  : 0;
+const { achievements: _rehydratedAchievements, healedXP: _healedXP } = _savedUser
+  ? reconcileAchievementsAndXP({
+      savedUnlocked: saved?.unlockedAchievementIds ?? [],
+      outputCount: _savedOutputsHealed.length,
+      completedSkillCount: Object.values(_savedUserSkills).filter((us) => us.status === 'completed').length,
+      xp: _savedUser.xp,
+      streak: _savedUser.streak,
+      longestStreak: _savedUser.longestStreak,
+      hasOutputs: _savedOutputsHealed.length > 0,
+    })
+  : { achievements: saved?.unlockedAchievementIds ?? [], healedXP: 0 };
 
 export const useAppStore = create<AppState>((set, get) => ({
   hasOnboarded: saved?.hasOnboarded ?? false,
