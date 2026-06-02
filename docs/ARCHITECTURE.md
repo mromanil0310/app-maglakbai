@@ -14,7 +14,7 @@
 | State | Zustand 5 — **one store composed from slices** (`src/store/appStore.ts`) | Actions split into 4 slices; catalog + pure logic extracted (see Module Map) |
 | Styling | `StyleSheet.create()` with design tokens | No NativeWind/Tailwind; all colors in `src/utils/theme.ts` |
 | Animations | React Native `Animated` API | No Reanimated; no Lottie; confetti via injected CSS keyframes |
-| Persistence | `localStorage` key `skillforge_v1` (`src/store/persistence.ts`) | No backend yet; single-device. ⚠️ No schema versioning/migration (ARCH-003) |
+| Persistence | `localStorage` key `skillforge_v1` (`src/store/persistence.ts`) | No backend yet; single-device. Schema-versioned envelope `{ v, data }` with migration + validation (ARCH-003) |
 | Testing | Vitest — 46 unit + integration tests (`npm test`) | Pure domain + store-action coverage (see Testing) |
 | Analytics | PostHog-compatible HTTP API (`src/utils/analytics.ts`) | **Opt-in + PII-scrubbed**; no-ops without consent or `VITE_POSTHOG_API_KEY` |
 | Icons | Unicode emoji only | No icon library dependency |
@@ -124,7 +124,7 @@ showWelcomeCard: boolean          // fires once per new-user session
 
 `attachPersistence(store)` registers a single `store.subscribe()` listener (not per-action `saveToStorage` calls). It diffs the persistable slice by reference equality and writes only when a persisted field changed. `saveToStorage` swallows quota errors and dispatches a `skillforge:storage-quota-exceeded` event for the UI. On load, `loadFromStorage()` + module-level rehydration in `appStore.ts` heal achievements/XP against the restored state.
 
-> ⚠️ **ARCH-003:** there is no schema version field or migration path yet — a breaking shape change would silently drop or fail to load saved data. Tracked as P1.
+> **Schema versioning (ARCH-003):** the payload is a versioned envelope `{ v: SCHEMA_VERSION, data }`. On load, `loadFromStorage` detects the version, runs a `migrate()` chain (legacy unversioned saves are treated as v0 and migrated forward), validates the shape, and returns `null` (clean reset) on corrupt data or a newer-than-current version. To evolve the shape: bump `SCHEMA_VERSION` and add a migration step.
 
 ---
 

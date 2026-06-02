@@ -167,7 +167,7 @@ const _savedOutputs: Output[]      = saved?.outputs ?? [];
 const _savedUnlocked: string[]      = saved?.unlockedAchievementIds ?? [];
 const _savedUser                    = saved?.user ?? null;
 const _savedUserSkills              = saved?.userSkills ?? {};
-const _savedCompletedSkillCount     = Object.values(_savedUserSkills).filter((us: any) => us.status === 'completed').length;
+const _savedCompletedSkillCount     = Object.values(_savedUserSkills).filter((us) => us.status === 'completed').length;
 
 // Checks whether a given achievement id is still valid given the current saved state
 function _achievementStillValid(id: string): boolean {
@@ -239,30 +239,30 @@ export const useAppStore = create<AppState>((set, get) => ({
   userSkills: _savedUserSkills,
   outputs: _savedOutputsHealed,
   unlockedAchievementIds: _rehydratedAchievements,
-  communityFeed: [...((saved as any)?.userFeedPosts ?? []), ...MOCK_FEED],
-  userFeedPosts: (saved as any)?.userFeedPosts ?? [],
+  communityFeed: [...(saved?.userFeedPosts ?? []), ...MOCK_FEED],
+  userFeedPosts: saved?.userFeedPosts ?? [],
   pendingCelebration: null,
   selectedSkillId: null,
-  customPaths: (saved as any)?.customPaths ?? [],
-  prioritizedPathId: (saved as any)?.prioritizedPathId ?? null,
+  customPaths: saved?.customPaths ?? [],
+  prioritizedPathId: saved?.prioritizedPathId ?? null,
   roadmaps: (() => {
-    const r: RoadmapEntry[] = (saved as any)?.roadmaps ?? [];
+    const r: RoadmapEntry[] = saved?.roadmaps ?? [];
     // Migration: existing users with no roadmaps array → create initial PRIORITY entry
-    if (r.length === 0 && saved?.hasOnboarded && (saved as any)?.user?.careerPathId) {
+    if (r.length === 0 && saved?.hasOnboarded && saved?.user?.careerPathId) {
       r.push({
-        pathId: (saved as any).user.careerPathId,
+        pathId: saved.user.careerPathId,
         priorityStatus: 'PRIORITY',
         roadmapStatus: 'ACTIVE',
-        startedAt: (saved as any).user?.joinedAt ?? new Date().toISOString(),
+        startedAt: saved.user?.joinedAt ?? new Date().toISOString(),
       });
     }
     return r;
   })(),
-  celebratedMilestones: (saved as any)?.celebratedMilestones ?? [],
+  celebratedMilestones: saved?.celebratedMilestones ?? [],
   showWelcomeCard: false,
-  savedPostIds: (saved as any)?.savedPostIds ?? [],
-  colorScheme: ((saved as any)?.colorScheme ?? 'dark') as 'dark' | 'light',
-  careerOutcomes: (saved as any)?.careerOutcomes ?? [],
+  savedPostIds: saved?.savedPostIds ?? [],
+  colorScheme: saved?.colorScheme ?? 'dark',
+  careerOutcomes: saved?.careerOutcomes ?? [],
 
   ...createCoreSlice(set, get),
   ...createRoadmapSlice(set, get),

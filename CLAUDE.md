@@ -180,7 +180,7 @@ pendingCelebration, selectedSkillId
 
 **Actions:** 40+ actions (the full surface is large). Core ones: `completeOnboarding`, `logOutput`, `logCareerOutcome`, `validateSkill`, `reactToPost`, `addComment`, roadmap lifecycle (`enrollInRoadmap`/`switchPath`/`pauseRoadmap`/…), `useStreakFreeze`, `clearCelebration`, `resetApp`.
 
-**Persistence:** `localStorage` key `skillforge_v1`, via an auto-persist `subscribe`. Persisted slice includes `hasOnboarded`, `user`, `userSkills`, `outputs`, `unlockedAchievementIds`, `customPaths`, `prioritizedPathId`, `roadmaps`, `celebratedMilestones`, `userFeedPosts`, `savedPostIds`, `colorScheme`, `careerOutcomes`. ⚠️ No schema versioning/migration yet (see ARCH-003 in the audit report).
+**Persistence:** `localStorage` key `skillforge_v1`, via an auto-persist `subscribe`. Persisted slice includes `hasOnboarded`, `user`, `userSkills`, `outputs`, `unlockedAchievementIds`, `customPaths`, `prioritizedPathId`, `roadmaps`, `celebratedMilestones`, `userFeedPosts`, `savedPostIds`, `colorScheme`, `careerOutcomes`. Stored as a schema-versioned envelope `{ v, data }` with migration + validation on load (ARCH-003, `src/store/persistence.ts`).
 
 ---
 
