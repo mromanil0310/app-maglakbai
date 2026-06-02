@@ -674,11 +674,14 @@ export default function DashboardScreen() {
     : null;
 
   // ── Dormancy & decay (needed before focusCard) ───────────────────────────────
-  // outputs are prepended → index 0 is always the most recent
+  // BUG-013: outputs are APPENDED by logOutput (newest last), so outputs[0] is the
+  // OLDEST entry — using it made decay/dormancy fire off a user's *first* output date
+  // (a 7+-day-old first output triggered a false "you've been away" card even after
+  // logging today). Compute from the most-recent createdAt instead (order-independent).
   const daysSinceLastOutput = useMemo(() => {
     if (outputs.length === 0) return 0;
-    const lastDate = new Date(outputs[0].createdAt);
-    const diffMs = Date.now() - lastDate.getTime();
+    const lastMs = outputs.reduce((m, o) => Math.max(m, new Date(o.createdAt).getTime()), 0);
+    const diffMs = Date.now() - lastMs;
     return Math.floor(diffMs / (1000 * 60 * 60 * 24));
   }, [outputs]);
 

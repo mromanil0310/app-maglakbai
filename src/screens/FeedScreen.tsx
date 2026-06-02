@@ -278,7 +278,7 @@ export default function FeedScreen() {
         ]}
       >
         <View style={styles.headerTop}>
-          <View>
+          <View style={{ flex: 1, marginRight: Spacing.sm }}>
             <Text style={styles.screenTitle}>Community</Text>
             <Text style={styles.screenSubtitle}>A preview of what builders share — your posts stay on this device</Text>
           </View>

@@ -1971,6 +1971,7 @@ const makeStyles = (Colors: ColorsType) => StyleSheet.create({
     color: Colors.textMuted,
     fontWeight: '600',
     letterSpacing: 0.3,
+    textTransform: 'uppercase', // UX-019: match the ALL-CAPS stat-label convention used on Home
   },
   statWeekNote: {
     fontSize: 9,
