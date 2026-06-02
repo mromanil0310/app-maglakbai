@@ -7,7 +7,7 @@
 // with no React, Zustand, theme, or storage dependencies. Presentation metadata
 // that needs theme colors (MASTERY_TIERS, CAREER_MASTERY_META) stays in appStore.ts.
 
-import type { Output, UserSkill, EvidenceTier, PaceMode, OutcomeType } from '../types';
+import type { Output, UserSkill, EvidenceTier, PaceMode, OutcomeType, OutputType } from '../types';
 
 // ─── Motivation Decay Model ───────────────────────────────────────────────────
 // Maps days since last output → 5 behavioral stages.
@@ -129,6 +129,43 @@ export function getCareerMastery(
   else                                             title = 'Expert';
 
   return { title, competentCount, validatedCount, practicingCount, totalPathSkills };
+}
+
+// ─── Output XP Calculation ───────────────────────────────────────────────────
+// Single source of truth for output XP math (ARCH-006).
+// Both the store (coreSlice.ts) and the Log Output preview use this function
+// so they can never silently diverge.
+
+export const OUTPUT_XP_BY_TYPE: Record<OutputType, number> = {
+  project:    75,
+  cert:       200,
+  github:     60,
+  book:       50,
+  script:     50,
+  diagram:    75,
+  reflection: 30, // lighter-weight — recovery-mode engagement
+  event:      65, // workshops, activities, events organised
+  other:      50,
+};
+
+/**
+ * Calculate total XP for a single output.
+ *
+ * @param type             - Output type (determines base XP)
+ * @param descriptionLength - Length of the description string
+ * @param hasKeyTakeaway   - Whether the user supplied a non-empty key takeaway
+ */
+export function calculateOutputXP(
+  type: OutputType,
+  descriptionLength: number,
+  hasKeyTakeaway: boolean,
+): number {
+  const base = OUTPUT_XP_BY_TYPE[type] ?? 50;
+  const qualityBonus = descriptionLength >= 120 ? 20
+    : descriptionLength >= 50 ? 10
+    : 0;
+  const takeawayBonus = hasKeyTakeaway ? 15 : 0;
+  return base + qualityBonus + takeawayBonus;
 }
 
 // ─── Career Outcome XP ───────────────────────────────────────────────────────

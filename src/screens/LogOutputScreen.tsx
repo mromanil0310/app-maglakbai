@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useAppStore, CAREER_PATHS, ALL_SKILLS, getEvidenceTier, BurnoutSignal } from '../store/appStore';
+import { calculateOutputXP, OUTPUT_XP_BY_TYPE } from '../domain/progression';
 import { useThemeColors, ColorsType, Colors, Spacing, Radius, FontSize, PathColors } from '../utils/theme';
 import { OutputType } from '../types';
 import { useToast } from '../components/Toast';
@@ -27,15 +28,16 @@ const OUTPUT_TYPES: {
   xp: number;
   recoveryOnly?: boolean; // highlighted when user is in recovery mode
 }[] = [
-  { id: 'project',    icon: '🔨', label: 'Project',  xp: 75 },
-  { id: 'cert',       icon: '🏅', label: 'Cert',     xp: 200 },
-  { id: 'github',     icon: '💻', label: 'GitHub',   xp: 60 },
-  { id: 'book',       icon: '📖', label: 'Book',     xp: 50 },
-  { id: 'script',     icon: '⚙️', label: 'Script',   xp: 50 },
-  { id: 'diagram',    icon: '📐', label: 'Design',   xp: 75 },
-  { id: 'reflection', icon: '💭', label: 'Reflect',  xp: 30, recoveryOnly: true },
-  { id: 'event',      icon: '🎤', label: 'Event',    xp: 65 },
-  { id: 'other',      icon: '📋', label: 'Other',    xp: 50 },
+  // xp values come from OUTPUT_XP_BY_TYPE (single source of truth — ARCH-006)
+  { id: 'project',    icon: '🔨', label: 'Project',  xp: OUTPUT_XP_BY_TYPE.project    },
+  { id: 'cert',       icon: '🏅', label: 'Cert',     xp: OUTPUT_XP_BY_TYPE.cert       },
+  { id: 'github',     icon: '💻', label: 'GitHub',   xp: OUTPUT_XP_BY_TYPE.github     },
+  { id: 'book',       icon: '📖', label: 'Book',     xp: OUTPUT_XP_BY_TYPE.book       },
+  { id: 'script',     icon: '⚙️', label: 'Script',   xp: OUTPUT_XP_BY_TYPE.script     },
+  { id: 'diagram',    icon: '📐', label: 'Design',   xp: OUTPUT_XP_BY_TYPE.diagram    },
+  { id: 'reflection', icon: '💭', label: 'Reflect',  xp: OUTPUT_XP_BY_TYPE.reflection, recoveryOnly: true },
+  { id: 'event',      icon: '🎤', label: 'Event',    xp: OUTPUT_XP_BY_TYPE.event      },
+  { id: 'other',      icon: '📋', label: 'Other',    xp: OUTPUT_XP_BY_TYPE.other      },
 ];
 
 const OUTPUT_ICON_MAP: Record<OutputType, string> = {
@@ -710,10 +712,11 @@ export default function LogOutputScreen() {
               <View style={{ flex: 1 }}>
                 <Text style={styles.xpPreviewLabel}>You'll earn</Text>
                 {(() => {
+                  const hasKeyTakeaway = keyTakeaway.trim().length > 0;
+                  const totalBase = calculateOutputXP(selectedType.id, description.length, hasKeyTakeaway);
                   const qualityBonus = description.length >= 120 ? 20
                     : description.length >= 50 ? 10 : 0;
-                  const takeawayBonus = keyTakeaway.trim().length > 0 ? 15 : 0;
-                  const totalBase = selectedType.xp + qualityBonus + takeawayBonus;
+                  const takeawayBonus = hasKeyTakeaway ? 15 : 0;
                   const builtInSkill = ALL_SKILLS.find((s) => s.id === skillId);
                   const us = userSkills[skillId];
                   const completesSkill = builtInSkill && us && us.outputCount + 1 >= builtInSkill.requiredOutputs;

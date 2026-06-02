@@ -6,6 +6,8 @@ import {
   getSkillMasteryLevel,
   getCareerMastery,
   OUTCOME_XP,
+  calculateOutputXP,
+  OUTPUT_XP_BY_TYPE,
 } from '../progression';
 import type { Output, UserSkill } from '../../types';
 
@@ -148,5 +150,50 @@ describe('OUTCOME_XP', () => {
     expect(OUTCOME_XP.freelance).toBe(250);
     expect(OUTCOME_XP.portfolio).toBe(200);
     expect(OUTCOME_XP.interview).toBe(150);
+  });
+});
+
+// ─── calculateOutputXP ────────────────────────────────────────────────────────
+describe('calculateOutputXP', () => {
+  it('returns the base XP for each type with no bonuses', () => {
+    expect(calculateOutputXP('project',    0, false)).toBe(75);
+    expect(calculateOutputXP('cert',       0, false)).toBe(200);
+    expect(calculateOutputXP('github',     0, false)).toBe(60);
+    expect(calculateOutputXP('book',       0, false)).toBe(50);
+    expect(calculateOutputXP('script',     0, false)).toBe(50);
+    expect(calculateOutputXP('diagram',    0, false)).toBe(75);
+    expect(calculateOutputXP('reflection', 0, false)).toBe(30);
+    expect(calculateOutputXP('event',      0, false)).toBe(65);
+    expect(calculateOutputXP('other',      0, false)).toBe(50);
+  });
+
+  it('awards +10 quality bonus at the 50-char threshold', () => {
+    expect(calculateOutputXP('project', 49, false)).toBe(75);      // just below
+    expect(calculateOutputXP('project', 50, false)).toBe(85);      // at threshold → +10
+    expect(calculateOutputXP('project', 119, false)).toBe(85);     // below detailed
+  });
+
+  it('awards +20 quality bonus at the 120-char threshold', () => {
+    expect(calculateOutputXP('project', 120, false)).toBe(95);     // at threshold → +20
+    expect(calculateOutputXP('project', 500, false)).toBe(95);     // above — capped at +20
+  });
+
+  it('awards +15 takeaway bonus when hasKeyTakeaway is true', () => {
+    expect(calculateOutputXP('project', 0, true)).toBe(90);        // 75 + 15
+    expect(calculateOutputXP('book',    0, true)).toBe(65);        // 50 + 15
+  });
+
+  it('stacks quality and takeaway bonuses correctly', () => {
+    // base 75 + quality 10 (≥50 chars) + takeaway 15 = 100
+    expect(calculateOutputXP('project', 80, true)).toBe(100);
+    // base 75 + quality 20 (≥120 chars) + takeaway 15 = 110
+    expect(calculateOutputXP('project', 200, true)).toBe(110);
+  });
+
+  it('OUTPUT_XP_BY_TYPE entries match the base returned by calculateOutputXP', () => {
+    // Ensures the lookup table and the calculator are consistent
+    (Object.keys(OUTPUT_XP_BY_TYPE) as Array<keyof typeof OUTPUT_XP_BY_TYPE>).forEach((type) => {
+      expect(calculateOutputXP(type, 0, false)).toBe(OUTPUT_XP_BY_TYPE[type]);
+    });
   });
 });
