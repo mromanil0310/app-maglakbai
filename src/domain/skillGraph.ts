@@ -44,6 +44,16 @@ export function unlockDependentSkills(
   return updated;
 }
 
+// FEAT-001: a roadmap is "started" (and thus no longer editable) once any of its
+// skills has real progress — an output logged, or a credited in-progress/completed
+// state. Pure so the edit-gating can be unit-tested.
+export function pathHasProgress(skillIds: string[], userSkills: Record<string, UserSkill>): boolean {
+  return skillIds.some((id) => {
+    const us = userSkills[id];
+    return !!us && (us.outputCount > 0 || us.status === 'completed' || us.status === 'in_progress');
+  });
+}
+
 export function checkAchievements(
   outputCount: number,
   completedSkillCount: number,

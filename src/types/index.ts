@@ -34,6 +34,7 @@ export interface RoadmapEntry {
   weeklyHours?: number;
   archivedAt?: string;
   completedAt?: string;
+  locked?: boolean; // FEAT-001: user "focus-lock" — commit the roadmap early; a roadmap also becomes uneditable once the journey starts
 }
 
 export interface CustomSkill {

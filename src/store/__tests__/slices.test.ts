@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { useAppStore } from '../appStore';
 import type { FeedPost, User } from '../../types';
+import { calculateOutputXP, CUSTOM_SKILL_COMPLETION_XP } from '../../domain/progression';
 
 // Store-action tests for the feed / profile / roadmap slices (QA-001).
 // These exercise the real store; resetApp() isolates each test.
@@ -186,5 +187,136 @@ describe('roadmapSlice', () => {
     expect(id.startsWith('personal_')).toBe(true);
     expect(get().userSkills[id].status).toBe('available');
     expect(get().customPaths.some((p) => p.id === 'personal_library')).toBe(true);
+  });
+});
+
+// ─── FEAT-001: editable roadmaps (pre-start only) ────────────────────────────────
+describe('roadmapSlice — FEAT-001 editable roadmaps', () => {
+  const newCustom = () =>
+    get().addCustomPath({
+      name: 'My Path', icon: '🎯', description: 'd', color: '#000',
+      skills: [
+        { id: 'm1', name: 'A', description: '', icon: '🅰️' },
+        { id: 'm2', name: 'B', description: '', icon: '🅱️' },
+      ],
+    });
+
+  it('isRoadmapEditable: true for a fresh custom path, false for a built-in path', () => {
+    reset();
+    onboard();
+    const id = newCustom();
+    expect(get().isRoadmapEditable(id)).toBe(true);
+    expect(get().isRoadmapEditable('data-architect')).toBe(false); // built-in must be forked first
+  });
+
+  it('forkBuiltInPath copies a built-in path into an enrolled editable custom copy', () => {
+    reset();
+    onboard();
+    const newId = get().forkBuiltInPath('ai-engineer');
+    expect(newId).not.toBeNull();
+    const fork = get().customPaths.find((p) => p.id === newId);
+    expect(fork).toBeDefined();
+    expect(fork!.isCustom).toBe(true);
+    expect(fork!.skills.length).toBeGreaterThan(0);
+    expect(fork!.skills[0].name).toBe('Python Fundamentals'); // copied curated name
+    expect(get().roadmaps.some((r) => r.pathId === newId)).toBe(true); // auto-enrolled
+    expect(get().isRoadmapEditable(newId!)).toBe(true);
+    // The built-in catalog is untouched.
+    expect(get().customPaths.some((p) => p.id === 'ai-engineer')).toBe(false);
+  });
+
+  it('forkBuiltInPath returns null for a non-built-in id', () => {
+    reset();
+    onboard();
+    expect(get().forkBuiltInPath('not-a-real-path')).toBeNull();
+  });
+
+  it('addMilestone appends an editable milestone before the journey starts', () => {
+    reset();
+    onboard();
+    const id = newCustom();
+    const skillId = get().addMilestone(id, 'Ship a side project', '🚀');
+    expect(skillId).not.toBeNull();
+    const path = get().customPaths.find((p) => p.id === id)!;
+    expect(path.skills.map((s) => s.id)).toContain(skillId);
+    expect(get().userSkills[skillId!].status).toBe('locked'); // not the first → gated
+  });
+
+  it('rename / remove / reorder mutate milestones before start', () => {
+    reset();
+    onboard();
+    const id = newCustom();
+    get().renameMilestone(id, 'm1', 'Renamed A');
+    expect(get().customPaths.find((p) => p.id === id)!.skills.find((s) => s.id === 'm1')!.name).toBe('Renamed A');
+
+    get().reorderMilestones(id, ['m2', 'm1']);
+    let skills = get().customPaths.find((p) => p.id === id)!.skills;
+    expect(skills.map((s) => s.id)).toEqual(['m2', 'm1']);
+    expect(get().userSkills['m2'].status).toBe('available'); // new first
+    expect(get().userSkills['m1'].status).toBe('locked');
+
+    get().removeMilestone(id, 'm2');
+    skills = get().customPaths.find((p) => p.id === id)!.skills;
+    expect(skills.map((s) => s.id)).toEqual(['m1']);
+    expect(get().userSkills['m2']).toBeUndefined();
+    expect(get().userSkills['m1'].status).toBe('available'); // promoted to first
+  });
+
+  it('edits are blocked once the journey has started (progress logged)', () => {
+    reset();
+    onboard();
+    const id = newCustom();
+    // Log proof on the first milestone → roadmap is now "started".
+    get().logOutput({ skillId: 'm1', type: 'book', title: 't', description: 'short' });
+    expect(get().isRoadmapEditable(id)).toBe(false);
+
+    expect(get().addMilestone(id, 'Late add', '⏰')).toBeNull();
+    const before = get().customPaths.find((p) => p.id === id)!.skills.map((s) => s.id);
+    get().renameMilestone(id, 'm2', 'Nope');
+    get().removeMilestone(id, 'm2');
+    const after = get().customPaths.find((p) => p.id === id)!.skills;
+    expect(after.map((s) => s.id)).toEqual(before);
+    expect(after.find((s) => s.id === 'm2')!.name).toBe('B'); // rename was a no-op
+  });
+
+  it('lockRoadmap freezes editing (focus-lock) before any progress', () => {
+    reset();
+    onboard();
+    const id = newCustom();
+    get().enrollInRoadmap(id); // lock lives on the RoadmapEntry → must be enrolled
+    get().lockRoadmap(id, true);
+    expect(get().roadmaps.find((r) => r.pathId === id)?.locked).toBe(true);
+    expect(get().isRoadmapEditable(id)).toBe(false);
+    expect(get().addMilestone(id, 'Blocked', '🚫')).toBeNull();
+    get().lockRoadmap(id, false);
+    expect(get().isRoadmapEditable(id)).toBe(true);
+  });
+
+  it('deleteRoadmap un-enrolls + drops the custom path and promotes the next priority', () => {
+    reset();
+    onboard(); // data-architect PRIORITY
+    const id = newCustom();
+    get().setPriorityRoadmap(id); // make the custom path the priority
+    expect(get().prioritizedPathId).toBe(id);
+
+    get().deleteRoadmap(id);
+    expect(get().roadmaps.some((r) => r.pathId === id)).toBe(false);
+    expect(get().customPaths.some((p) => p.id === id)).toBe(false);
+    expect(get().userSkills['m1']).toBeUndefined(); // unstarted skills dropped
+    expect(get().prioritizedPathId).toBe('data-architect'); // promoted next active
+  });
+
+  it('custom milestone completion grants a modest flat XP bonus (not curated rewards)', () => {
+    reset();
+    onboard();
+    const id = newCustom();
+    // Pre-unlock achievements so their XP grants do not pollute the delta.
+    store.setState({ unlockedAchievementIds: ['first-steps', 'builder', 'skill-mastered', 'evolution'] });
+    const before = get().user!.xp;
+    get().logOutput({ skillId: 'm1', type: 'book', title: 't', description: 'short' });
+    const after = get().user!.xp;
+    expect(get().userSkills['m1'].status).toBe('completed'); // 1 output completes a custom milestone
+    const expectedOutputXP = calculateOutputXP('book', 'short'.length, false);
+    expect(after - before).toBe(expectedOutputXP + CUSTOM_SKILL_COMPLETION_XP);
   });
 });

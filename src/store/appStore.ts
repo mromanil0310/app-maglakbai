@@ -105,6 +105,10 @@ export interface PendingCelebration {
 
 export interface AppState {
   hasOnboarded: boolean;
+  // ARCH-001: Supabase session state — null when not signed in or backend disabled
+  supabaseUserId: string | null;
+  supabaseEmail: string | null;
+  supabaseSyncing: boolean; // true while an initial sync is in progress
   user: User | null;
   userSkills: Record<string, UserSkill>;
   outputs: Output[];
@@ -138,6 +142,16 @@ export interface AppState {
   archiveRoadmap: (pathId: string) => void; // → ARCHIVED
   reactivateRoadmap: (pathId: string) => void; // PAUSED/ARCHIVED → ACTIVE SECONDARY
   addRoadmapItem: (name: string, icon: string) => string; // creates item in personal library, returns new skillId
+  // FEAT-001: editable roadmaps — all milestone edits are gated to *before the journey starts*
+  // (no progress logged) and to custom paths only; built-in paths must be forked first.
+  isRoadmapEditable: (pathId: string) => boolean; // custom + not locked + not started
+  forkBuiltInPath: (pathId: CareerPathId | string) => string | null; // copy a built-in path → editable custom copy + enroll; returns new id (null if not built-in)
+  addMilestone: (pathId: string, name: string, icon: string) => string | null; // returns new skillId (null if not editable)
+  renameMilestone: (pathId: string, skillId: string, name: string) => void;
+  removeMilestone: (pathId: string, skillId: string) => void;
+  reorderMilestones: (pathId: string, orderedSkillIds: string[]) => void;
+  lockRoadmap: (pathId: string, locked: boolean) => void; // user "focus-lock" — commit the roadmap
+  deleteRoadmap: (pathId: string) => void; // un-enroll + drop a custom path's definition (the "delete & rebuild" path)
   useStreakFreeze: () => void;
   markMilestoneCelebrated: (key: string) => void;
   dismissWelcomeCard: () => void;
@@ -156,6 +170,10 @@ export interface AppState {
   deleteOutput: (outputId: string) => void;
   addComment: (postId: string, text: string) => void;
   setColorScheme: (scheme: 'dark' | 'light') => void;
+  // ARCH-001: auth actions
+  setSupabaseSession: (userId: string | null, email: string | null) => void;
+  setSupabaseSyncing: (syncing: boolean) => void;
+  syncFromSupabase: () => Promise<void>; // pull remote → merge into local state
 }
 
 const saved = loadFromStorage();
@@ -181,8 +199,13 @@ const { achievements: _rehydratedAchievements, healedXP: _healedXP } = _savedUse
     })
   : { achievements: saved?.unlockedAchievementIds ?? [], healedXP: 0 };
 
+import { createAuthSlice } from './slices/authSlice';
+
 export const useAppStore = create<AppState>((set, get) => ({
   hasOnboarded: saved?.hasOnboarded ?? false,
+  supabaseUserId: null,
+  supabaseEmail: null,
+  supabaseSyncing: false,
   user: saved?.user
     ? { ...saved.user, xp: _healedXP, level: getLevelFromXP(_healedXP) }
     : null,
@@ -218,6 +241,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   ...createRoadmapSlice(set, get),
   ...createFeedSlice(set, get),
   ...createProfileSlice(set, get),
+  ...createAuthSlice(set, get),
 }));
 
 // Persist the store to localStorage on every change (see src/store/persistence.ts).

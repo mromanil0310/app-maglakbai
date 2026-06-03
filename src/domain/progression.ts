@@ -136,6 +136,11 @@ export function getCareerMastery(
 // Both the store (coreSlice.ts) and the Log Output preview use this function
 // so they can never silently diverge.
 
+// FEAT-001: completion bonus for a user-defined (custom) milestone. Modest + flat
+// — proof (an output) is still required to complete it, but self-defined milestones
+// don't grant curated-skill rewards, to keep the XP economy honest/leaderboard-safe.
+export const CUSTOM_SKILL_COMPLETION_XP = 50;
+
 export const OUTPUT_XP_BY_TYPE: Record<OutputType, number> = {
   project:    75,
   cert:       200,

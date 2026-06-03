@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { checkAchievements } from '../skillGraph';
+import { checkAchievements, pathHasProgress } from '../skillGraph';
+import type { UserSkill } from '../../types';
 
 // checkAchievements(outputCount, completedSkillCount, xp, streak, alreadyUnlocked)
 // returns the NEW achievement ids earned by the given state (excluding ones
@@ -48,5 +49,30 @@ describe('checkAchievements', () => {
         'consistent', 'on-fire', 'thirty-day-legend', 'evolution',
       ]),
     );
+  });
+});
+
+// pathHasProgress(skillIds, userSkills) — FEAT-001: is a roadmap "started"?
+describe('pathHasProgress', () => {
+  const us = (over: Partial<UserSkill>): UserSkill => ({ skillId: 's', status: 'available', outputCount: 0, ...over });
+
+  it('is false when no skill in the path has any progress', () => {
+    const skills = { a: us({ skillId: 'a' }), b: us({ skillId: 'b', status: 'locked' }) };
+    expect(pathHasProgress(['a', 'b'], skills)).toBe(false);
+  });
+
+  it('is false for skills outside the given id list', () => {
+    const skills = { other: us({ skillId: 'other', outputCount: 3 }) };
+    expect(pathHasProgress(['a', 'b'], skills)).toBe(false);
+  });
+
+  it('is true when a path skill has a logged output', () => {
+    const skills = { a: us({ skillId: 'a', outputCount: 1 }) };
+    expect(pathHasProgress(['a', 'b'], skills)).toBe(true);
+  });
+
+  it('is true when a path skill is in_progress or completed (pre-credited)', () => {
+    expect(pathHasProgress(['a'], { a: us({ skillId: 'a', status: 'in_progress' }) })).toBe(true);
+    expect(pathHasProgress(['a'], { a: us({ skillId: 'a', status: 'completed' }) })).toBe(true);
   });
 });
