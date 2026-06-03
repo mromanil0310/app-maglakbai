@@ -27,6 +27,7 @@ import {
 import { page, track } from '../utils/analytics';
 import CareerNode from '../components/CareerNode';
 import { CustomSkill, Skill, UserSkill } from '../types';
+import { pathHasProgress } from '../domain/skillGraph';
 
 const PALETTE = ['#7C3AED', '#06B6D4', '#10B981', '#F59E0B', '#EF4444', '#EC4899', '#8B5CF6', '#F97316'];
 const ICON_OPTIONS = ['🎯', '📚', '🎨', '🏋️', '🎵', '🗣️', '✍️', '🔬', '🌍', '💼', '🍳', '📸', '🎭', '⚽', '🧘', '💡'];
@@ -644,6 +645,11 @@ function RoadmapActionsSheet({
   onPause,
   onArchive,
   onReactivate,
+  onEdit,
+  onLockIn,
+  onUnlock,
+  onFork,
+  onDeleteRebuild,
   onClose,
 }: {
   visible: boolean;
@@ -654,16 +660,34 @@ function RoadmapActionsSheet({
   onPause: () => void;
   onArchive: () => void;
   onReactivate: () => void;
+  onEdit: () => void;
+  onLockIn: () => void;
+  onUnlock: () => void;
+  onFork: () => void;
+  onDeleteRebuild: () => void;
   onClose: () => void;
 }) {
   const Colors = useThemeColors();
   const actions = makeActions(Colors);
   const path = CAREER_PATHS.find(p => p.id === pathId);
   const customPaths = useAppStore(s => s.customPaths);
+  const userSkills = useAppStore(s => s.userSkills);
+  const roadmaps = useAppStore(s => s.roadmaps);
   const customPath = customPaths.find(p => p.id === pathId);
   const displayName = path?.name ?? customPath?.name ?? pathId;
   const displayIcon = path?.icon ?? customPath?.icon ?? '🎯';
   const pc = PathColors[pathId] ?? { primary: customPath?.color ?? '#7C3AED' };
+
+  // FEAT-001 edit-state for this roadmap
+  const isBuiltIn = CAREER_PATHS.some(p => p.id === pathId);
+  const isJourneyCustom = !!customPath && pathId !== 'personal_library';
+  const entry = roadmaps.find(r => r.pathId === pathId);
+  const locked = !!entry?.locked;
+  const skillIds = isBuiltIn
+    ? (CAREER_PATHS.find(p => p.id === pathId)?.skillIds ?? [])
+    : (customPath?.skills.map(s => s.id) ?? []);
+  const started = pathHasProgress(skillIds, userSkills);
+  const editable = isJourneyCustom && !locked && !started;
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
@@ -674,6 +698,47 @@ function RoadmapActionsSheet({
             <Text style={actions.titleIcon}>{displayIcon}</Text>
             <Text style={actions.titleText}>{displayName}</Text>
           </View>
+
+          {/* FEAT-001: edit milestones (pre-start, custom only) */}
+          {editable && (
+            <TouchableOpacity style={actions.row} onPress={onEdit} activeOpacity={0.8}>
+              <Text style={actions.rowIcon}>🛠️</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={actions.rowLabel}>Edit Milestones</Text>
+                <Text style={actions.rowSub}>Add, rename, reorder — only before you start</Text>
+              </View>
+            </TouchableOpacity>
+          )}
+
+          {editable && (
+            <TouchableOpacity style={actions.row} onPress={onLockIn} activeOpacity={0.8}>
+              <Text style={actions.rowIcon}>🔒</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={actions.rowLabel}>Lock It In</Text>
+                <Text style={actions.rowSub}>Commit now and focus — no more changes</Text>
+              </View>
+            </TouchableOpacity>
+          )}
+
+          {isJourneyCustom && locked && !started && (
+            <TouchableOpacity style={actions.row} onPress={onUnlock} activeOpacity={0.8}>
+              <Text style={actions.rowIcon}>🔓</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={actions.rowLabel}>Unlock to Edit</Text>
+                <Text style={actions.rowSub}>Reopen milestones for changes</Text>
+              </View>
+            </TouchableOpacity>
+          )}
+
+          {isBuiltIn && (
+            <TouchableOpacity style={actions.row} onPress={onFork} activeOpacity={0.8}>
+              <Text style={actions.rowIcon}>📋</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={actions.rowLabel}>Make an Editable Copy</Text>
+                <Text style={actions.rowSub}>Customize milestones on your own copy</Text>
+              </View>
+            </TouchableOpacity>
+          )}
 
           {!isPriority && roadmapStatus === 'ACTIVE' && (
             <TouchableOpacity style={actions.row} onPress={onSetPriority} activeOpacity={0.8}>
@@ -707,11 +772,22 @@ function RoadmapActionsSheet({
           )}
 
           {roadmapStatus !== 'ARCHIVED' && (
-            <TouchableOpacity style={[actions.row, actions.rowDanger]} onPress={onArchive} activeOpacity={0.8}>
+            <TouchableOpacity style={actions.row} onPress={onArchive} activeOpacity={0.8}>
               <Text style={actions.rowIcon}>📦</Text>
               <View style={{ flex: 1 }}>
-                <Text style={[actions.rowLabel, { color: Colors.danger }]}>Archive Roadmap</Text>
-                <Text style={actions.rowSub}>All progress preserved. Can be reactivated.</Text>
+                <Text style={actions.rowLabel}>Archive Roadmap</Text>
+                <Text style={actions.rowSub}>Pause and keep. Reactivate anytime.</Text>
+              </View>
+            </TouchableOpacity>
+          )}
+
+          {/* FEAT-001: delete & rebuild — the escape hatch once a custom journey is locked/started */}
+          {isJourneyCustom && (
+            <TouchableOpacity style={[actions.row, actions.rowDanger]} onPress={onDeleteRebuild} activeOpacity={0.8}>
+              <Text style={actions.rowIcon}>🗑️</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={[actions.rowLabel, { color: Colors.danger }]}>Delete &amp; Rebuild</Text>
+                <Text style={actions.rowSub}>Remove to start fresh — your proof &amp; XP are kept</Text>
               </View>
             </TouchableOpacity>
           )}
@@ -721,6 +797,275 @@ function RoadmapActionsSheet({
           </TouchableOpacity>
         </View>
       </TouchableOpacity>
+    </Modal>
+  );
+}
+
+// ── Edit Roadmap modal (FEAT-001: pre-start milestone editing) ────────────────
+function EditRoadmapModal({
+  visible,
+  pathId,
+  onClose,
+}: {
+  visible: boolean;
+  pathId: string | null;
+  onClose: () => void;
+}) {
+  const Colors = useThemeColors();
+  const modal = makeModal(Colors);
+  const edit = makeEdit(Colors);
+  const customPaths = useAppStore((s) => s.customPaths);
+  const addMilestone = useAppStore((s) => s.addMilestone);
+  const renameMilestone = useAppStore((s) => s.renameMilestone);
+  const removeMilestone = useAppStore((s) => s.removeMilestone);
+  const reorderMilestones = useAppStore((s) => s.reorderMilestones);
+  const lockRoadmap = useAppStore((s) => s.lockRoadmap);
+  const [newName, setNewName] = useState('');
+  const [newIcon, setNewIcon] = useState('⭐');
+
+  const path = pathId ? customPaths.find((p) => p.id === pathId) : null;
+  const handleClose = () => { setNewName(''); setNewIcon('⭐'); onClose(); };
+
+  if (!path || !pathId) {
+    return (
+      <Modal visible={visible} transparent animationType="fade" onRequestClose={handleClose}>
+        <View />
+      </Modal>
+    );
+  }
+
+  const color = path.color || Colors.primary;
+  const ids = path.skills.map((s) => s.id);
+  const move = (index: number, dir: -1 | 1) => {
+    const target = index + dir;
+    if (target < 0 || target >= ids.length) return;
+    const next = [...ids];
+    [next[index], next[target]] = [next[target], next[index]];
+    reorderMilestones(pathId, next);
+  };
+  const handleAdd = () => {
+    const n = newName.trim();
+    if (!n) return;
+    addMilestone(pathId, n, newIcon);
+    setNewName('');
+    setNewIcon('⭐');
+  };
+  const handleLock = () => { lockRoadmap(pathId, true); handleClose(); };
+
+  return (
+    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={handleClose}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
+        <SafeAreaView style={modal.container}>
+          <View style={modal.header}>
+            <TouchableOpacity onPress={handleClose} style={modal.cancelBtn} accessibilityRole="button" accessibilityLabel="Done editing roadmap">
+              <Text style={modal.cancelText}>Done</Text>
+            </TouchableOpacity>
+            <Text style={modal.headerTitle}>Edit Roadmap</Text>
+            <View style={{ width: 60 }} />
+          </View>
+
+          <ScrollView style={modal.scroll} contentContainerStyle={modal.scrollContent} showsVerticalScrollIndicator={false}>
+            <View style={edit.banner}>
+              <Text style={edit.bannerText}>
+                ✏️ Shape this roadmap freely until you log your first proof. After that it locks in — so you finish what you start.
+              </Text>
+            </View>
+
+            <View style={[modal.previewCard, { borderColor: color + '60', backgroundColor: color + '12', marginTop: Spacing.md }]}>
+              <Text style={modal.previewIcon}>{path.icon}</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={[modal.previewName, { color }]}>{path.name}</Text>
+                <Text style={modal.previewMeta}>{path.skills.length} milestone{path.skills.length === 1 ? '' : 's'}</Text>
+              </View>
+            </View>
+
+            <Text style={modal.fieldLabel}>MILESTONES</Text>
+            {path.skills.map((skill, i) => (
+              <View key={skill.id} style={modal.skillRow}>
+                <View style={[modal.skillNumber, { backgroundColor: color + '30', borderColor: color + '60' }]}>
+                  <Text style={[modal.skillNumberText, { color }]}>{i + 1}</Text>
+                </View>
+                <TextInput
+                  style={modal.skillInput}
+                  placeholder={`Milestone ${i + 1}...`}
+                  placeholderTextColor={Colors.textMuted}
+                  value={skill.name}
+                  onChangeText={(v) => renameMilestone(pathId, skill.id, v)}
+                  accessibilityLabel={`Milestone ${i + 1} name`}
+                />
+                <View style={edit.moveCol}>
+                  <TouchableOpacity
+                    style={[edit.moveBtn, i === 0 && modal.btnDisabled]}
+                    disabled={i === 0}
+                    onPress={() => move(i, -1)}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Move milestone ${i + 1} up`}
+                  >
+                    <Text style={edit.moveText}>▲</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[edit.moveBtn, i === path.skills.length - 1 && modal.btnDisabled]}
+                    disabled={i === path.skills.length - 1}
+                    onPress={() => move(i, 1)}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Move milestone ${i + 1} down`}
+                  >
+                    <Text style={edit.moveText}>▼</Text>
+                  </TouchableOpacity>
+                </View>
+                <TouchableOpacity
+                  onPress={() => removeMilestone(pathId, skill.id)}
+                  style={modal.removeSkillBtn}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Remove milestone ${i + 1}`}
+                >
+                  <Text style={modal.removeSkillText}>✕</Text>
+                </TouchableOpacity>
+              </View>
+            ))}
+
+            <View style={edit.addRow}>
+              <TouchableOpacity
+                style={[modal.iconOption, { marginRight: 8, marginBottom: 0 }]}
+                onPress={() => {
+                  const idx = ICON_OPTIONS.indexOf(newIcon);
+                  setNewIcon(ICON_OPTIONS[(idx + 1) % ICON_OPTIONS.length]);
+                }}
+                accessibilityRole="button"
+                accessibilityLabel="Cycle new milestone icon"
+              >
+                <Text style={modal.iconOptionText}>{newIcon}</Text>
+              </TouchableOpacity>
+              <TextInput
+                style={modal.skillInput}
+                placeholder="Add a milestone…"
+                placeholderTextColor={Colors.textMuted}
+                value={newName}
+                onChangeText={setNewName}
+                onSubmitEditing={handleAdd}
+                accessibilityLabel="New milestone name"
+              />
+              <TouchableOpacity
+                style={[edit.addBtn, !newName.trim() && modal.btnDisabled]}
+                disabled={!newName.trim()}
+                onPress={handleAdd}
+                accessibilityRole="button"
+                accessibilityLabel="Add milestone"
+              >
+                <Text style={edit.addBtnText}>Add</Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={{ height: Spacing.xl }} />
+
+            <TouchableOpacity
+              style={[edit.lockBtn, { borderColor: color + '80' }]}
+              onPress={handleLock}
+              activeOpacity={0.85}
+              accessibilityRole="button"
+              accessibilityLabel="Lock this roadmap to focus"
+            >
+              <Text style={[edit.lockBtnText, { color }]}>🔒 Lock it in</Text>
+              <Text style={edit.lockBtnSub}>Commit now — to change milestones later you'd delete &amp; rebuild</Text>
+            </TouchableOpacity>
+          </ScrollView>
+        </SafeAreaView>
+      </KeyboardAvoidingView>
+    </Modal>
+  );
+}
+
+// ── Fork confirmation (built-in → editable copy) ──────────────────────────────
+function ForkConfirmModal({
+  visible,
+  pathId,
+  onConfirm,
+  onDismiss,
+}: {
+  visible: boolean;
+  pathId: string | null;
+  onConfirm: () => void;
+  onDismiss: () => void;
+}) {
+  const Colors = useThemeColors();
+  const confirm = makeConfirm(Colors);
+  const path = pathId ? (CAREER_PATHS.find((p) => p.id === pathId) ?? null) : null;
+  const pc = pathId ? (PathColors[pathId] ?? { primary: '#7C3AED' }) : null;
+
+  return (
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onDismiss}>
+      <View style={confirm.overlay}>
+        <View style={confirm.sheet}>
+          <Text style={confirm.emoji}>📋</Text>
+          <Text style={confirm.title}>Make an editable copy?</Text>
+          <Text style={confirm.body}>
+            Built-in roadmaps stay fixed so their milestones are consistent. We'll create your own editable copy you can shape before you start — the original stays as-is.
+          </Text>
+          {path && pc && (
+            <View style={[confirm.pathPreview, { backgroundColor: pc.primary + '15', borderColor: pc.primary + '40' }]}>
+              <Text style={confirm.pathPreviewIcon}>{path.icon}</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={[confirm.pathPreviewName, { color: pc.primary }]}>{path.name} (My Copy)</Text>
+                <Text style={confirm.pathPreviewSub}>Editable · enrolled as a secondary roadmap</Text>
+              </View>
+            </View>
+          )}
+          <TouchableOpacity style={[confirm.btn, confirm.btnStay]} onPress={onConfirm} activeOpacity={0.85}>
+            <Text style={confirm.btnStayText}>Create Editable Copy</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[confirm.btn, { backgroundColor: Colors.card }]} onPress={onDismiss} activeOpacity={0.85}>
+            <Text style={[confirm.btnStayText, { color: Colors.textMuted }]}>Cancel</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+// ── Delete & rebuild confirmation ─────────────────────────────────────────────
+function DeleteRebuildConfirmModal({
+  visible,
+  pathId,
+  onConfirm,
+  onDismiss,
+}: {
+  visible: boolean;
+  pathId: string | null;
+  onConfirm: () => void;
+  onDismiss: () => void;
+}) {
+  const Colors = useThemeColors();
+  const confirm = makeConfirm(Colors);
+  const customPaths = useAppStore((s) => s.customPaths);
+  const builtIn = pathId ? CAREER_PATHS.find((p) => p.id === pathId) : null;
+  const custom = pathId ? customPaths.find((p) => p.id === pathId) : null;
+  const name = builtIn?.name ?? custom?.name ?? 'this roadmap';
+  const icon = builtIn?.icon ?? custom?.icon ?? '🎯';
+
+  return (
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onDismiss}>
+      <View style={confirm.overlay}>
+        <View style={confirm.sheet}>
+          <Text style={confirm.emoji}>🗑️</Text>
+          <Text style={confirm.title}>Delete &amp; rebuild?</Text>
+          <Text style={confirm.body}>
+            To change a roadmap after you've started, delete it and build a fresh one. Your logged proof and XP are kept — only the roadmap structure is removed. This can't be undone.
+          </Text>
+          <View style={[confirm.pathPreview, { backgroundColor: Colors.danger + '12', borderColor: Colors.danger + '40' }]}>
+            <Text style={confirm.pathPreviewIcon}>{icon}</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={[confirm.pathPreviewName, { color: Colors.danger }]}>{name}</Text>
+              <Text style={confirm.pathPreviewSub}>Structure removed · proof &amp; XP kept</Text>
+            </View>
+          </View>
+          <TouchableOpacity style={[confirm.btn, confirm.btnConfirm]} onPress={onConfirm} activeOpacity={0.85}>
+            <Text style={confirm.btnConfirmText}>Delete &amp; Rebuild</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[confirm.btn, confirm.btnStay]} onPress={onDismiss} activeOpacity={0.85}>
+            <Text style={confirm.btnStayText}>Keep My Roadmap</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
     </Modal>
   );
 }
@@ -747,6 +1092,9 @@ export default function EvolveScreen() {
   const archiveRoadmap = useAppStore((s) => s.archiveRoadmap);
   const reactivateRoadmap = useAppStore((s) => s.reactivateRoadmap);
   const switchPath = useAppStore((s) => s.switchPath);
+  const forkBuiltInPath = useAppStore((s) => s.forkBuiltInPath);
+  const deleteRoadmap = useAppStore((s) => s.deleteRoadmap);
+  const lockRoadmap = useAppStore((s) => s.lockRoadmap);
 
   // Which roadmap's skill tree is currently shown
   const [activeViewPathId, setActiveViewPathId] = useState<string | null>(null);
@@ -757,6 +1105,10 @@ export default function EvolveScreen() {
   const [detailSkill, setDetailSkill] = useState<{ skill: Skill; userSkill: UserSkill } | null>(null);
   const [showArchived, setShowArchived] = useState(false);
   const [focusCheckPathId, setFocusCheckPathId] = useState<string | null>(null);
+  // FEAT-001 edit flows
+  const [editPathId, setEditPathId] = useState<string | null>(null);
+  const [forkPathId, setForkPathId] = useState<string | null>(null);
+  const [deletePathId, setDeletePathId] = useState<string | null>(null);
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -813,6 +1165,21 @@ export default function EvolveScreen() {
   const viewInfo = effectiveViewId ? getPathInfo(effectiveViewId) : null;
   const managingEntry = managingPathId ? roadmaps.find(r => r.pathId === managingPathId) : null;
 
+  // FEAT-001: edit-state for the currently-viewed roadmap (drives the header chip)
+  const viewState = (() => {
+    if (!effectiveViewId) return null;
+    const builtIn = CAREER_PATHS.some(p => p.id === effectiveViewId);
+    const custom = customPaths.find(p => p.id === effectiveViewId);
+    const isJourneyCustom = !!custom && effectiveViewId !== 'personal_library';
+    const entry = roadmaps.find(r => r.pathId === effectiveViewId);
+    const locked = !!entry?.locked;
+    const skillIds = builtIn
+      ? (CAREER_PATHS.find(p => p.id === effectiveViewId)?.skillIds ?? [])
+      : (custom?.skills.map(s => s.id) ?? []);
+    const started = pathHasProgress(skillIds, userSkills);
+    return { builtIn, isJourneyCustom, locked, started, editable: isJourneyCustom && !locked && !started };
+  })();
+
   const handleNodePress = (skillId: string, status: string) => {
     if (status === 'locked') return;
     const builtInSkill = ALL_SKILLS.find(s => s.id === skillId);
@@ -868,6 +1235,44 @@ export default function EvolveScreen() {
     }
     setPendingPriorityId(null);
   };
+
+  // FEAT-001 handlers
+  const handleConfirmFork = () => {
+    if (!forkPathId) return;
+    const newId = forkBuiltInPath(forkPathId);
+    setForkPathId(null);
+    if (newId) {
+      setActiveViewPathId(newId);
+      setEditPathId(newId); // drop straight into editing the new copy
+    }
+  };
+
+  const handleConfirmDelete = () => {
+    if (!deletePathId) return;
+    const id = deletePathId;
+    deleteRoadmap(id);
+    setDeletePathId(null);
+    if (activeViewPathId === id) setActiveViewPathId(null);
+    setShowCustomModal(true); // open the builder so they can rebuild fresh
+  };
+
+  // Header chip: state-aware primary action for the viewed roadmap
+  const handleViewChipPress = () => {
+    if (!effectiveViewId || !viewState) return;
+    if (viewState.editable) setEditPathId(effectiveViewId);
+    else if (viewState.isJourneyCustom && viewState.locked && !viewState.started) lockRoadmap(effectiveViewId, false);
+    else if (viewState.isJourneyCustom && viewState.started) setDeletePathId(effectiveViewId);
+    else if (viewState.builtIn) setForkPathId(effectiveViewId);
+  };
+
+  const viewChip = (() => {
+    if (!viewState) return null;
+    if (viewState.editable) return { label: '✏️ Edit', tint: viewInfo?.color ?? Colors.primary };
+    if (viewState.isJourneyCustom && viewState.locked && !viewState.started) return { label: '🔒 Locked', tint: Colors.textMuted };
+    if (viewState.isJourneyCustom && viewState.started) return { label: '🔒 In progress', tint: Colors.textMuted };
+    if (viewState.builtIn) return { label: '📋 Editable copy', tint: Colors.gold };
+    return null; // personal_library or unknown
+  })();
 
   const renderCompactRoadmap = (pathId: string) => {
     const info = getPathInfo(pathId);
@@ -1035,10 +1440,24 @@ export default function EvolveScreen() {
         {effectiveViewId && viewInfo && viewInfo.skills.length > 0 && (
           <View style={styles.section}>
             <View style={styles.skillTreeHeader}>
-              <Text style={styles.sectionLabel}>MILESTONE MAP</Text>
-              <Text style={[styles.skillTreePath, { color: viewInfo.color }]}>
-                {viewInfo.icon} {viewInfo.name}
-              </Text>
+              {/* RES-004: numberOfLines={1} stops the label wrapping at 320px */}
+              <Text style={[styles.sectionLabel, styles.skillTreeLabel]} numberOfLines={1}>MILESTONES</Text>
+              <View style={styles.skillTreeHeaderRight}>
+                <Text style={[styles.skillTreePath, { color: viewInfo.color }]} numberOfLines={1}>
+                  {viewInfo.icon} {viewInfo.name}
+                </Text>
+                {viewChip && (
+                  <TouchableOpacity
+                    style={[styles.editChip, { borderColor: viewChip.tint + '55', backgroundColor: viewChip.tint + '1A' }]}
+                    onPress={handleViewChipPress}
+                    activeOpacity={0.8}
+                    accessibilityRole="button"
+                    accessibilityLabel={`${viewChip.label} — ${viewInfo.name}`}
+                  >
+                    <Text style={[styles.editChipText, { color: viewChip.tint }]}>{viewChip.label}</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
             </View>
 
             {viewInfo.skills.map((skill, index) => {
@@ -1165,9 +1584,34 @@ export default function EvolveScreen() {
           onPause={() => { pauseRoadmap(managingPathId); setManagingPathId(null); }}
           onArchive={() => { archiveRoadmap(managingPathId); setManagingPathId(null); }}
           onReactivate={() => { reactivateRoadmap(managingPathId); setManagingPathId(null); }}
+          onEdit={() => { const id = managingPathId; setManagingPathId(null); setEditPathId(id); }}
+          onLockIn={() => { lockRoadmap(managingPathId, true); setManagingPathId(null); }}
+          onUnlock={() => { lockRoadmap(managingPathId, false); setManagingPathId(null); }}
+          onFork={() => { const id = managingPathId; setManagingPathId(null); setForkPathId(id); }}
+          onDeleteRebuild={() => { const id = managingPathId; setManagingPathId(null); setDeletePathId(id); }}
           onClose={() => setManagingPathId(null)}
         />
       )}
+
+      <EditRoadmapModal
+        visible={!!editPathId}
+        pathId={editPathId}
+        onClose={() => setEditPathId(null)}
+      />
+
+      <ForkConfirmModal
+        visible={!!forkPathId}
+        pathId={forkPathId}
+        onConfirm={handleConfirmFork}
+        onDismiss={() => setForkPathId(null)}
+      />
+
+      <DeleteRebuildConfirmModal
+        visible={!!deletePathId}
+        pathId={deletePathId}
+        onConfirm={handleConfirmDelete}
+        onDismiss={() => setDeletePathId(null)}
+      />
 
       {/* Skill Detail Sheet */}
       <Modal
@@ -1280,10 +1724,6 @@ export default function EvolveScreen() {
                       {
                         width: `${progressPct}%` as any,
                         backgroundColor: isCompleted ? Colors.success : skillPathColor.primary,
-                        // @ts-ignore
-                        background: isCompleted
-                          ? `linear-gradient(90deg, ${Colors.success}, #34D399)`
-                          : `linear-gradient(90deg, ${skillPathColor.primary}, ${skillPathColor.text})`,
                       },
                     ]} />
                   </View>
@@ -1481,7 +1921,15 @@ const makeStyles = (Colors: ColorsType) => StyleSheet.create({
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     marginBottom: Spacing.sm,
   },
-  skillTreePath: { fontSize: FontSize.xs, fontWeight: '600' },
+  // RES-004: label must not wrap — give it flexShrink:0 so the right-side chip can't crowd it
+  skillTreeLabel: { flexShrink: 0 },
+  skillTreePath: { fontSize: FontSize.xs, fontWeight: '600', flexShrink: 1 },
+  skillTreeHeaderRight: { flexDirection: 'row', alignItems: 'center', gap: 8, flexShrink: 1 },
+  editChip: {
+    flexDirection: 'row', alignItems: 'center',
+    borderRadius: Radius.full, paddingHorizontal: 10, paddingVertical: 5, borderWidth: 1,
+  },
+  editChipText: { fontSize: 11, fontWeight: '700' },
 
   // Archived section
   archivedToggle: { paddingVertical: 4 },
@@ -1777,6 +2225,36 @@ const makeModal = (Colors: ColorsType) => StyleSheet.create({
   btnDisabled: { opacity: 0.35 },
 });
 
+// FEAT-001: Edit Roadmap modal styles
+const makeEdit = (Colors: ColorsType) => StyleSheet.create({
+  banner: {
+    backgroundColor: Colors.primaryDim, borderRadius: Radius.lg, padding: Spacing.md,
+    borderWidth: 1, borderColor: Colors.primary + '30',
+  },
+  bannerText: { fontSize: FontSize.sm, color: Colors.text, lineHeight: 20, fontWeight: '500' },
+  moveCol: { gap: 3 },
+  moveBtn: {
+    width: 30, height: 18, borderRadius: 6, backgroundColor: Colors.cardAlt,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  moveText: { fontSize: 9, color: Colors.textMuted, lineHeight: 11 },
+  addRow: { flexDirection: 'row', alignItems: 'center', marginTop: 4 },
+  addBtn: {
+    marginLeft: 8, backgroundColor: Colors.primary, borderRadius: Radius.md,
+    paddingHorizontal: 18, paddingVertical: 13, alignItems: 'center',
+  },
+  addBtnText: { fontSize: FontSize.sm, fontWeight: '700', color: Colors.white },
+  lockBtn: {
+    borderWidth: 1.5, borderRadius: Radius.xl, paddingVertical: 14,
+    alignItems: 'center', backgroundColor: 'transparent',
+  },
+  lockBtnText: { fontSize: FontSize.base, fontWeight: '800' },
+  lockBtnSub: {
+    fontSize: FontSize.xs, color: Colors.textMuted, marginTop: 4,
+    textAlign: 'center', paddingHorizontal: Spacing.md,
+  },
+});
+
 const makeDetail = (Colors: ColorsType) => StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.bg },
   handle: {
@@ -1839,8 +2317,6 @@ const makeDetail = (Colors: ColorsType) => StyleSheet.create({
   progressCount: { fontSize: FontSize.sm, fontWeight: '700', color: Colors.text },
   progressBg: {
     height: 8, backgroundColor: Colors.cardAlt, borderRadius: 4, overflow: 'hidden',
-    // @ts-ignore
-    background: Colors.cardAlt,
   },
   progressFill: {
     height: '100%', borderRadius: 4,

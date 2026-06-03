@@ -1766,6 +1766,9 @@ const makeStyles = (Colors: ColorsType) => StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 3,
+    // RES-001: ensure the tap target meets the 44px WCAG minimum
+    minHeight: 44,
+    justifyContent: 'center',
   },
   xpInfoBtn: {
     fontSize: 10,

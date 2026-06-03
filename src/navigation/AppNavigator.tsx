@@ -6,6 +6,8 @@ import { Text, View, Animated, TouchableOpacity, StyleSheet } from 'react-native
 import { useThemeColors, Colors, FontSize, Spacing } from '../utils/theme';
 
 import { useAppStore } from '../store/appStore';
+// ARCH-001: auth session listener
+import { onAuthStateChange, isSupabaseEnabled } from '../lib/auth';
 
 import OnboardingScreen from '../screens/OnboardingScreen';
 import DashboardScreen from '../screens/DashboardScreen';
@@ -223,10 +225,10 @@ function MainTabs() {
         name="Feed"
         component={GuardedFeed}
         options={{
-          tabBarLabel: 'Community',
+          tabBarLabel: 'Feed', // RES-002: 'Community' (9 chars) truncates at 320px; 'Feed' always fits
           tabBarAccessibilityLabel: 'Community feed tab',
           tabBarIcon: ({ focused }) => (
-            <TabIcon icon="🌐" label="Community" focused={focused} />
+            <TabIcon icon="🌐" label="Feed" focused={focused} />
           ),
         }}
       />
@@ -267,6 +269,24 @@ function MainTabs() {
 
 export default function AppNavigator() {
   const hasOnboarded = useAppStore((s) => s.hasOnboarded);
+  const setSupabaseSession = useAppStore((s) => s.setSupabaseSession);
+  const syncFromSupabase   = useAppStore((s) => s.syncFromSupabase);
+
+  // ARCH-001: subscribe to Supabase auth state changes for the lifetime of the app.
+  // When a Magic Link is clicked the browser redirects back here, Supabase picks up
+  // the token via detectSessionInUrl, fires SIGNED_IN, and we sync remote → local.
+  useEffect(() => {
+    if (!isSupabaseEnabled) return;
+    const unsub = onAuthStateChange(async (session) => {
+      if (session) {
+        setSupabaseSession(session.user.id, session.user.email ?? null);
+        await syncFromSupabase();
+      } else {
+        setSupabaseSession(null, null);
+      }
+    });
+    return unsub;
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <NavigationContainer>

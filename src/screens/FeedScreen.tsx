@@ -209,13 +209,15 @@ export default function FeedScreen() {
   const ListHeader = () => (
     <View>
       {/* Filter chips with post count */}
+      {/* RES-003: wrap in a relative container so the right-edge fade can overlay it */}
       <View style={styles.filterSection}>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.filterRow}
-        >
-          {allFilters.map((filter) => {
+        <View style={styles.filterScrollWrapper}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.filterRow}
+          >
+            {allFilters.map((filter) => {
             const isActive = activeFilter === filter.id;
             const count = getFilterCount(filter.id);
             return (
@@ -252,7 +254,15 @@ export default function FeedScreen() {
               </TouchableOpacity>
             );
           })}
-        </ScrollView>
+          </ScrollView>
+          {/* Right-edge fade: signals more chips exist off-screen.
+              Inline style is intentional: RN-web strips `background` gradients
+              from StyleSheet.create(), but honours them as inline style props. */}
+          <View
+            style={[styles.filterFade, { background: `linear-gradient(to right, transparent, ${Colors.bg})` } as any]}
+            pointerEvents="none"
+          />
+        </View>
       </View>
       {/* Coaching banner only when no personal post and viewing all */}
       {!hasPersonalPost && activeFilter === 'all' && <FeedCoachingBanner />}
@@ -526,6 +536,19 @@ const makeStyles = (Colors: ColorsType) => StyleSheet.create({
   // Filter chips
   filterSection: {
     marginBottom: Spacing.md,
+  },
+  // RES-003: contains the ScrollView + the right-edge fade overlay
+  filterScrollWrapper: {
+    position: 'relative' as const,
+  },
+  // Right-to-transparent fade that signals more chips exist off-screen
+  filterFade: {
+    position: 'absolute' as const,
+    top: 0,
+    right: 0,
+    bottom: 0,
+    width: 40,
+    // gradient is applied as inline style at the callsite — StyleSheet strips it
   },
   filterRow: {
     flexDirection: 'row',
