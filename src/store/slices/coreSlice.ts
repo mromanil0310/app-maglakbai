@@ -15,8 +15,10 @@ import { CAREER_PATHS } from '../../data/careerPaths';
 import { ALL_SKILLS } from '../../data/skills';
 import { ALL_ACHIEVEMENTS } from '../../data/achievements';
 import { MOCK_FEED } from '../../data/mockFeed';
-import { getEvidenceTier, OUTCOME_XP, getCareerMastery, calculateOutputXP } from '../../domain/progression';
+import { getEvidenceTier, OUTCOME_XP, getCareerMastery, calculateOutputXP, CUSTOM_SKILL_COMPLETION_XP } from '../../domain/progression';
 import { initUserSkills, unlockDependentSkills, checkAchievements } from '../../domain/skillGraph';
+// ARCH-001: fire-and-forget Supabase sync after local state is updated
+import { upsertProfile, insertOutput, upsertSkillProgress } from '../../lib/db';
 
 type Set = StoreApi<AppState>['setState'];
 type Get = StoreApi<AppState>['getState'];
@@ -103,6 +105,9 @@ export const createCoreSlice = (set: Set, get: Get): Pick<AppState, 'completeOnb
     };
     const state = { hasOnboarded: true, user, userSkills, prioritizedPathId: pathId, roadmaps: [initialRoadmap], showWelcomeCard: true };
     set(state);
+    // ARCH-001: sync the new profile to Supabase (fire-and-forget)
+    const syncUserId = get().supabaseUserId;
+    if (syncUserId) upsertProfile(syncUserId, user).catch(() => {});
     // Anonymous-only analytics: identify by id, never name/email (see analytics.ts).
     identify(userId, { career_path: pathId, joined_at: user.joinedAt });
     track('onboarding_completed', {
@@ -170,8 +175,9 @@ export const createCoreSlice = (set: Set, get: Get): Pick<AppState, 'completeOnb
     }
 
     const skillCompleted = wouldComplete && !evidenceRequired;
-    // Only built-in skills award bonus XP on completion
-    const skillXP = skillCompleted && skill ? skill.xpReward : 0;
+    // Built-in skills award their curated reward; user-defined (custom) milestones
+    // award a modest flat bonus (FEAT-001) — proof is still required to complete them.
+    const skillXP = skillCompleted ? (skill ? skill.xpReward : CUSTOM_SKILL_COMPLETION_XP) : 0;
     const totalXPGained = OUTPUT_XP + skillXP;
 
     const newXP = state.user.xp + totalXPGained;
@@ -423,6 +429,15 @@ export const createCoreSlice = (set: Set, get: Get): Pick<AppState, 'completeOnb
       track('retention_d30', { total_outputs: newOutputs.length, streak: newStreak });
     }
     // ─────────────────────────────────────────────────────────────────────────
+
+    // ARCH-001: fire-and-forget Supabase sync (localStorage already updated above via set())
+    const syncUserId = get().supabaseUserId;
+    if (syncUserId) {
+      const syncPathId = updatedUser.careerPathId;
+      insertOutput(syncUserId, newOutput, syncPathId).catch(() => {});
+      upsertSkillProgress(syncUserId, payload.skillId, syncPathId, updatedUserSkills[payload.skillId]).catch(() => {});
+      upsertProfile(syncUserId, updatedUser).catch(() => {});
+    }
 
     return {
       skillCompleted,

@@ -18,6 +18,8 @@ import { useThemeColors, ColorsType, Spacing, Radius, FontSize } from '../utils/
 import { useToast } from '../components/Toast';
 import { page, getConsentStatus, setConsent } from '../utils/analytics';
 import PrivacyPolicyModal from '../components/PrivacyPolicyModal';
+// ARCH-001: Supabase auth
+import { sendMagicLink, signOut, isSupabaseEnabled } from '../lib/auth';
 
 const STORAGE_KEY = 'skillforge_v1';
 
@@ -252,10 +254,18 @@ export default function SettingsScreen() {
   const styles = React.useMemo(() => makeStyles(Colors), [Colors]);
   const { showToast } = useToast();
 
+  const supabaseUserId = useAppStore((s) => s.supabaseUserId);
+  const supabaseEmail  = useAppStore((s) => s.supabaseEmail);
+  const supabaseSyncing = useAppStore((s) => s.supabaseSyncing);
+
   const [editingField, setEditingField] = useState<'name' | 'email' | null>(null);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [showPrivacy, setShowPrivacy] = useState(false);
   const [analyticsOn, setAnalyticsOn] = useState(getConsentStatus() === 'granted');
+  // ARCH-001: Magic Link state
+  const [magicLinkEmail, setMagicLinkEmail] = useState('');
+  const [magicLinkSending, setMagicLinkSending] = useState(false);
+  const [magicLinkSent, setMagicLinkSent] = useState(false);
 
   React.useEffect(() => {
     page('settings', {});
@@ -362,6 +372,93 @@ export default function SettingsScreen() {
             onPress={() => setEditingField('email')}
           />
         </View>
+
+        {/* ── Cloud Backup (ARCH-001: Supabase) ─────────────────────── */}
+        {isSupabaseEnabled && (
+          <>
+            <SectionHeader title="CLOUD BACKUP" />
+            <View style={styles.sectionCard}>
+              {supabaseUserId ? (
+                // Signed in — show status + sign-out
+                <>
+                  <View style={styles.row}>
+                    <Text style={styles.rowIcon}>☁️</Text>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.rowLabel}>Progress backed up</Text>
+                      <Text style={[styles.rowValue, { color: Colors.success }]}>
+                        {supabaseSyncing ? 'Syncing…' : `Signed in as ${supabaseEmail ?? 'unknown'}`}
+                      </Text>
+                    </View>
+                  </View>
+                  <View style={styles.rowDivider} />
+                  <SettingsRow
+                    icon="🚪"
+                    label="Sign out of cloud backup"
+                    valueColor={Colors.danger}
+                    onPress={async () => {
+                      await signOut();
+                      showToast({ message: 'Signed out. Progress stays on this device.', emoji: '📱', variant: 'success' });
+                    }}
+                  />
+                </>
+              ) : magicLinkSent ? (
+                // Magic link sent — waiting
+                <View style={[styles.row, { flexDirection: 'column', alignItems: 'flex-start', gap: 8 }]}>
+                  <Text style={styles.rowIcon}>📬</Text>
+                  <Text style={[styles.rowLabel, { flex: 0 }]}>Check your inbox</Text>
+                  <Text style={styles.rowSubValue}>
+                    We sent a sign-in link to {magicLinkEmail}. Tap it on any device to back up and sync your progress.
+                  </Text>
+                  <TouchableOpacity onPress={() => { setMagicLinkSent(false); setMagicLinkEmail(''); }}>
+                    <Text style={{ color: Colors.primaryLight, fontSize: FontSize.sm, marginTop: 4 }}>Use a different email →</Text>
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                // Not signed in — show Magic Link form
+                <View style={[styles.row, { flexDirection: 'column', alignItems: 'stretch', gap: 10 }]}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                    <Text style={styles.rowIcon}>☁️</Text>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.rowLabel}>Back up to cloud</Text>
+                      <Text style={styles.rowSubValue}>Sign in to keep progress safe across devices. No password needed.</Text>
+                    </View>
+                  </View>
+                  <TextInput
+                    style={[styles.input, { marginTop: 4 }]}
+                    placeholder="Enter your email"
+                    placeholderTextColor={Colors.textMuted}
+                    value={magicLinkEmail}
+                    onChangeText={setMagicLinkEmail}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    accessibilityLabel="Email for cloud backup"
+                  />
+                  <TouchableOpacity
+                    style={[styles.actionBtn, { opacity: magicLinkSending || !magicLinkEmail.includes('@') ? 0.4 : 1 }]}
+                    disabled={magicLinkSending || !magicLinkEmail.includes('@')}
+                    onPress={async () => {
+                      setMagicLinkSending(true);
+                      const result = await sendMagicLink(magicLinkEmail);
+                      setMagicLinkSending(false);
+                      if (result.ok) {
+                        setMagicLinkSent(true);
+                      } else {
+                        showToast({ message: result.error ?? 'Failed to send link', emoji: '⚠️', variant: 'warning' });
+                      }
+                    }}
+                    accessibilityRole="button"
+                    accessibilityLabel="Send magic link to back up progress"
+                  >
+                    <Text style={styles.actionBtnText}>
+                      {magicLinkSending ? 'Sending…' : 'Send Sign-in Link ✉️'}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </View>
+          </>
+        )}
 
         {/* ── Account ───────────────────────────────────────────────── */}
         <SectionHeader title="ACCOUNT" />
@@ -810,6 +907,36 @@ const makeStyles = (Colors: ColorsType) => StyleSheet.create({
   },
   confirmBtnText: {
     fontSize: FontSize.base,
+    fontWeight: '700',
+    color: Colors.white,
+  },
+  // ARCH-001: Cloud Backup section
+  rowSubValue: {
+    fontSize: FontSize.xs,
+    color: Colors.textMuted,
+    lineHeight: 18,
+    flex: 1,
+  },
+  input: {
+    backgroundColor: Colors.card ?? Colors.surface,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: Radius.md,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: 12,
+    fontSize: FontSize.sm,
+    color: Colors.text,
+  },
+  actionBtn: {
+    backgroundColor: Colors.primary,
+    borderRadius: Radius.full,
+    paddingVertical: 13,
+    alignItems: 'center',
+    // @ts-ignore — web only
+    boxShadow: '0 4px 16px rgba(124,58,237,0.35)',
+  },
+  actionBtnText: {
+    fontSize: FontSize.sm,
     fontWeight: '700',
     color: Colors.white,
   },

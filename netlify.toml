@@ -1,0 +1,47 @@
+# ─── Netlify configuration ───────────────────────────────────────────────────
+# SkillForge web/PWA deployment.
+# SPA routing is handled by public/_redirects (/* /index.html 200).
+# Env vars VITE_SUPABASE_URL + VITE_SUPABASE_ANON_KEY must be set in the
+# Netlify dashboard → Site configuration → Environment variables.
+# Vite inlines VITE_* vars at build time, so they must exist before `npm run build`.
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# ─── Security headers (mirrors vercel.json) ──────────────────────────────────
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+
+# ─── Long-cache for hashed Vite assets ───────────────────────────────────────
+# Vite names assets with a content hash (e.g. index-EKHkK-LI.js), so
+# immutable caching is safe — the filename changes whenever the content does.
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# ─── PWA assets — short cache so updates propagate quickly ───────────────────
+[[headers]]
+  for = "/manifest.json"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/icon-*.png"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
+
+[[headers]]
+  for = "/apple-touch-icon.png"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"

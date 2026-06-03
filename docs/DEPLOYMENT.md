@@ -1,14 +1,14 @@
 # SkillForge — Deployment
 
-SkillForge ships as a **web/PWA** app (Vite build → static `dist/`). There is no native build in the pilot. This doc covers local build, production deploy (Vercel), the user-guide page (GitHub Pages), environment variables, and the sandbox build workaround.
+SkillForge ships as a **web/PWA** app (Vite build → static `dist/`). There is no native build in the pilot. This doc covers local build, production deploy (Netlify), the user-guide page (GitHub Pages), environment variables, and the sandbox build workaround.
 
 ---
 
 ## Prerequisites
 
-- Node 18+ and npm
+- Node 20 and npm
 - `npm install` once to populate `node_modules`
-- Optional: `.env` from `.env.example` (analytics / Phase-2 vars — all optional)
+- `.env` copied from `.env.example` with Supabase vars filled in (required for cloud backup; all other vars optional)
 
 ## Scripts (`package.json`)
 
@@ -26,30 +26,49 @@ A production build emits hashed assets into `dist/`:
 
 ---
 
-## Production deploy — Vercel (recommended)
+## Production deploy — Netlify (recommended)
 
-`vercel.json` is committed: SPA rewrite (`/(.*) → /index.html`) + security headers (`X-Content-Type-Options`, `X-Frame-Options`, `X-XSS-Protection`) + long-cache headers for `/assets/*`.
+`netlify.toml` is committed: build config + security headers + long-cache headers for `/assets/*`. SPA routing is handled by `public/_redirects` (`/* /index.html 200`), which Vite copies to `dist/` on every build.
 
-> Note: static files in the output are matched **before** the SPA rewrite, so real files like `/USER_GUIDE.html` and `/manifest.json` are served directly. (`public/_redirects` is a Netlify convention and is ignored by Vercel.)
+### First-time setup (one time)
 
-**First-time setup (one time, requires your Vercel login):**
+1. Go to **app.netlify.com** → **Add new site** → **Import an existing project**
+2. Connect to GitHub → pick **`mromanil0310/skillforge`**
+3. Netlify auto-detects `netlify.toml` — build command and publish directory are pre-filled
+4. Add environment variables under **Site configuration → Environment variables**:
+
+| Key | Value | Required |
+|-----|-------|----------|
+| `VITE_SUPABASE_URL` | `https://wovceouygyobczkkeyxy.supabase.co` | ✅ Yes |
+| `VITE_SUPABASE_ANON_KEY` | your anon key | ✅ Yes |
+| `VITE_POSTHOG_API_KEY` | your PostHog key | Optional |
+
+5. Click **Deploy site** — Netlify builds from `main` and gives you a `*.netlify.app` URL
+
+### Every release after that
+
 ```bash
-npm i -g vercel
-vercel            # links/creates the project → gives a *.vercel.app domain
+git push origin main   # Netlify auto-deploys on every push to main
 ```
 
-**Each release:**
+That's it. No CLI needed.
+
+### After deploy — update Supabase redirect URLs
+
+Magic Link emails redirect the user back to the app. You must tell Supabase your production URL:
+
+1. Supabase dashboard → **Authentication → URL Configuration**
+2. **Site URL**: set to your Netlify URL (e.g. `https://skillforge.netlify.app`)
+3. **Redirect URLs**: add `https://skillforge.netlify.app` (and keep `http://localhost:8082` for local dev)
+
+Without this, Magic Links from production will redirect to localhost instead of the live app.
+
+### Manual / one-off deploy (no account needed)
+
 ```bash
-npm test          # green first
-npm run build     # produces dist/
-vercel --prod     # deploy dist/ to production
+npm run build
+# Drag the dist/ folder onto app.netlify.com/drop → instant URL
 ```
-
-Set any env vars (e.g. `VITE_POSTHOG_API_KEY`) in the Vercel project's Environment Variables, or in a local `.env` before `npm run build`. Vite inlines `VITE_*` vars at build time.
-
-### Alternatives
-- **Netlify Drop** — drag the built `dist/` folder onto app.netlify.com/drop for an instant URL (no account).
-- Any static host works — just serve `dist/` with the SPA fallback to `index.html`.
 
 ---
 
@@ -62,28 +81,43 @@ The how-to guide (`docs/USER_GUIDE.html`, also copied to `public/USER_GUIDE.html
 
 `docs/USER_GUIDE.html` is the source of truth; `public/USER_GUIDE.html` is the copy that ships inside the app build. Keep them in sync when editing.
 
+> **Don't use GitHub Pages for the main app** — it doesn't support SPA routing natively. Netlify handles this via `_redirects`.
+
+---
+
+## Environment variables
+
+Vite inlines `VITE_*` vars at **build time**. They must be set in the host's environment before `npm run build` runs — not at runtime.
+
+| Variable | Purpose | Required |
+|----------|---------|----------|
+| `VITE_SUPABASE_URL` | Supabase project URL | Yes (for cloud backup) |
+| `VITE_SUPABASE_ANON_KEY` | Supabase public anon key | Yes (for cloud backup) |
+| `VITE_POSTHOG_API_KEY` | PostHog analytics key | No |
+| `VITE_POSTHOG_HOST` | PostHog host override | No |
+
+In local dev: copy `.env.example` → `.env` and fill in values. `.env` is gitignored.
+
 ---
 
 ## Sandbox / FUSE build workaround
 
-In the agent sandbox, the workspace is a FUSE mount where Vite's in-place `dist/` cleanup can fail with an unlink error. Two ways around it:
+In the agent sandbox, the workspace is a FUSE mount where Vite's in-place `dist/` cleanup can fail with an unlink error. Build to a temp dir instead:
 
-1. **Build to a non-FUSE outDir:**
-   ```bash
-   node node_modules/.bin/vite build --outDir /tmp/sf_dist --emptyOutDir
-   ```
-   then copy `/tmp/sf_dist/*` back over `dist/` (overwrite works; deletes don't).
+```bash
+node node_modules/.bin/vite build --outDir /tmp/sf_dist --emptyOutDir
+```
+Then copy `/tmp/sf_dist/*` back over `dist/` (overwrite works; deletes don't).
 
-2. **Build from a /tmp copy of the source** (see the daily-QA skill `docs/skillforge-daily-qa.md` for the full copy-and-symlink-`node_modules` recipe), then sync `dist/` back.
-
-On a normal machine (your Mac), `npm run build` works directly — the workaround is only needed inside the sandbox.
+On your Mac, `npm run build` works directly — this workaround is only needed inside the sandbox.
 
 ---
 
 ## Pre-deploy checklist
 
-- [ ] `npm test` green
-- [ ] `npm run build` succeeds (no TS/Vite errors)
-- [ ] Spot-check the built bundle via `npm run serve`
-- [ ] Env vars set in the host (if using analytics/Phase 2)
+- [ ] `npm test` — 94 tests green
+- [ ] `npm run build` — no TS/Vite errors
+- [ ] Spot-check via `npm run serve`
+- [ ] `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY` set in Netlify env vars
+- [ ] Supabase Site URL + Redirect URLs updated to the Netlify domain
 - [ ] `USER_GUIDE.html` updated in **both** `docs/` and `public/` if changed
