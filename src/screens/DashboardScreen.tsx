@@ -920,8 +920,14 @@ export default function DashboardScreen() {
 
         ) : (
 
-          /* Evolution view — fills remaining space, no scroll */
-          <>
+          /* Evolution view — scrollable so ring doesn't overlap header at short heights (UX-023)
+             and dead space is eliminated at tall heights (UX-018) */
+          <ScrollView
+            style={{ flex: 1 }}
+            contentContainerStyle={styles.evolutionScroll}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+          >
             {/* Ring */}
             <View style={styles.ringSection}>
               <Text style={styles.pathLabel} numberOfLines={1}>
@@ -1098,7 +1104,7 @@ export default function DashboardScreen() {
                 </View>
               </TouchableOpacity>
             )}
-          </>
+          </ScrollView>
         )}
 
       </Animated.View>
@@ -1258,7 +1264,6 @@ const makeStyles = (Colors: ColorsType) => StyleSheet.create({
     flex: 1,
     paddingHorizontal: Spacing.md,
     paddingTop: Spacing.sm,
-    paddingBottom: Spacing.md,
     gap: Spacing.sm,
   },
 
@@ -1523,12 +1528,17 @@ const makeStyles = (Colors: ColorsType) => StyleSheet.create({
     flexShrink: 1,
   },
 
-  // Evolution ring section — takes all remaining vertical space
+  // Evolution scroll container — contentContainerStyle for the ScrollView
+  evolutionScroll: {
+    gap: Spacing.sm,
+    paddingBottom: Spacing.md,
+  },
+
+  // Evolution ring section — natural height (no flex-grow), centered
   ringSection: {
-    flex: 1,
     alignItems: 'center',
-    justifyContent: 'center',
     paddingTop: Spacing.sm,
+    paddingBottom: Spacing.sm,
     gap: 10,
   },
   pathLabel: {
