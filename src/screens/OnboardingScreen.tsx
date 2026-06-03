@@ -719,7 +719,8 @@ function FirstOutputStep({
           ? 'What are you working on now?'
           : experienceLevel === 'building'
           ? 'Log your most recent output.'
-          : 'Prove it with your first output.'}
+          // beginner / Fresh Start (UX-027): forward-looking, not "what have you already built"
+          : 'Start with one small step.'}
       </Text>
       <Text style={styles.stepSub}>
         {isCustomPath
@@ -728,7 +729,8 @@ function FirstOutputStep({
           ? 'Your foundation is credited. Show us what you\'re building at the advanced level.'
           : experienceLevel === 'building'
           ? 'Your first skill has been credited. What have you built recently on this path?'
-          : 'What have you already built, read, or earned on this path? Log it now.'}
+          // beginner / Fresh Start: logging is optional — make skipping a first-class choice
+          : 'New to this? Log anything you\'ve already tried — a tutorial, notes, a small build. Nothing yet? Tap Skip and we\'ll line up your first mission.'}
       </Text>
 
       {/* Output type selector */}
@@ -797,7 +799,11 @@ function FirstOutputStep({
         onPress={() => onSubmit('project', '', '')}
         activeOpacity={0.7}
       >
-        <Text style={styles.skipLinkText}>Skip for now</Text>
+        <Text style={styles.skipLinkText}>
+          {!isCustomPath && experienceLevel === 'beginner'
+            ? "I'm just getting started — skip →"
+            : 'Skip for now'}
+        </Text>
       </TouchableOpacity>
     </ScrollView>
   );
