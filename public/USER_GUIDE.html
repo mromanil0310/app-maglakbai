@@ -47,6 +47,12 @@
     background: rgba(124,58,237,0.15); border: 1px solid rgba(124,58,237,0.4);
     color: var(--primary-light); font-size: 12px; font-weight: 700; letter-spacing: 0.5px;
   }
+  .app-link {
+    display: inline-block; margin-top: 14px; padding: 10px 22px; border-radius: 999px;
+    background: var(--primary); color: #fff; font-size: 14px; font-weight: 700;
+    text-decoration: none; letter-spacing: 0.2px;
+  }
+  .app-link:hover { background: var(--primary-light); }
 
   /* TOC */
   .toc {
@@ -90,7 +96,7 @@
   .callout.warn { background: rgba(245,158,11,0.10); border-color: rgba(245,158,11,0.40); }
   .callout b { display: block; margin-bottom: 3px; }
 
-  /* Phone mockup ("image") */
+  /* Phone mockup */
   .phone {
     width: 270px; border-radius: 30px; padding: 12px;
     background: #050509; border: 1px solid var(--border);
@@ -107,6 +113,7 @@
   .m-sub { font-size: 11px; color: var(--text-sub); margin: 0 0 12px; }
   .m-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 11px 12px; margin-bottom: 9px; }
   .m-card.hi { border-color: rgba(124,58,237,0.5); background: rgba(124,58,237,0.08); }
+  .m-card.ok { border-color: rgba(16,185,129,0.4); background: rgba(16,185,129,0.07); }
   .m-row { display: flex; align-items: center; justify-content: space-between; }
   .m-lbl { font-size: 12.5px; font-weight: 600; }
   .m-val { font-size: 12px; color: var(--text-sub); }
@@ -141,6 +148,7 @@
   .m-stat .v { font-size: 17px; font-weight: 800; }
   .m-stat .l { font-size: 8px; letter-spacing: 0.5px; color: var(--text-sub); }
   .m-avatar { width: 60px; height: 60px; border-radius: 50%; background: var(--surface-high); border: 2px solid var(--primary); display: flex; align-items: center; justify-content: center; font-size: 28px; margin: 4px auto 8px; }
+  .m-input { background: var(--surface); border: 1px solid rgba(124,58,237,0.4); border-radius: 8px; padding: 8px 10px; font-size: 11px; color: var(--text-sub); margin-top: 6px; }
 
   footer { margin-top: 64px; padding-top: 28px; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 13px; text-align: center; }
   footer a { color: var(--primary-light); text-decoration: none; }
@@ -154,6 +162,8 @@
   <h1>Welcome to SkillForge</h1>
   <p class="tagline">The Strava for professional growth</p>
   <p class="sub">Track your evolution as a tech professional through proof-based progression. Log the real things you build — projects, scripts, books, certs — earn XP, unlock milestones, and watch your career level up.</p>
+  <a class="app-link" href="https://fascinating-kitten-b6a79d.netlify.app" target="_blank">Open SkillForge ⚡</a>
+  <br/>
   <span class="pilot-pill">📱 PILOT GUIDE · v1.0</span>
 </div>
 
@@ -170,7 +180,8 @@
       <li><a href="#evolve">The Evolve milestone map</a></li>
       <li><a href="#community">The Community preview</a></li>
       <li><a href="#profile">Your Profile</a></li>
-      <li><a href="#data">Your data &amp; privacy controls</a></li>
+      <li><a href="#backup">Cloud backup &amp; sign-in</a></li>
+      <li><a href="#data">Data &amp; privacy controls</a></li>
       <li><a href="#tips">Tips &amp; FAQ</a></li>
     </ol>
   </div>
@@ -178,19 +189,23 @@
   <!-- 1 -->
   <section id="open">
     <h2 class="sec-title"><span class="step-num">1</span>Open &amp; install the app</h2>
-    <p class="sec-intro">SkillForge runs right in your web browser — there's nothing to download from an app store during the pilot.</p>
+    <p class="sec-intro">SkillForge runs right in your browser — nothing to download from an app store.</p>
     <div class="layout">
       <div>
-        <p>Open the link you were sent in <strong>Safari</strong> (iPhone) or <strong>Chrome</strong> (Android / desktop). That's it — you're in.</p>
-        <p class="lead" style="margin-bottom:8px;">Add it to your home screen (recommended)</p>
-        <p>For an app-like, full-screen experience that launches from your home screen:</p>
+        <p>Open this link in <strong>Safari</strong> (iPhone) or <strong>Chrome</strong> (Android / desktop):</p>
+        <p style="background:var(--surface);padding:10px 14px;border-radius:10px;font-size:13px;font-weight:600;color:var(--primary-light);word-break:break-all;">
+          https://fascinating-kitten-b6a79d.netlify.app
+        </p>
+        <p class="lead" style="margin:16px 0 8px;">Add it to your home screen (recommended)</p>
+        <p>For a full-screen, app-like experience that launches from your home screen:</p>
         <ul class="points">
           <li><strong>iPhone (Safari):</strong> tap the <span class="k">Share</span> button → <span class="k">Add to Home Screen</span> → <span class="k">Add</span>.</li>
           <li><strong>Android (Chrome):</strong> tap the <span class="k">⋮</span> menu → <span class="k">Add to Home screen</span> / <span class="k">Install app</span>.</li>
+          <li><strong>Desktop (Chrome):</strong> look for the install icon in the address bar.</li>
         </ul>
-        <div class="callout warn">
-          <b>⚠️ Important during the pilot</b>
-          Your progress is saved <strong>only on this device, in this browser</strong>. There is no account and no cloud sync yet. If you switch browsers or devices, or clear browsing data, your progress won't follow automatically — so back it up (see <a href="#data" style="color:var(--gold);">section 9</a>).
+        <div class="callout tip">
+          <b>☁️ Your progress is safe</b>
+          After you complete onboarding, go to <span class="k">Settings → Cloud Backup</span> and enter your email. You'll get a sign-in link — tap it, and your progress is saved to the cloud. You can then access it from any device, any browser, anytime.
         </div>
       </div>
       <div>
@@ -247,15 +262,15 @@
       <div>
         <ul class="points">
           <li><strong>Welcome</strong> — a short intro to how SkillForge works.</li>
-          <li><strong>Your name (&amp; optional email)</strong> — what we'll call you. (Stored only on your device.)</li>
+          <li><strong>Your name (&amp; optional email)</strong> — what we'll call you.</li>
           <li><strong>Pick a career path</strong> — choose your focus:
-            <br/>🏗️ <span class="k">Data Architect</span> · 🤖 <span class="k">AI Engineer</span> · 🌐 <span class="k">Full Stack</span> · and 16 more</li>
-          <li><strong>Set your experience level</strong> — tell us where you're starting (🌱 <span class="k">Fresh Start</span> · ⚡ <span class="k">Some Foundation</span> · 🏆 <span class="k">Bringing Experience</span>) so your roadmap is pre-credited to match.</li>
-          <li><strong>Log your first output</strong> — record something you've already built to earn your first XP right away.</li>
+            <br/>🏗️ <span class="k">Data Architect</span> · 🤖 <span class="k">AI Engineer</span> · 🌐 <span class="k">Full Stack</span> · and 16 more. You can also <span class="k">Build My Own Path</span>.</li>
+          <li><strong>Set your experience level</strong> — 🌱 <span class="k">Fresh Start</span> · ⚡ <span class="k">Some Foundation</span> · 🏆 <span class="k">Bringing Experience</span> — your roadmap is pre-credited to match.</li>
+          <li><strong>Log your first output</strong> — record something you've already built to earn your first XP right away. (Or tap Skip if you're just getting started.)</li>
         </ul>
         <div class="callout">
           <b>💡 What's a "path"?</b>
-          Each path is an ordered map of skills to master — e.g. AI Engineer goes Python → REST APIs → Prompt Engineering → Vector Databases → RAG → AI Agents. You can switch paths or build your own custom roadmap later in <span class="k">Evolve</span>.
+          Each path is an ordered map of skills to master — e.g. AI Engineer goes Python → REST APIs → Prompt Engineering → Vector Databases → RAG → AI Agents. You can switch paths, enroll in multiple, or build a fully custom roadmap anytime in <span class="k">Evolve</span>.
         </div>
       </div>
       <div>
@@ -280,11 +295,11 @@
       <div>
         <ul class="points">
           <li><strong>Evolution ring</strong> — your overall progress through the current path's skills.</li>
-          <li><strong>Stats bar</strong> — total XP, current day streak 🔥, and XP earned this week.</li>
+          <li><strong>Stats bar</strong> — total XP, current day streak 🔥, and outputs this week.</li>
           <li><strong>Streak dots</strong> — keep your daily streak alive; the app nudges you when it's at risk and lets you spend a <span class="k">Freeze</span> to protect it.</li>
           <li><strong>"So close" card</strong> — your next milestone and exactly what's needed to complete it.</li>
         </ul>
-        <p>The bottom tab bar is how you move around: <span class="k">Home</span>, <span class="k">Community</span>, the big <span class="k">+</span> button to log work, <span class="k">Evolve</span>, and <span class="k">Profile</span>.</p>
+        <p>The bottom tab bar: <span class="k">Home</span> · <span class="k">Feed</span> · big <span class="k">+</span> to log work · <span class="k">Evolve</span> · <span class="k">Profile</span>.</p>
       </div>
       <div>
         <div class="phone"><div class="phone-screen">
@@ -293,15 +308,15 @@
           <div class="m-card"><div class="m-row">
             <div class="m-stat"><div class="v">260</div><div class="l">TOTAL XP</div></div>
             <div class="m-stat"><div class="v">3</div><div class="l">STREAK</div></div>
-            <div class="m-stat"><div class="v">0</div><div class="l">THIS WEEK</div></div>
+            <div class="m-stat"><div class="v">2</div><div class="l">THIS WEEK</div></div>
           </div></div>
           <div class="m-card hi">
             <div style="font-size:9px;font-weight:700;color:var(--primary-light);">SO CLOSE ⚡</div>
-            <div class="m-row"><span class="m-lbl">REST APIs &amp; Integration</span><span class="m-btn">Complete It</span></div>
+            <div class="m-row"><span class="m-lbl">REST APIs</span><span class="m-btn">Complete It</span></div>
           </div>
           <div class="m-tabs">
             <div class="m-tab on"><span class="e">🏠</span>Home</div>
-            <div class="m-tab"><span class="e">🌐</span>Community</div>
+            <div class="m-tab"><span class="e">🌐</span>Feed</div>
             <div class="m-tab"><span class="m-plus">+</span></div>
             <div class="m-tab"><span class="e">⚡</span>Evolve</div>
             <div class="m-tab"><span class="e">👤</span>Profile</div>
@@ -364,14 +379,21 @@
           <li><span class="green">✓ Completed</span> skills are filled in green with the date you reached them.</li>
           <li><span class="k">In-progress</span> skills show a progress bar and how many outputs remain.</li>
           <li>🔒 <strong>Locked</strong> skills unlock automatically once you finish their prerequisites.</li>
-          <li><strong>My Roadmaps</strong> — switch between the built-in paths, set a <span class="k">Priority Focus</span>, or tap <span class="k">+ Add</span> to build your own custom roadmap.</li>
+          <li><strong>My Roadmaps</strong> — set a <span class="k">Priority Focus</span>, enroll in multiple paths, or tap <span class="k">+ Add</span> to build a custom roadmap.</li>
         </ul>
+        <div class="callout">
+          <b>✏️ Editable roadmaps</b>
+          On any custom roadmap, tap the <span class="k">✏️ Edit</span> chip next to the milestone map to add, rename, reorder, or remove milestones — but only <strong>before you log your first proof</strong>. Once the journey starts, the structure locks in so your XP target stays stable. To restructure a started roadmap, use <span class="k">Delete &amp; Rebuild</span> in the ⋯ menu (your XP and logged proof are always kept).
+        </div>
       </div>
       <div>
         <div class="phone"><div class="phone-screen">
           <div class="m-title">Milestone Map</div>
-          <div class="m-sub">🤖 AI Engineer</div>
-          <div class="m-card" style="border-color:rgba(16,185,129,0.4);background:rgba(16,185,129,0.07);">
+          <div class="m-row" style="margin-bottom:10px;">
+            <div class="m-sub" style="margin:0;">🤖 AI Engineer</div>
+            <span class="m-chip">✏️ Edit</span>
+          </div>
+          <div class="m-card ok">
             <div class="m-row"><span class="m-lbl">✅ Python Fundamentals</span><span class="m-chip green">COMPETENT</span></div>
           </div>
           <div class="m-card hi">
@@ -380,7 +402,6 @@
             <span class="gold" style="font-size:10px;">+150 XP on complete</span>
           </div>
           <div class="m-card" style="opacity:0.55;"><div class="m-row"><span class="m-lbl">🔒 Prompt Engineering</span><span class="m-val">LOCKED</span></div></div>
-          <div class="m-card" style="opacity:0.55;"><div class="m-row"><span class="m-lbl">🔒 Vector Databases</span><span class="m-val">LOCKED</span></div></div>
         </div></div>
         <p class="cap">Completed → in-progress → locked, all connected</p>
       </div>
@@ -389,17 +410,18 @@
 
   <!-- 7 -->
   <section id="community">
-    <h2 class="sec-title"><span class="step-num">7</span>The Community preview</h2>
-    <p class="sec-intro">A glimpse of what the social feed will become — with a few sample builders to show the vibe.</p>
+    <h2 class="sec-title"><span class="step-num">7</span>The Feed (Community preview)</h2>
+    <p class="sec-intro">A glimpse of what the social feed will become — with sample builders to show the vibe.</p>
     <div class="layout">
       <div>
         <ul class="points">
-          <li>See <strong>sample posts</strong> from example builders and a sample weekly XP leaderboard, so you can picture the experience.</li>
-          <li>When you log an output, <strong>your own posts appear here too</strong> — and react to posts with emojis.</li>
+          <li>See <strong>sample posts</strong> from example builders and a sample weekly XP leaderboard.</li>
+          <li>When you log an output, <strong>your own posts appear here too</strong> — react to posts with emojis.</li>
+          <li>Filter posts by career path using the chips at the top — scroll right to see all 19 paths.</li>
         </ul>
         <div class="callout warn">
           <b>👀 This is a preview</b>
-          During the pilot, the community is marked <strong>PREVIEW</strong>. The other builders and the leaderboard are <strong>samples</strong>, and <strong>your posts stay on your device</strong> — nothing is shared with anyone else yet. Real sharing is coming soon.
+          During the pilot, the community is marked <strong>PREVIEW</strong>. The other builders and leaderboard are <strong>samples</strong>, and <strong>your posts stay on your device</strong> — nothing is shared with anyone else yet. Real sharing is coming in the next release.
         </div>
       </div>
       <div>
@@ -412,13 +434,12 @@
             <div class="m-row" style="margin-top:4px;"><span class="m-lbl">🥈 Marcus <span class="m-val">SAMPLE</span></span><span class="gold" style="font-size:11px;">340 XP</span></div>
           </div>
           <div class="m-card">
-            <div class="m-row"><span class="m-lbl">Alex Chen</span><span class="m-chip">Data Architect</span></div>
-            <div style="font-size:10px;color:var(--primary-light);font-weight:700;margin-top:5px;">⚡ Milestone Unlocked · SQL Foundations</div>
-            <div class="m-val" style="margin-top:3px;">Finally nailed window functions after building a real pipeline…</div>
-            <div style="margin-top:7px;font-size:11px;">🔥 12 · 👏 8 · 💪 5</div>
+            <div class="m-row"><span class="m-lbl">Kenji Nakamura</span><span class="m-chip">ML Engineer</span></div>
+            <div style="font-size:10px;color:var(--primary-light);font-weight:700;margin-top:5px;">⚡ Offer Received · +500 XP</div>
+            <div class="m-val" style="margin-top:3px;">ML Engineer at Stripe. Proof-based progression is real.</div>
           </div>
         </div></div>
-        <p class="cap">Sample builders &amp; benchmarks — a preview</p>
+        <p class="cap">Sample builders &amp; benchmarks — a preview of the real feed</p>
       </div>
     </div>
   </section>
@@ -432,6 +453,7 @@
         <ul class="points">
           <li><strong>Headline stats</strong> — total XP, outputs logged, day streak, and skills completed.</li>
           <li><strong>Level progress</strong> — your current level and title (Builder, and beyond), with progress to the next.</li>
+          <li><strong>XP Sources</strong> — breakdown of XP from outputs, achievements, and milestones.</li>
           <li><strong>Achievements</strong> — badges you've unlocked, by rarity.</li>
           <li><strong>Proof-of-work gallery</strong> — the real outputs you've logged.</li>
           <li>Tap the <span class="k">⚙️ gear</span> (top-right) to open <strong>Settings</strong>.</li>
@@ -456,21 +478,63 @@
   </section>
 
   <!-- 9 -->
+  <section id="backup">
+    <h2 class="sec-title"><span class="step-num">9</span>Cloud backup &amp; sign-in</h2>
+    <p class="sec-intro">Sign in once to keep your progress safe across every device and browser. No password needed.</p>
+    <div class="layout">
+      <div>
+        <p>Open <span class="k">Profile → ⚙️ Settings → Cloud Backup</span> and enter your email address. We'll send you a <strong>Magic Link</strong> — a one-tap sign-in link that arrives in your inbox.</p>
+        <ul class="points">
+          <li>Tap the link in the email — it opens the app and signs you in automatically.</li>
+          <li>Your progress syncs to the cloud instantly.</li>
+          <li>Open the app on any other device, sign in the same way, and your progress is there.</li>
+        </ul>
+        <div class="callout tip">
+          <b>🔒 Do this first</b>
+          Sign in via Cloud Backup right after onboarding. It's the single most important step to protect your progress — clearing your browser or switching devices won't lose anything once you're backed up.
+        </div>
+        <p>The Magic Link expires after 1 hour. If you need a new one, just tap <span class="k">Send Sign-in Link</span> again.</p>
+      </div>
+      <div>
+        <div class="phone"><div class="phone-screen">
+          <div class="m-title">Settings</div>
+          <div class="m-sub" style="color:var(--primary-light);font-weight:700;letter-spacing:1px;">CLOUD BACKUP</div>
+          <div class="m-card hi">
+            <div class="m-row"><span style="font-size:16px;">☁️</span><div style="flex:1;margin-left:8px;"><div class="m-lbl">Back up to cloud</div><div class="m-val">No password needed.</div></div></div>
+            <div class="m-input">your@email.com</div>
+            <div style="margin-top:8px;text-align:center;" class="m-btn">Send Sign-in Link ✉️</div>
+          </div>
+          <div class="m-card ok" style="margin-top:6px;">
+            <div class="m-row">
+              <span style="font-size:16px;">☁️</span>
+              <div style="flex:1;margin-left:8px;">
+                <div class="m-lbl">Progress backed up</div>
+                <div class="green" style="font-size:10px;">Signed in as your@email.com</div>
+              </div>
+            </div>
+          </div>
+        </div></div>
+        <p class="cap">Settings → Cloud Backup — sign in once, safe everywhere</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10 -->
   <section id="data">
-    <h2 class="sec-title"><span class="step-num">9</span>Your data &amp; privacy controls</h2>
+    <h2 class="sec-title"><span class="step-num">10</span>Data &amp; privacy controls</h2>
     <p class="sec-intro">You're in full control. Open <span class="k">Profile → ⚙️ Settings</span> and scroll to <strong>Data &amp; Privacy</strong>.</p>
     <div class="layout">
       <div>
         <ul class="points">
-          <li><strong>Anonymous Analytics</strong> — flip this toggle on or off anytime. Off means absolutely nothing is sent.</li>
-          <li><strong>Export Data</strong> — download a backup file of all your progress. <span class="gold">Do this regularly!</span></li>
-          <li><strong>Import Backup</strong> — restore your progress from a backup file (e.g. on a new device or browser).</li>
+          <li><strong>Anonymous Analytics</strong> — flip this toggle on or off anytime.</li>
+          <li><strong>Export Data</strong> — download a backup file of all your progress.</li>
+          <li><strong>Import Backup</strong> — restore your progress from a backup file.</li>
           <li><strong>Privacy Policy</strong> — read exactly how your data is handled, in plain language.</li>
           <li><strong>Reset All Progress</strong> (Danger Zone) — permanently erases everything from this device. Can't be undone.</li>
         </ul>
-        <div class="callout tip">
+        <div class="callout">
           <b>🔒 The short version</b>
-          Your progress lives <strong>only on your device</strong>. There's no server, we can't see your data, and nothing you log is shared. Because of that, <strong>exporting a backup is the only way to protect your progress</strong> against clearing your browser or switching devices.
+          Once you sign in via Cloud Backup, your progress is stored in the cloud and on your device. Without signing in, it's device-local only. Either way, we can't see the content of what you log — only anonymous usage stats if you've opted in.
         </div>
       </div>
       <div>
@@ -480,7 +544,6 @@
           <div class="m-card"><div class="m-row"><span class="m-lbl">📊 Anonymous Analytics</span><span class="m-toggle"></span></div></div>
           <div class="m-card"><div class="m-row"><span class="m-lbl">💾 Export Data</span><span class="m-val">Backup ›</span></div></div>
           <div class="m-card"><div class="m-row"><span class="m-lbl">📥 Import Backup</span><span class="m-val">Restore ›</span></div></div>
-          <div style="font-size:10px;color:var(--text-sub);padding:4px 2px;">🗄️ Your progress is stored only on this device. Export a backup regularly.</div>
           <div class="m-sub" style="color:#ef4444;font-weight:700;letter-spacing:1px;margin-top:6px;">DANGER ZONE</div>
           <div class="m-card" style="border-color:rgba(239,68,68,0.4);"><span class="m-lbl" style="color:#ef4444;">🗑️ Reset All Progress</span></div>
         </div></div>
@@ -489,14 +552,16 @@
     </div>
   </section>
 
-  <!-- 10 -->
+  <!-- 11 -->
   <section id="tips">
-    <h2 class="sec-title"><span class="step-num">10</span>Tips &amp; FAQ</h2>
+    <h2 class="sec-title"><span class="step-num">11</span>Tips &amp; FAQ</h2>
     <div class="m-card" style="padding:16px 18px;">
-      <p><strong>How do I earn XP fastest?</strong><br/><span style="color:var(--text-sub);">Log real outputs — certs and projects are worth the most, and completing a skill grants a big bonus. Adding a key takeaway gives a little extra.</span></p>
+      <p><strong>How do I earn XP fastest?</strong><br/><span style="color:var(--text-sub);">Log real outputs — certs and projects are worth the most. Completing a skill grants a big bonus. Adding a key takeaway gives a little extra. Signing in via Cloud Backup protects all of it.</span></p>
       <p style="margin-top:14px;"><strong>What happens if I miss a day?</strong><br/><span style="color:var(--text-sub);">Your streak has a short grace period, and you can spend a <span class="k">Freeze</span> from Settings to protect it. Hit 7, 14, and 30-day streaks for milestone bonuses.</span></p>
-      <p style="margin-top:14px;"><strong>Why can't I see other real users?</strong><br/><span style="color:var(--text-sub);">The Community tab is a <strong>preview</strong> during the pilot. Sample builders show the experience; real sharing comes in a later release.</span></p>
-      <p style="margin-top:14px;"><strong>I cleared my browser / switched phones and lost everything!</strong><br/><span style="color:var(--text-sub);">Progress is device-local with no cloud sync yet. Always <span class="k">Export Data</span> first, then <span class="k">Import Backup</span> on the new device. Without a backup, cleared data can't be recovered.</span></p>
+      <p style="margin-top:14px;"><strong>Why can't I see other real users?</strong><br/><span style="color:var(--text-sub);">The Community tab is a <strong>preview</strong> during the pilot. Sample builders show the experience; real sharing comes in the next release.</span></p>
+      <p style="margin-top:14px;"><strong>I cleared my browser — is my progress gone?</strong><br/><span style="color:var(--text-sub);">If you signed in via <span class="k">Settings → Cloud Backup</span>, your data is safe in the cloud — just sign in again on the new browser or device and it will sync back. If you didn't sign in, use <span class="k">Import Backup</span> to restore from an exported file. Without either, cleared data can't be recovered — so sign in first!</span></p>
+      <p style="margin-top:14px;"><strong>What is a Magic Link?</strong><br/><span style="color:var(--text-sub);">It's a passwordless sign-in. Enter your email → get a one-tap link in your inbox → tap it → you're signed in. No password ever created or remembered. The link expires after 1 hour.</span></p>
+      <p style="margin-top:14px;"><strong>Can I customise my roadmap?</strong><br/><span style="color:var(--text-sub);">Yes — for custom roadmaps, tap the <span class="k">✏️ Edit</span> chip before you start logging. You can add milestones, rename them, and reorder them. Once you've logged your first proof the roadmap locks in to keep your XP target stable.</span></p>
       <p style="margin-top:14px;"><strong>How do I turn analytics off?</strong><br/><span style="color:var(--text-sub);">Settings → Data &amp; Privacy → toggle <span class="k">Anonymous Analytics</span> off. Done.</span></p>
     </div>
     <div class="callout" style="margin-top:22px;">
@@ -506,7 +571,7 @@
   </section>
 
   <footer>
-    SkillForge · Pilot v1.0 · Your data stays on your device.<br/>
+    SkillForge · Pilot v1.0 · <a href="https://fascinating-kitten-b6a79d.netlify.app" target="_blank">Open the app ⚡</a><br/>
     Questions about privacy? See the in-app <a href="#data">Privacy Policy</a>.
   </footer>
 
