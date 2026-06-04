@@ -1,7 +1,7 @@
 # SkillForge — Claude Code Project Context
 
-> "The Strava for professional growth."
-> Track your evolution as a tech professional through proof-based progression.
+> "Level up through proof, not promises."
+> Any skill. Any field. Any level.
 
 ---
 
@@ -13,7 +13,7 @@
 | `reports/skillforge-audit-report.md` | Live backlog and run log — source of truth for bugs, fixes, and next actions |
 | `docs/PRD.md` | Full product requirements and feature specs |
 | `docs/ARCHITECTURE.md` | Tech decisions, animation patterns, Edge Function spec |
-| `docs/DATABASE.md` | Supabase schema design (planned integration) |
+| `docs/DATABASE.md` | Supabase schema design (live — project `wovceouygyobczkkeyxy`) |
 | `docs/design/skillforge-prototype.html` | Interactive UI prototype — open in browser for visual reference |
 | `docs/USER_GUIDE.html` | End-user how-to guide (on-brand, self-contained) |
 
@@ -21,9 +21,11 @@
 
 ## What This App Is
 
-SkillForge is a career gamification app for tech professionals. Users log real proof-of-work outputs — projects, scripts, books, certifications, GitHub repos — to earn XP, unlock milestone achievements, and share progress on a social feed.
+SkillForge is a skill gamification app for anyone who wants to grow — not just tech professionals. Users log real proof-of-work outputs — projects, scripts, books, certifications, GitHub repos — to earn XP, unlock milestone achievements, and share progress on a social feed.
 
 **Core differentiator:** Proof-based progression. XP comes from building, not watching.
+
+**Core tagline:** *"Stop watching. Start building."*
 
 **Core addiction loop:** Learn → Build → Log Output → Gain XP → Unlock Milestone → Share → Receive Recognition → Repeat
 
@@ -35,12 +37,13 @@ SkillForge is a career gamification app for tech professionals. Users log real p
 |---|---|
 | Framework | React Native + Expo SDK 55 |
 | Navigation | React Navigation 7 (Native Stack + Bottom Tabs) |
-| State | Zustand store — `src/store/appStore.ts` (runtime state + actions + persistence). Static catalog lives in `src/data/`, pure calculators in `src/domain/`. |
+| State | Zustand store — `src/store/appStore.ts` (runtime state + slice composition). Static catalog in `src/data/`, pure calculators in `src/domain/`, store slices in `src/store/slices/`. |
 | Styling | StyleSheet.create() with design tokens in `src/utils/theme.ts` |
 | Web bundler | Vite (for fast web dev), Metro (for native) |
-| Persistence | `localStorage` key `skillforge_v1`, written directly in `appStore.ts` (auto-persist `subscribe`). `src/utils/asyncStorageWeb.ts` is a localStorage shim aliased in `vite.config.ts`. |
-| Testing | Vitest (`npm test`) — unit tests over `src/domain/` + `src/utils/theme.ts` |
-| Backend | **Not yet integrated** — Supabase planned (see `docs/DATABASE.md`) |
+| Persistence | `localStorage` key `skillforge_v1` (primary, always-on) + **Supabase** (cloud backup, activated on Magic Link sign-in). Schema-versioned envelope `{ v, data }` with migration + validation (`src/store/persistence.ts`). |
+| Backend | **Live (ARCH-001)** — Supabase project `wovceouygyobczkkeyxy`. Auth (Magic Link), profiles, outputs, skill_progress. Client in `src/lib/`. |
+| Testing | Vitest (`npm test`) — **94 tests** across domain, persistence, and all store-action slices + CI gate |
+| Deployment | Netlify (`netlify.toml`) — auto-deploys on push to `main`. Live at `https://fascinating-kitten-b6a79d.netlify.app` |
 | AI | **Not yet integrated** — OpenAI Edge Function planned (see `docs/ARCHITECTURE.md`) |
 
 ---
@@ -50,7 +53,7 @@ SkillForge is a career gamification app for tech professionals. Users log real p
 ```
 SkillForge/
 ├── CLAUDE.md                        ← you are here
-├── App.tsx                          ← root: SafeAreaProvider + ErrorBoundary + AppNavigator
+├── App.tsx                          ← root: ThemeContext + SafeAreaProvider + ErrorBoundary + AppNavigator
 ├── index.ts                         ← Expo entry point (registerRootComponent)
 ├── index.html                       ← Vite web entry HTML (loads web-index.tsx)
 ├── web-index.tsx                    ← Vite web entry (renders App into #root)
@@ -59,17 +62,20 @@ SkillForge/
 ├── babel.config.js                  ← Babel config for Expo
 ├── tsconfig.json                    ← TypeScript strict config
 ├── app.json                         ← Expo project config
-├── vercel.json                      ← Vercel rewrites + security headers (web/PWA deploy)
+├── netlify.toml                     ← Netlify build config + security headers + asset cache
+├── vercel.json                      ← Vercel rewrites (legacy; Netlify is the active deploy target)
+├── .env.example                     ← env var template (VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY, VITE_POSTHOG_API_KEY)
 ├── package.json
 │
-├── public/                          ← PWA assets copied to dist/ on build (manifest, icons, USER_GUIDE.html)
+├── public/                          ← PWA assets copied to dist/ on build (manifest, icons, _redirects, USER_GUIDE.html)
 ├── scripts/
 │   └── start-vite.sh
 │
 ├── docs/                            ← Product & technical docs
 │   ├── PRD.md                       ← Full product requirements & feature specs
-│   ├── ARCHITECTURE.md              ← Tech decisions, animation patterns, Edge Function
-│   ├── DATABASE.md                  ← Supabase schema design (planned integration)
+│   ├── ARCHITECTURE.md              ← Tech decisions, animation patterns, Supabase integration
+│   ├── DATABASE.md                  ← Supabase schema (live — project wovceouygyobczkkeyxy)
+│   ├── DEPLOYMENT.md                ← Netlify deploy guide + env vars + Supabase URL config
 │   ├── USER_GUIDE.html              ← end-user how-to guide (also deployed via public/)
 │   ├── skillforge-daily-qa.md       ← canonical daily-QA scheduled-task skill definition
 │   └── design/
@@ -83,7 +89,7 @@ SkillForge/
     │   ├── AchievementBadge.tsx     ← rarity badge chip (common…legendary)
     │   ├── CareerNode.tsx           ← skill node on the evolution map
     │   ├── CelebrationOverlay.tsx   ← full-screen confetti/mascot overlay (Home)
-    │   ├── ConsentBanner.tsx        ← analytics opt-in consent gate
+    │   ├── ConsentBanner.tsx        ← analytics opt-in consent gate (shown post-onboarding only)
     │   ├── FeedCard.tsx             ← community feed post card with reactions
     │   ├── LevelUpOverlay.tsx       ← level-up celebration overlay
     │   ├── PrivacyPolicyModal.tsx   ← privacy policy modal
@@ -98,28 +104,42 @@ SkillForge/
     │   └── mockFeed.ts              ← MOCK_FEED (seed/PREVIEW posts — not live data)
     │
     ├── domain/                      ← pure, unit-tested progression calculators (ARCH-002)
-    │   ├── progression.ts           ← decay, burnout, evidence tier, skill/career mastery, OUTCOME_XP
-    │   └── __tests__/               ← Vitest suites (progression.test.ts, leveling.test.ts)
+    │   ├── progression.ts           ← decay, burnout, evidence tier, skill/career mastery, OUTCOME_XP, ONBOARDING_XP_GRANT
+    │   ├── hydration.ts             ← reconcileAchievementsAndXP() — heals XP on load
+    │   ├── skillGraph.ts            ← initUserSkills, unlockDependentSkills, checkAchievements, pathHasProgress
+    │   └── __tests__/               ← Vitest suites (progression, leveling, skillGraph, hydration)
+    │
+    ├── lib/                         ← Supabase backend layer (ARCH-001)
+    │   ├── supabase.ts              ← Supabase client singleton; isSupabaseEnabled guard
+    │   ├── auth.ts                  ← Magic Link send/verify, session listener, onAuthStateChange
+    │   └── db.ts                    ← upsertProfile, insertOutput, upsertSkillProgress + fetch helpers
     │
     ├── navigation/
-    │   └── AppNavigator.tsx         ← Onboarding → Main tabs → modal/stack screens; per-screen ErrorBoundary
+    │   └── AppNavigator.tsx         ← Onboarding → Main tabs → modal/stack screens; per-screen ErrorBoundary; auth session listener
     │
     ├── screens/                     ← 9 screens
     │   ├── OnboardingScreen.tsx     ← 5-step onboarding: welcome → name/email → path → experience level → first output
     │   ├── DashboardScreen.tsx      ← Home tab: path ring, XP bar, coaching, decay/burnout nudges
-    │   ├── EvolveScreen.tsx         ← Evolve tab: milestone map, path switcher, custom roadmaps
-    │   ├── LogOutputScreen.tsx      ← Log tab: proof-of-work output (6 types + XP float)
-    │   ├── FeedScreen.tsx           ← Community tab: feed (PREVIEW) + leaderboard + coaching banner
-    │   ├── ProfileScreen.tsx        ← Profile tab: stats, achievements, mastery, gallery
+    │   ├── EvolveScreen.tsx         ← Evolve tab: milestone map, path switcher, editable custom roadmaps
+    │   ├── LogOutputScreen.tsx      ← Log tab: proof-of-work output (9 types + XP float)
+    │   ├── FeedScreen.tsx           ← Feed tab: community feed (PREVIEW) + leaderboard + coaching banner
+    │   ├── ProfileScreen.tsx        ← Profile tab: stats, achievements, mastery, gallery, pace mode
     │   ├── MilestoneScreen.tsx      ← skill-completion celebration (modal + share)
-    │   ├── SettingsScreen.tsx       ← theme, analytics consent, data export/import, reset
+    │   ├── SettingsScreen.tsx       ← theme, analytics consent, cloud backup, data export/import, reset
     │   └── PortfolioScreen.tsx      ← proof-of-work portfolio + self-reported career outcomes
     │
     ├── store/
-    │   └── appStore.ts              ← Zustand store: runtime state + 40+ actions + persistence (logic/wiring)
+    │   ├── appStore.ts              ← Zustand store: state init + slice composition + AppState interface
+    │   ├── persistence.ts           ← schema-versioned localStorage persistence (ARCH-003)
+    │   └── slices/
+    │       ├── coreSlice.ts         ← completeOnboarding, logOutput, validateSkill, logCareerOutcome, resetApp…
+    │       ├── roadmapSlice.ts      ← addCustomPath, enrollInRoadmap, forkBuiltInPath, addMilestone, lockRoadmap, deleteRoadmap…
+    │       ├── feedSlice.ts         ← reactToPost, toggleSavePost, addComment
+    │       ├── profileSlice.ts      ← updateName, updateBio, setPaceMode, setColorScheme…
+    │       └── authSlice.ts         ← setSupabaseSession, setSupabaseSyncing, syncFromSupabase
     │
     ├── types/
-    │   └── index.ts                 ← All TypeScript interfaces (User, Skill, Output, FeedPost, etc.)
+    │   └── index.ts                 ← All TypeScript interfaces (User, Skill, Output, FeedPost, RoadmapEntry, etc.)
     │
     └── utils/
         ├── analytics.ts             ← PostHog-compatible, opt-in + PII-scrubbed (set VITE_POSTHOG_API_KEY)
@@ -136,9 +156,9 @@ Stack.Navigator (headerShown: false, animation: fade)
 ├── Onboarding          ← OnboardingScreen  (shown when hasOnboarded === false)
 ├── Main                ← Bottom Tab Navigator
 │   ├── Home  "Home"         ← DashboardScreen  (path ring, XP bar, coaching)
-│   ├── Feed  "Community"    ← FeedScreen
+│   ├── Feed  "Feed"         ← FeedScreen        (tab label "Feed"; screen header "Community")
 │   ├── Log   (+ button)     ← LogOutputScreen
-│   ├── Map   "Evolve"       ← EvolveScreen     (milestone map, custom roadmaps)
+│   ├── Map   "Evolve"       ← EvolveScreen     (milestone map, editable custom roadmaps)
 │   └── Profile "Profile"   ← ProfileScreen
 ├── MilestoneDetail (modal, slide_from_bottom) ← MilestoneScreen
 ├── Settings  (stack)       ← SettingsScreen
@@ -146,41 +166,50 @@ Stack.Navigator (headerShown: false, animation: fade)
 ```
 
 Every screen is wrapped with a per-screen `withScreenBoundary(...)` ErrorBoundary in `AppNavigator.tsx`.
-Auth gate: `AppNavigator.tsx` reads `useAppStore((s) => s.hasOnboarded)` and conditionally renders Onboarding or Main.
+Auth gate: `AppNavigator.tsx` reads `useAppStore((s) => s.hasOnboarded)` and conditionally renders Onboarding or Main. Supabase session listener (`onAuthStateChange`) bootstraps cloud sync on sign-in.
 
 ---
 
 ## State — `src/store/appStore.ts`
 
-Single Zustand store for runtime state + actions + persistence wiring. Static catalog data and pure calculators were extracted out of this file (ARCH-002) and are imported back + re-exported, so existing `from '../store/appStore'` imports still resolve.
+Single Zustand store composed from slices. Static catalog and pure calculators live outside the store; the store imports + re-exports them for backward-compat.
 
-**Static catalog — now in `src/data/` (re-exported from appStore):**
-- `CAREER_PATHS` (`src/data/careerPaths.ts`) — **19 paths**, each with color theme + ordered skill IDs
-- `ALL_SKILLS` (`src/data/skills.ts`) — all skill nodes with prerequisites, XP rewards, required output counts
-- `ALL_ACHIEVEMENTS` (`src/data/achievements.ts`) — **8** achievement definitions with XP grants
-- `MOCK_FEED` (`src/data/mockFeed.ts`) — seed/PREVIEW community posts (fictional users; labeled non-live)
+**Static catalog — `src/data/`:**
+- `CAREER_PATHS` — **19 paths**, each with color theme + ordered skill IDs
+- `ALL_SKILLS` — all skill nodes with prerequisites, XP rewards, required output counts
+- `ALL_ACHIEVEMENTS` — **8** achievement definitions with XP grants
+- `MOCK_FEED` — seed/PREVIEW community posts (fictional users; labeled non-live)
 
-**Pure progression logic — now in `src/domain/progression.ts` (unit-tested, re-exported):**
-- `getDecayStage`, `getBurnoutSignal`, `getEvidenceTier`, `getSkillMasteryLevel`, `getCareerMastery`, `OUTCOME_XP`
-- (`MASTERY_TIERS` / `CAREER_MASTERY_META` presentation metadata stay in `appStore.ts` — they depend on theme `Colors`.)
+**Pure progression logic — `src/domain/`:**
+- `progression.ts` — `getDecayStage`, `getBurnoutSignal`, `getEvidenceTier`, `getSkillMasteryLevel`, `getCareerMastery`, `OUTCOME_XP`, `calculateOutputXP`, `OUTPUT_XP_BY_TYPE`, `ONBOARDING_XP_GRANT`, `CUSTOM_SKILL_COMPLETION_XP`
+- `hydration.ts` — `reconcileAchievementsAndXP()` heals XP + achievements on load
+- `skillGraph.ts` — `initUserSkills`, `unlockDependentSkills`, `checkAchievements`, `pathHasProgress`
 
 **Runtime state (selected fields):**
 ```typescript
 hasOnboarded: boolean
-user: User | null                          // xp, level, streak, careerPathId, avatarEmoji, paceMode, etc.
-userSkills: Record<string, UserSkill>      // per-skill: status + outputCount + validated
-outputs: Output[]                          // all logged proof-of-work items
+supabaseUserId: string | null    // null = not signed in / Supabase disabled
+supabaseEmail: string | null
+supabaseSyncing: boolean          // true during remote→local sync
+user: User | null                 // xp, level, streak, careerPathId, paceMode, lastActiveDate, etc.
+userSkills: Record<string, UserSkill>
+outputs: Output[]
 unlockedAchievementIds: string[]
-communityFeed / userFeedPosts: FeedPost[]  // seed (preview) + user's own posts
-customPaths / roadmaps                     // custom + enrolled-roadmap state
-careerOutcomes: CareerOutcome[]            // self-reported real-world wins
+communityFeed / userFeedPosts: FeedPost[]
+customPaths / roadmaps            // custom paths + enrolled roadmap lifecycle
+careerOutcomes: CareerOutcome[]
 savedPostIds, celebratedMilestones, colorScheme, prioritizedPathId
 pendingCelebration, selectedSkillId
 ```
 
-**Actions:** 40+ actions (the full surface is large). Core ones: `completeOnboarding`, `logOutput`, `logCareerOutcome`, `validateSkill`, `reactToPost`, `addComment`, roadmap lifecycle (`enrollInRoadmap`/`switchPath`/`pauseRoadmap`/…), `useStreakFreeze`, `clearCelebration`, `resetApp`.
+**Actions (50+ across 5 slices):**
+- **Core:** `completeOnboarding`, `logOutput`, `validateSkill`, `logCareerOutcome`, `deleteCareerOutcome`, `deleteOutput`, `togglePinOutput`, `useStreakFreeze`, `clearCelebration`, `resetApp`
+- **Roadmap:** `addCustomPath`, `switchPath`, `enrollInRoadmap`, `setPriorityRoadmap`, `pauseRoadmap`, `archiveRoadmap`, `reactivateRoadmap`, `addRoadmapItem`, `isRoadmapEditable`, `forkBuiltInPath`, `addMilestone`, `renameMilestone`, `removeMilestone`, `reorderMilestones`, `lockRoadmap`, `deleteRoadmap`
+- **Feed:** `reactToPost`, `toggleSavePost`, `addComment`
+- **Profile:** `updateName`, `updateEmail`, `updateBio`, `updateAvatar`, `updateAvatarImage`, `updateTargetRole`, `setPaceMode`, `setComebackGoal`, `setColorScheme`, `dismissWelcomeCard`
+- **Auth:** `setSupabaseSession`, `setSupabaseSyncing`, `syncFromSupabase`
 
-**Persistence:** `localStorage` key `skillforge_v1`, via an auto-persist `subscribe`. Persisted slice includes `hasOnboarded`, `user`, `userSkills`, `outputs`, `unlockedAchievementIds`, `customPaths`, `prioritizedPathId`, `roadmaps`, `celebratedMilestones`, `userFeedPosts`, `savedPostIds`, `colorScheme`, `careerOutcomes`. Stored as a schema-versioned envelope `{ v, data }` with migration + validation on load (ARCH-003, `src/store/persistence.ts`).
+**Persistence:** Dual-layer. (1) `localStorage` key `skillforge_v1` — always-on, fast, offline-capable. Schema-versioned envelope `{ v, data }` with migration chain. (2) Supabase — activated on Magic Link sign-in; `logOutput` and `completeOnboarding` fire-and-forget sync to cloud. `syncFromSupabase()` merges remote on sign-in (remote wins on XP/streak; union on outputs).
 
 ---
 
@@ -194,23 +223,30 @@ pendingCelebration, selectedSkillId
 | `ai-engineer` | AI Engineer 🤖 | Python Fundamentals → REST APIs → Prompt Engineering → Vector Databases → RAG Systems → AI Agents |
 | `fullstack` | Full Stack 🌐 | HTML & CSS → JavaScript → React & RN → Backend APIs → Database Design → Cloud Deployment |
 
-Others: `data-engineer`, `ml-engineer`, `backend-engineer`, `frontend-engineer`, `cloud-engineer`, `devops`, `cybersecurity`, `product-manager`, `business-analyst`, `data-analyst`, `project-manager`, `solutions-architect`, `software-architect`, `mobile-developer`, `ui-ux-designer`, `startup-founder`. Users can also create **custom paths**.
+Others: `data-engineer`, `ml-engineer`, `backend-engineer`, `frontend-engineer`, `cloud-engineer`, `devops`, `cybersecurity`, `product-manager`, `business-analyst`, `data-analyst`, `project-manager`, `solutions-architect`, `software-architect`, `mobile-developer`, `ui-ux-designer`, `startup-founder`. Users can also create **custom paths** and **fork built-in paths** into editable copies.
 
 Skill status flow: `locked` → `available` → `in_progress` → `completed`
 
-Prerequisites are enforced in `unlockDependentSkills()` — a skill only becomes `available` when all its `prerequisites[]` are `completed`.
+**FEAT-001 — Editable roadmaps:** Custom paths can be edited (add/rename/reorder/remove milestones) only *before the journey starts* (no outputs logged). Once started, structure freezes. To change a started roadmap: Delete & Rebuild. Built-in paths must be forked into an editable copy first.
 
 ---
 
 ## XP & Leveling
 
 ```typescript
-OUTPUT_XP = 50       // flat XP per any output logged
-skill.xpReward       // bonus XP on skill completion (75–400 depending on rarity)
-achievement.xpGranted // bonus XP on achievement unlock
+ONBOARDING_XP_GRANT = 25        // granted on completeOnboarding (journey started ⚡)
+OUTPUT_XP_BY_TYPE = {            // base XP per output type
+  project: 75, cert: 200, github: 60, book: 50,
+  script: 50, diagram: 75, reflection: 30, event: 65, other: 50
+}
+qualityBonus = +10 (50+ chars) or +20 (120+ chars)   // description quality
+takeawayBonus = +15              // key takeaway provided
+skill.xpReward                   // bonus on skill completion (75–400 by rarity)
+CUSTOM_SKILL_COMPLETION_XP = 50  // flat bonus for completing a user-defined milestone
+achievement.xpGranted            // bonus on achievement unlock
 ```
 
-Level thresholds live in `getLevelFromXP()` in `src/utils/theme.ts`. Check that file for the full table.
+Level thresholds live in `getLevelFromXP()` in `src/utils/theme.ts`.
 
 Skill rarities: `common` | `uncommon` | `rare` | `epic` | `legendary`
 
@@ -228,7 +264,7 @@ Colors.primaryLight  = '#A855F7'
 Colors.gold          = '#F59E0B'
 Colors.green         = '#10B981'
 Colors.text          = '#EEEEF8'
-Colors.textSecondary = '#8888AA'
+Colors.textSub       = '#8888AA'   // use this — not Colors.textSecondary (doc alias only)
 Colors.textMuted     = '#44446A'
 ```
 
@@ -244,67 +280,53 @@ For the full visual target, open `docs/design/skillforge-prototype.html` in a br
 # Fastest for UI work — web via Vite
 npx vite
 
+# Run unit tests (Vitest)
+npm test                          # 94 tests, all green
+
+# Production build
+npm run build                     # → dist/
+
 # Expo dev server (all platforms)
 npx expo start
-
-# iOS simulator
-npx expo run:ios
-
-# Android emulator
-npx expo run:android
-
-# Web via Expo (Metro)
-npx expo start --web
-
-# Run unit tests (Vitest)
-npm test
 ```
 
 ---
 
 ## Build Status
 
-### ✅ Already Built (Pilot-Ready)
-- Onboarding — 5-step flow: welcome → name/email → path selection → experience level (Fresh Start / Some Foundation / Bringing Experience, with skill pre-crediting) → first output log
-- Career Evolution Map (`EvolveScreen`) with skill nodes (locked / available / in-progress / completed)
-- Custom roadmaps — users can create personal skill paths beyond the 3 built-in ones
-- Path switching — users can switch between built-in and custom paths
-- Dashboard (`DashboardScreen`) — hero card with giant ring, XP bar, stats
-  - Empty-state coaching card for users with 0 outputs (with proof-of-work prompts + CTA)
-  - "Next Milestone" quick-action card shows next skill to work on
-  - Streak nudge + 7-day progress dots for days 1-6
-  - Streak-at-risk pulsing warning + "Use Freeze" button
-- Log Output form (6 output types: project, book, cert, script, diagram, GitHub)
-  - XP float animation (+XP rising from submit button)
-  - XP preview showing base + skill-completion bonus
-  - Dynamic "Add to My Library" when typing a new item title
-- XP calculation + level-up logic (10 levels with titles)
-- Skill completion detection + prerequisite unlocking
-- Achievement system (8 achievements including streak-based ones)
-- Streak system with grace period, freeze mechanic, milestone bonuses (7/14/30-day)
-- Milestone celebration screen (modal) with particle burst + level-up card + share post
-- CelebrationOverlay (Home screen) — confetti + rocket/trophy/dancer animations per milestone tier
-- Community feed with 8 seed posts from fictional users + user posts prepended on log
-- Feed coaching banner for users with no personal posts yet
-- Emoji reactions on feed posts (optimistic, toggle)
-- Profile screen with stats, XP bar, achievements, proof-of-work gallery
-- Toast notification system for XP feedback
-- localStorage persistence (`skillforge_v1`)
-- **Analytics instrumentation** (`src/utils/analytics.ts`) — PostHog-compatible
-  - Events: onboarding_started, onboarding_step_completed, onboarding_completed,
-    first_output_logged, output_logged, skill_completed, level_up, achievement_unlocked,
-    streak_milestone, post_reacted, milestone_screen_viewed, path_switched,
-    custom_path_created, screen_viewed
-  - Set `VITE_POSTHOG_API_KEY` in `.env` to activate (gracefully no-ops when unset)
+### ✅ Already Built (Pilot-Live)
+- Onboarding — 5-step flow: welcome → name/email → path → experience level → first output log
+  - Beginner path adapted for Fresh Start users (forward-looking framing)
+  - 25 XP + streak 1 granted on completion (UX-029)
+  - Consent banner shown post-onboarding only (UX-028)
+- Career Evolution Map (`EvolveScreen`) with skill nodes + **editable custom roadmaps (FEAT-001)**
+  - Fork built-in paths, add/rename/reorder/remove milestones pre-start
+  - Focus-lock, Delete & Rebuild for post-start changes
+- Dashboard — hero ring, XP bar, streak dots, coaching cards, burnout detection
+- Log Output form — **9 output types** (project, cert, github, book, script, diagram, reflect, event, other)
+  - XP float animation, evidence-quality indicator, key-takeaway bonus
+- XP calculation — per-type base + quality bonus + takeaway bonus + completion rewards
+- Level-up logic (10 levels with titles), achievement system (8 achievements)
+- Streak system — grace period, freeze mechanic, milestone bonuses (7/14/30-day)
+- Milestone celebration + CelebrationOverlay (confetti/animations)
+- Community feed (PREVIEW) — 8+ seed posts, emoji reactions, comments, coaching banner
+- Profile — stats, XP sources, level progress, achievements, proof gallery, pace mode
+- Analytics — PostHog-compatible, opt-in, PII-scrubbed
+- **Supabase backend (ARCH-001 — LIVE):**
+  - Magic Link auth (no password)
+  - Cloud backup of profiles, outputs, skill_progress
+  - Settings → Cloud Backup UI
+  - Fire-and-forget sync on every logOutput / completeOnboarding
+  - Remote→local merge on sign-in (multi-device safe)
+- Deployed on **Netlify** (`netlify.toml`) — auto-deploys on `git push main`
 
-### 🔲 Phase 2 — Real Backend (next priority)
-- Supabase auth (Magic Link — replace localStorage)
-- Supabase database (schema in `docs/DATABASE.md`)
-- Multi-device support + persistent profiles
+### 🔲 Phase 2 — Community + AI
+- Live community feed (replace MOCK_FEED with real Supabase queries)
 - Follow / unfollow users
-- Comments on feed posts
-- Real weekly XP leaderboard (currently mocked)
-- AI-generated LinkedIn post (OpenAI Edge Function — see `docs/ARCHITECTURE.md`)
+- Real weekly XP leaderboard (server-side SUM query)
+- Comments + reactions persisted to Supabase
+- AI-generated LinkedIn post (OpenAI Edge Function on milestone completion)
+- Pace mode gameplay weight (FEAT-002 — Sprint XP multiplier, Recovery streak freeze)
 
 ### 🔲 Phase 3 — Identity & Portfolio
 - Public profile URL (`skillforge.app/@username`)
@@ -325,11 +347,13 @@ npm test
 - Functional components only, `const` arrow functions
 - `StyleSheet.create()` for all styles — no inline style objects in JSX
 - All colors from `Colors` in `src/utils/theme.ts` — never hardcode hex
+- **Web-only gradients:** use `backgroundImage: 'linear-gradient(...)'` with `// @ts-ignore` + always provide a `backgroundColor` fallback. Never use `background:` shorthand (react-native-web rejects it, fires console errors)
 - All state reads/writes through `useAppStore` — no shared state in local useState
 - New screen → add to `AppNavigator.tsx` (wrap with `withScreenBoundary`) and update the relevant param list type
 - New skill/path → update `src/data/careerPaths.ts` and `src/data/skills.ts`
 - New achievement → add to `src/data/achievements.ts` and update `checkAchievements()` in `appStore.ts`
 - New pure progression logic → add to `src/domain/progression.ts` **with a Vitest test** in `src/domain/__tests__/`
+- New store action → add signature to `AppState` in `appStore.ts`, implement in the appropriate slice in `src/store/slices/`, add to the slice's `Pick<>` type
 
 ## Do NOT Build
 - AI tutoring or course content

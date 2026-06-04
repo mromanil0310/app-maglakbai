@@ -1,17 +1,18 @@
 # SkillForge ⚒️
 
-> **The Strava for professional growth.**
-> Track your evolution as a tech professional through proof-based progression.
+> **Level up through proof, not promises.**
+> Any skill. Any field. Any level.
 
-SkillForge is a career-gamification app for tech professionals. You log real proof-of-work outputs — projects, scripts, books, certifications, diagrams, GitHub repos — to earn XP, unlock milestone achievements, and share your progress. XP comes from **building, not watching.**
+SkillForge is a skill gamification app for anyone who wants to grow. You log real proof-of-work outputs — projects, scripts, books, certifications, diagrams, GitHub repos — to earn XP, unlock milestone achievements, and share your progress. XP comes from **building, not watching.**
 
+**📱 Live app:** https://fascinating-kitten-b6a79d.netlify.app
 **📖 User guide:** https://mromanil0310.github.io/skillforge/USER_GUIDE.html
 
 ---
 
 ## Status
 
-🧪 **Web / PWA pilot.** This is an early pilot release that runs in the browser and installs as a PWA. It is **device-local**: your data is stored in your browser (no account, no cloud sync yet). A native mobile build and a real backend are on the roadmap, not in this release.
+🚀 **Live web / PWA pilot.** Runs in the browser and installs as a PWA. **Cloud backup** available via Settings → Cloud Backup (Magic Link sign-in — no password needed). Progress syncs across devices once signed in.
 
 ---
 

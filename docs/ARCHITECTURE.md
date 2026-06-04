@@ -1,6 +1,6 @@
 # SkillForge — Architecture & Technical Decisions
 
-> Describes the **current implemented architecture** (web/PWA pilot, as of sprint 33 — post the ARCH-002 store decomposition) and the **planned Phase 2 backend migration** to Supabase. This is the BAEF Phase 3 artifact; it must match the code. If you change structure, update this doc (see DOC-002 history in `reports/skillforge-audit-report.md`).
+> Describes the **current implemented architecture** (web/PWA pilot, as of sprint 39 — post ARCH-001 Supabase integration). This is the BAEF Phase 3 artifact; it must match the code. If you change structure, update this doc (see DOC-002 history in `reports/skillforge-audit-report.md`).
 
 ---
 
@@ -242,20 +242,39 @@ A single `subscribe()` with reference-equality short-circuiting auto-persists ev
 
 ---
 
-## Phase 2 — Supabase Migration (Planned)
+## Phase 2 — Supabase Backend
 
-**Not yet implemented.** Requires a Supabase project + credentials.
+### ✅ Implemented (sprint 39, ARCH-001)
 
-### Required environment variables
+**Project:** `wovceouygyobczkkeyxy.supabase.co`
+
+**Environment variables** (set in Netlify dashboard + `.env` locally):
 ```bash
-VITE_SUPABASE_URL=https://your-project.supabase.co
-VITE_SUPABASE_ANON_KEY=your-anon-key
+VITE_SUPABASE_URL=https://wovceouygyobczkkeyxy.supabase.co
+VITE_SUPABASE_ANON_KEY=sb_publishable_rRWhF-tIe1f8Kx5lck15Mw_KFcEcQ9Z
 ```
 
-### Migration plan
-1. **Auth** — replace the `hasOnboarded` localStorage flag with Supabase Magic Link; gate on `supabase.auth.getSession()`.
-2. **Profiles** — migrate `user` → `profiles` table (schema in `docs/DATABASE.md`).
-3. **Outputs + skill_progress** — persist `outputs[]` and `userSkills` to Supabase; `logOutput` becomes async.
+**Client layer** — `src/lib/`:
+- `supabase.ts` — singleton client; `isSupabaseEnabled` guard (no-ops when env vars absent — CI stays green)
+- `auth.ts` — `sendMagicLink`, `signOut`, `getSession`, `onAuthStateChange`
+- `db.ts` — `upsertProfile`, `fetchProfile`, `insertOutput`, `fetchOutputs`, `upsertSkillProgress`, `fetchSkillProgress`
+
+**Store layer** — `src/store/slices/authSlice.ts`:
+- `setSupabaseSession` — stores session userId + email in Zustand state
+- `syncFromSupabase` — pulls remote → merges into local (remote wins on XP/streak; union on outputs; `completed` status wins on skills)
+
+**Sync strategy** — localStorage-first, Supabase additive:
+- `localStorage` is always the primary store (fast, offline-capable, no latency change)
+- `logOutput` + `completeOnboarding` fire-and-forget sync to Supabase after local state is updated
+- `AppNavigator` subscribes to `onAuthStateChange` — triggers `syncFromSupabase` on SIGNED_IN
+- Users sign in via **Settings → Cloud Backup** (Magic Link email)
+
+**RLS policies** — all tables are owner-only (tightened from initial schema):
+- `profiles`, `outputs`, `milestones` — select only for `auth.uid() = user_id / id`
+- `skill_progress` — select only for `auth.uid() = user_id`
+- Feed tables (`feed_posts`, `reactions`, `comments`) — public read (ready for Phase 2 social feed)
+
+### 🔲 Remaining Phase 2 (not yet built)
 4. **Community feed** — replace `MOCK_FEED` + `userFeedPosts` with a live query + follow graph.
 5. **Real leaderboard** — replace the mocked FeedScreen leaderboard with a weekly `SUM(xp)` query.
 6. **AI LinkedIn post** — OpenAI `gpt-4o-mini` via a Supabase Edge Function on skill completion.

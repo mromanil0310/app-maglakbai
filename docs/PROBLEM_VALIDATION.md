@@ -34,7 +34,7 @@ Tech professionals who learn and build constantly have **no structured, credible
 | Duolingo / habit apps | Gamify *consumption/streaks*, not real-world professional output |
 | Notion/portfolio sites | Manual, high-effort, no gamification or community recognition |
 
-**Wedge:** the "Strava for professional growth" framing — gamified, proof-based, social — is not directly occupied by the above.
+**Wedge:** the "proof-based progression" framing — gamified, social, any-field — is not directly occupied by the above. (Original positioning used a "Strava for growth" analogy; replaced with owned copy: "Level up through proof, not promises.")
 
 ## Success metrics (pilot)
 
@@ -49,7 +49,7 @@ Leading indicators the pilot should move (instrumented via the opt-in analytics 
 1. Users will log proof-of-work *honestly and consistently* without external accountability. *(The evidence gate exists to protect this; retention/honesty unproven.)*
 2. Gamified XP/streaks meaningfully increase upskilling consistency for professionals (not just novelty).
 3. A proof-based feed earns recognition that LinkedIn doesn't — i.e., community value materializes once the feed is *live* (it's preview/seed data today).
-4. The "Strava for growth" positioning resonates enough to drive word-of-mouth.
+4. The "Level up through proof, not promises" positioning resonates enough to drive word-of-mouth — especially with the inclusive "any skill, any field" framing replacing the earlier tech-only positioning.
 
 ## Viability notes (pilot stage)
 

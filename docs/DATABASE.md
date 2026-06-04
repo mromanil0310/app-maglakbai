@@ -1,6 +1,13 @@
 # SkillForge — Database Schema (Supabase / PostgreSQL)
 
+**Status:** Live — project `wovceouygyobczkkeyxy.supabase.co` (implemented sprint 39, ARCH-001).
+
 All tables use Supabase with Row Level Security (RLS). Auth is handled by `supabase.auth`.
+
+> **RLS note:** The initial schema had `profiles`, `outputs`, and `milestones` as publicly readable.
+> These were tightened to owner-only after pilot launch to protect user privacy.
+> Feed tables (`feed_posts`, `reactions`, `comments`) remain public-read — ready for Phase 2 social feed.
+> See the corrected policies below.
 
 ---
 
@@ -61,9 +68,9 @@ create trigger on_auth_user_created
 ```sql
 alter table public.profiles enable row level security;
 
--- Anyone can read profiles (public)
-create policy "Profiles are public" on public.profiles
-  for select using (true);
+-- Owner-only read (tightened post-launch for user privacy)
+create policy "Users can read own profile" on public.profiles
+  for select using (auth.uid() = id);
 
 -- Users can only update their own profile
 create policy "Users can update own profile" on public.profiles
@@ -133,9 +140,9 @@ create index outputs_created_at_idx on public.outputs(created_at desc);
 ```sql
 alter table public.outputs enable row level security;
 
--- Outputs are public (visible on profiles and feed)
-create policy "Outputs are public" on public.outputs
-  for select using (true);
+-- Owner-only read (tightened post-launch for user privacy)
+create policy "Users can read own outputs" on public.outputs
+  for select using (auth.uid() = user_id);
 
 create policy "Users can insert own outputs" on public.outputs
   for insert with check (auth.uid() = user_id);
@@ -172,8 +179,9 @@ create index milestones_user_id_idx on public.milestones(user_id);
 ```sql
 alter table public.milestones enable row level security;
 
-create policy "Milestones are public" on public.milestones
-  for select using (true);
+-- Owner-only read (tightened post-launch for user privacy)
+create policy "Users can read own milestones" on public.milestones
+  for select using (auth.uid() = user_id);
 
 create policy "Users can insert own milestones" on public.milestones
   for insert with check (auth.uid() = user_id);

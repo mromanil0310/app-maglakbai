@@ -1,10 +1,11 @@
 # SkillForge — Product Requirements Document
 
-**Version:** 1.0 (MVP — original product vision)
-**Positioning:** "The Strava for professional growth."
-**Target users:** AI learners and data professionals who already upskill constantly, post achievements on LinkedIn, and value professional visibility.
+**Version:** 1.0 (sprint 39 — live web/PWA pilot)
+**Positioning:** "Level up through proof, not promises."
+**Tagline:** "Stop watching. Start building."
+**Audience:** Anyone who wants to grow their skills — any field, any level. Not just tech professionals.
 
-> **Status (sprint 33):** This PRD captures the original product vision and remains the reference for *what* SkillForge is and the core loop it serves. The **current shipping reality** is a **web/PWA pilot** (no native build, no backend yet — device-local with opt-in, PII-free analytics), governed by BAEF. Where this v1.0 vision and the shipped pilot differ (e.g. native-iOS framing, a live community/leaderboard), the **live source of truth is `reports/skillforge-audit-report.md`** (release decision + backlog) and `docs/ARCHITECTURE.md` (implemented architecture). Phase 2 (Supabase backend, real feed/leaderboard, AI share posts) is planned, not built.
+> **Status (sprint 39):** This PRD captures the product vision and core loop. The **current shipping reality** is a **live web/PWA pilot** on Netlify (`fascinating-kitten-b6a79d.netlify.app`) with Supabase cloud backup (ARCH-001 shipped). The live source of truth for release decisions and backlog is `reports/skillforge-audit-report.md`. Phase 2 items (live community feed, real leaderboard, AI share posts) remain planned.
 
 ---
 
