@@ -15,7 +15,7 @@ import { CAREER_PATHS } from '../../data/careerPaths';
 import { ALL_SKILLS } from '../../data/skills';
 import { ALL_ACHIEVEMENTS } from '../../data/achievements';
 import { MOCK_FEED } from '../../data/mockFeed';
-import { getEvidenceTier, OUTCOME_XP, getCareerMastery, calculateOutputXP, CUSTOM_SKILL_COMPLETION_XP } from '../../domain/progression';
+import { getEvidenceTier, OUTCOME_XP, getCareerMastery, calculateOutputXP, CUSTOM_SKILL_COMPLETION_XP, ONBOARDING_XP_GRANT } from '../../domain/progression';
 import { initUserSkills, unlockDependentSkills, checkAchievements } from '../../domain/skillGraph';
 // ARCH-001: fire-and-forget Supabase sync after local state is updated
 import { upsertProfile, insertOutput, upsertSkillProgress } from '../../lib/db';
@@ -34,19 +34,25 @@ export const createCoreSlice = (set: Set, get: Get): Pick<AppState, 'completeOnb
       ? get().customPaths.find(p => p.id === pathId)
       : null;
 
+    // UX-029: grant a small "journey started" XP so new users never land on 0.
+    // Pre-credited skill XP is added below after the experience-level block.
+    const todayStr = new Date().toISOString().slice(0, 10);
+
     const user: User = {
       id: userId,
       name,
       handle: name.toLowerCase().replace(/\s+/g, '.').replace(/[^a-z0-9.]/g, '') || 'explorer',
       email: email?.trim() || undefined,
       careerPathId: pathId,
-      xp: 0,
-      level: 1,
-      streak: 0,
-      longestStreak: 0,
-      // Intentionally NOT set here (BUG-012): pre-seeding today's date made the
-      // first output land in the "already logged today" branch and leave the
-      // streak at 0. Leaving it undefined lets the first logOutput start it at 1.
+      xp: ONBOARDING_XP_GRANT,
+      level: getLevelFromXP(ONBOARDING_XP_GRANT),
+      // UX-029: starting the streak at 1 (they took real action today by beginning
+      // their journey). Setting lastActiveDate prevents double-incrementing if they
+      // log an output later the same day. Safe with BUG-012 fix: we set BOTH fields
+      // together so the first same-day logOutput correctly stays at 1 (not 0→1).
+      streak: 1,
+      longestStreak: 1,
+      lastActiveDate: todayStr,
       bio: '',
       avatarEmoji: pathMeta?.icon ?? customPathMeta?.icon ?? '⚡',
       avatarColor: pathMeta?.dimColor ?? '#0A0A0F',
@@ -97,17 +103,37 @@ export const createCoreSlice = (set: Set, get: Get): Pick<AppState, 'completeOnb
       }
     }
 
+    // UX-029: credit XP for pre-completed skills so experienced users don't start
+    // with completed skills but 0 XP. Each completed skill grants its xpReward;
+    // in-progress skills grant one output's worth of base XP.
+    let precreditXP = 0;
+    if (isBuiltInPath && pathMeta) {
+      if (experienceLevel === 'building') {
+        precreditXP = 50; // one output's base XP for the in-progress first skill
+      } else if (experienceLevel === 'experienced') {
+        const toPrecredit = pathMeta.skillIds.slice(0, 2);
+        toPrecredit.forEach((skillId) => {
+          const skill = ALL_SKILLS.find((s) => s.id === skillId);
+          precreditXP += skill?.xpReward ?? 75;
+        });
+      }
+    }
+    const finalXP = ONBOARDING_XP_GRANT + precreditXP;
+    const finalUser: User = precreditXP > 0
+      ? { ...user, xp: finalXP, level: getLevelFromXP(finalXP) }
+      : user;
+
     const initialRoadmap: RoadmapEntry = {
       pathId,
       priorityStatus: 'PRIORITY',
       roadmapStatus: 'ACTIVE',
       startedAt: new Date().toISOString(),
     };
-    const state = { hasOnboarded: true, user, userSkills, prioritizedPathId: pathId, roadmaps: [initialRoadmap], showWelcomeCard: true };
+    const state = { hasOnboarded: true, user: finalUser, userSkills, prioritizedPathId: pathId, roadmaps: [initialRoadmap], showWelcomeCard: true };
     set(state);
     // ARCH-001: sync the new profile to Supabase (fire-and-forget)
     const syncUserId = get().supabaseUserId;
-    if (syncUserId) upsertProfile(syncUserId, user).catch(() => {});
+    if (syncUserId) upsertProfile(syncUserId, finalUser).catch(() => {});
     // Anonymous-only analytics: identify by id, never name/email (see analytics.ts).
     identify(userId, { career_path: pathId, joined_at: user.joinedAt });
     track('onboarding_completed', {

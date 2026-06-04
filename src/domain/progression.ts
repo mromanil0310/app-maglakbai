@@ -136,6 +136,11 @@ export function getCareerMastery(
 // Both the store (coreSlice.ts) and the Log Output preview use this function
 // so they can never silently diverge.
 
+// UX-029: XP granted on onboarding completion — gives every new user a non-zero
+// starting state ("journey started ⚡") so they land on 25 XP / 🔥1 instead of
+// four zeros, regardless of whether they logged a first output.
+export const ONBOARDING_XP_GRANT = 25;
+
 // FEAT-001: completion bonus for a user-defined (custom) milestone. Modest + flat
 // — proof (an output) is still required to complete it, but self-defined milestones
 // don't grant curated-skill rewards, to keep the XP economy honest/leaderboard-safe.

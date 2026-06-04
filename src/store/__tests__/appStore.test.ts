@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { useAppStore } from '../appStore';
 import type { ExperienceLevel } from '../../types';
+import { ONBOARDING_XP_GRANT } from '../../domain/progression';
 
 // Integration tests over the core store actions. These exercise the real Zustand
 // store (no mocks) — the behavioral safety net required before slicing actions
@@ -30,7 +31,8 @@ describe('completeOnboarding', () => {
     onboard('beginner');
     const s = get();
     expect(s.hasOnboarded).toBe(true);
-    expect(s.user!.xp).toBe(0);
+    expect(s.user!.xp).toBe(ONBOARDING_XP_GRANT);  // UX-029: journey-started grant
+    expect(s.user!.streak).toBe(1);                  // UX-029: streak starts at 1
     expect(s.user!.level).toBe(1);
     expect(s.userSkills['sql-foundations'].status).toBe('available'); // no prereqs
     expect(s.userSkills['python-automation'].status).toBe('locked');  // gated on sql-foundations
@@ -113,9 +115,12 @@ describe('logOutput', () => {
     expect(get().user!.streak).toBe(4);
   });
 
-  it('starts the streak at 1 on the day-1 first output (BUG-012)', () => {
+  it('streak is 1 from onboarding and stays 1 on the first same-day output (BUG-012 + UX-029)', () => {
     reset();
-    onboard(); // does NOT pre-set lastActiveDate (BUG-012 fix)
+    // UX-029: onboarding now sets streak=1 + lastActiveDate=today
+    onboard();
+    expect(get().user!.streak).toBe(1);
+    // Logging on the same day keeps the streak at 1 (not double-incremented)
     const r = log();
     expect(r.newStreak).toBe(1);
     expect(get().user!.streak).toBe(1);
@@ -136,9 +141,9 @@ describe('validateSkill', () => {
   it('is a no-op unless the skill is completed', () => {
     reset();
     onboard();
-    get().validateSkill('sql-foundations'); // still only 'available'
+    get().validateSkill('sql-foundations'); // still only 'available' — no-op
     expect(get().userSkills['sql-foundations'].validated).toBeFalsy();
-    expect(get().user!.xp).toBe(0);
+    expect(get().user!.xp).toBe(ONBOARDING_XP_GRANT); // no change from onboarding grant
   });
 
   it('validates a completed skill and grants the 50 XP bonus', () => {
