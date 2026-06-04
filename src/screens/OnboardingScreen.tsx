@@ -302,7 +302,10 @@ function WelcomeStep({
       {/* Brand */}
       <Text style={styles.brandName}>SkillForge</Text>
       <Text style={styles.brandTagline}>
-        The Strava for{'\n'}professional growth.
+        Level up through proof,{'\n'}not promises.
+      </Text>
+      <Text style={styles.forEveryoneLabel}>
+        Any skill. Any field. Any level.
       </Text>
 
       {/* Proof pills */}
@@ -322,7 +325,7 @@ function WelcomeStep({
       </View>
 
       <Text style={styles.proofTagline}>
-        Not "I watched a video." But "I built this."
+        Stop watching. Start building.
       </Text>
 
       <TouchableOpacity style={styles.primaryBtn} onPress={onNext} activeOpacity={0.85}>
@@ -1115,6 +1118,15 @@ const makeStyles = (Colors: ColorsType) => StyleSheet.create({
     color: Colors.textSub,
     textAlign: 'center',
     lineHeight: 28,
+    marginBottom: Spacing.sm,
+  },
+  forEveryoneLabel: {
+    fontSize: FontSize.xs,
+    color: Colors.primary,
+    fontWeight: '700',
+    letterSpacing: 1.5,
+    textAlign: 'center',
+    textTransform: 'uppercase',
     marginBottom: Spacing.xl,
   },
   proofPills: {
@@ -1153,8 +1165,8 @@ const makeStyles = (Colors: ColorsType) => StyleSheet.create({
     paddingHorizontal: Spacing.xl,
     alignItems: 'center',
     width: '100%',
-    // @ts-ignore - web gradient
-    background: 'linear-gradient(135deg, #7C3AED, #4F46E5)',
+    // @ts-ignore - web-only gradient
+    backgroundImage: 'linear-gradient(135deg, #7C3AED, #4F46E5)',
     backgroundColor: Colors.primary,
     // @ts-ignore
     boxShadow: '0 4px 20px rgba(124,58,237,0.45)',
@@ -1299,8 +1311,8 @@ const makeStyles = (Colors: ColorsType) => StyleSheet.create({
     paddingHorizontal: Spacing.md,
     paddingTop: Spacing.md,
     paddingBottom: 'env(safe-area-inset-bottom, 16px)' as any,
-    // @ts-ignore
-    background: `linear-gradient(to top, ${Colors.bg} 70%, transparent)`,
+    // @ts-ignore - web-only gradient
+    backgroundImage: `linear-gradient(to top, ${Colors.bg} 70%, transparent)`,
     backgroundColor: 'transparent',
   },
 
