@@ -273,6 +273,89 @@ export default function OnboardingScreen() {
   );
 }
 
+// ── LakbAI Signature Icon ────────────────────────────────────────────────────
+// LA monogram with subtle Philippine sun ray geometry (8 rays from A peak).
+// The A's peak forms an upward arrow — progress, aspiration, forward movement.
+// Filipino DNA: sun rays are barely visible at 0.18 opacity — elegant, discoverable.
+function LakbAIIcon({ size = 104 }: { size?: number }) {
+  return (
+    // @ts-ignore — SVG is web-only; valid in react-native-web / Vite target
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 96 96"
+      style={{ borderRadius: 22, overflow: 'hidden', display: 'block' } as any}
+    >
+      {/* @ts-ignore */}
+      <defs>
+        {/* @ts-ignore */}
+        <linearGradient id="lakbBg" x1="0%" y1="0%" x2="100%" y2="100%">
+          {/* @ts-ignore */}
+          <stop offset="0%" stopColor="#6D28D9" />
+          {/* @ts-ignore */}
+          <stop offset="100%" stopColor="#2E1065" />
+        </linearGradient>
+        {/* @ts-ignore */}
+        <linearGradient id="lakbLetters" x1="0%" y1="0%" x2="0%" y2="100%">
+          {/* @ts-ignore */}
+          <stop offset="0%" stopColor="#FFFFFF" />
+          {/* @ts-ignore */}
+          <stop offset="100%" stopColor="#C4B5FD" />
+        </linearGradient>
+      </defs>
+
+      {/* Rounded background */}
+      {/* @ts-ignore */}
+      <rect x="0" y="0" width="96" height="96" rx="22" ry="22" fill="url(#lakbBg)" />
+
+      {/* Philippine sun DNA — 8 rays from the A peak (61, 20) */}
+      {/* @ts-ignore */}
+      <g opacity="0.18" stroke="#FFFFFF" strokeWidth="1.5" strokeLinecap="round">
+        {/* @ts-ignore */}<line x1="61" y1="20" x2="61" y2="8" />   {/* N  */}
+        {/* @ts-ignore */}<line x1="61" y1="20" x2="70" y2="11" />  {/* NE */}
+        {/* @ts-ignore */}<line x1="61" y1="20" x2="73" y2="20" />  {/* E  */}
+        {/* @ts-ignore */}<line x1="61" y1="20" x2="70" y2="29" />  {/* SE */}
+        {/* @ts-ignore */}<line x1="61" y1="20" x2="61" y2="32" />  {/* S  */}
+        {/* @ts-ignore */}<line x1="61" y1="20" x2="52" y2="29" />  {/* SW */}
+        {/* @ts-ignore */}<line x1="61" y1="20" x2="49" y2="20" />  {/* W  */}
+        {/* @ts-ignore */}<line x1="61" y1="20" x2="52" y2="11" />  {/* NW */}
+      </g>
+
+      {/* L — vertical stroke + horizontal base */}
+      {/* @ts-ignore */}
+      <g fill="none" stroke="url(#lakbLetters)" strokeWidth="7.5" strokeLinecap="round" strokeLinejoin="round">
+        {/* @ts-ignore */}
+        <polyline points="17,20 17,75 40,75" />
+      </g>
+
+      {/* A — two legs + crossbar; legs converge at (61,27) */}
+      {/* @ts-ignore */}
+      <g fill="none" stroke="url(#lakbLetters)" strokeWidth="7.5" strokeLinecap="round" strokeLinejoin="round">
+        {/* @ts-ignore */}
+        <polyline points="48,75 61,27 74,75" />
+        {/* @ts-ignore */}
+        <line x1="53" y1="56" x2="69" y2="56" />
+      </g>
+
+      {/* Upward arrow at A peak — the signature forward-motion cue */}
+      {/* @ts-ignore */}
+      <polygon
+        points="61,12 56,24 66,24"
+        fill="url(#lakbLetters)"
+      />
+    </svg>
+  );
+}
+
+// ── Welcome Screen ──────────────────────────────────────────────────────────
+// Redesigned based on:
+//   • Behavioral psychology: clear 3-second value proposition (what/why/different)
+//   • HIG + Material: one primary action, no competing CTAs
+//   • Conversion: outcome-centric chips, not feature-centric; strong action verb CTA
+//   • Brand recall: unique icon, two-line bilingual tagline with size contrast
+//   • Social proof: lightweight trust strip (paths · skills · AI-powered)
+//
+// Reading order: Icon → Brand → Value Prop → Scope → Social Proof → Benefits → CTA
 function WelcomeStep({
   logoScale,
   logoOpacity,
@@ -289,49 +372,73 @@ function WelcomeStep({
       contentContainerStyle={styles.stepContainer}
       showsVerticalScrollIndicator={false}
     >
-      {/* Logo */}
+      {/* 1 — Signature icon */}
       <Animated.View
         style={[
           styles.logoWrapper,
           { opacity: logoOpacity, transform: [{ scale: logoScale }] },
         ]}
       >
-        <View style={styles.logoGlow} />
-        <Text style={styles.logoEmoji}>⚡</Text>
+        <LakbAIIcon size={104} />
       </Animated.View>
 
-      {/* Brand */}
+      {/* 2 — Brand name */}
       <Text style={styles.brandName}>LakbAI</Text>
-      <Text style={styles.brandTagline}>
-        Navigate Your Future.{'\n'}Isulong Ang Pangarap.
+
+      {/* 3 — Primary tagline + bilingual subline (size contrast = visual hierarchy) */}
+      <Text style={styles.brandTaglinePrimary}>Navigate Your Future.</Text>
+      <Text style={styles.brandTaglineSub}>Isulong Ang Pangarap.</Text>
+
+      {/* 4 — Value proposition: answers "what does this do?" in one line */}
+      <Text style={styles.valueProp}>
+        AI-guided career roadmaps. Build real projects.{'\n'}Prove you're ready for the job.
       </Text>
+
+      {/* 5 — Scope line (retained per brand requirement) */}
       <Text style={styles.forEveryoneLabel}>
         Any skill. Any field. Any level.
       </Text>
 
-      {/* Proof pills */}
-      <View style={styles.proofPills}>
-        <View style={styles.proofPill}>
-          <Text style={styles.proofPillText}>Learn → Build</Text>
+      {/* 6 — Social proof: lightweight trust strip */}
+      <View style={styles.socialProofRow}>
+        <Text style={styles.socialProofItem}>🗺️ 19 career paths</Text>
+        <Text style={styles.socialProofDot}>·</Text>
+        <Text style={styles.socialProofItem}>🎯 95+ skills</Text>
+        <Text style={styles.socialProofDot}>·</Text>
+        <Text style={styles.socialProofItem}>✨ AI-powered</Text>
+      </View>
+
+      {/* 7 — Outcome chips: what the USER gets, not what the app does */}
+      <View style={styles.outcomeChips}>
+        <View style={styles.outcomeChip}>
+          <Text style={styles.outcomeChipEmoji}>🗺️</Text>
+          <Text style={styles.outcomeChipLabel}>Your Path</Text>
         </View>
-        <View style={styles.proofPill}>
-          <Text style={styles.proofPillText}>Log Output</Text>
+        <View style={styles.outcomeChip}>
+          <Text style={styles.outcomeChipEmoji}>🛠️</Text>
+          <Text style={styles.outcomeChipLabel}>Real Projects</Text>
         </View>
-        <View style={styles.proofPill}>
-          <Text style={styles.proofPillText}>Gain XP</Text>
-        </View>
-        <View style={styles.proofPill}>
-          <Text style={styles.proofPillText}>Share → Grow</Text>
+        <View style={styles.outcomeChip}>
+          <Text style={styles.outcomeChipEmoji}>📈</Text>
+          <Text style={styles.outcomeChipLabel}>Real Growth</Text>
         </View>
       </View>
 
-      <Text style={styles.proofTagline}>
-        Stop watching. Start building.
-      </Text>
-
-      <TouchableOpacity style={styles.primaryBtn} onPress={onNext} activeOpacity={0.85}>
-        <Text style={styles.primaryBtnText}>Begin Your Journey →</Text>
+      {/* 8 — Primary CTA: "Start Building" mirrors the core philosophy */}
+      {/* "Start Building" outperforms "Begin Your Journey" — concrete verb, */}
+      {/* creates cognitive completion with "Stop watching. Start building." */}
+      <TouchableOpacity
+        style={styles.primaryBtn}
+        onPress={onNext}
+        activeOpacity={0.85}
+        accessibilityRole="button"
+        accessibilityLabel="Start building your future with LakbAI"
+      >
+        <Text style={styles.primaryBtnText}>Start Building →</Text>
       </TouchableOpacity>
+
+      {/* Philosophy line — elevated from buried italic to visible brand statement */}
+      <Text style={styles.philosophyLine}>Stop watching. Start building.</Text>
     </ScrollView>
   );
 }
@@ -1099,79 +1206,137 @@ const makeStyles = (Colors: ColorsType) => StyleSheet.create({
     paddingBottom: Spacing.xxl,
   },
 
-  // Logo
+  // ── Icon ─────────────────────────────────────────────────────────────────
   logoWrapper: {
-    width: 96,
-    height: 96,
+    width: 104,
+    height: 104,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: Spacing.md,
-  },
-  logoGlow: {
-    position: 'absolute',
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-    backgroundColor: Colors.primary,
-    opacity: 0.18,
+    marginBottom: 20,
     // @ts-ignore
-    boxShadow: '0 0 40px rgba(124,58,237,0.5)',
-  },
-  logoEmoji: {
-    fontSize: 52,
+    filter: 'drop-shadow(0 8px 24px rgba(109,40,217,0.55))',
   },
 
-  // Brand text
+  // ── Brand name ───────────────────────────────────────────────────────────
   brandName: {
-    fontSize: 40,
-    fontWeight: '800',
+    fontSize: 42,
+    fontWeight: '800' as const,
     color: Colors.primaryLight,
-    letterSpacing: 1,
-    marginBottom: Spacing.xs,
+    letterSpacing: 1.5,
+    marginBottom: 6,
   },
-  brandTagline: {
-    fontSize: FontSize.lg,
+
+  // ── Tagline — two-line bilingual treatment ────────────────────────────────
+  // Primary: larger, white — English
+  // Sub: smaller, muted italic — Filipino
+  // Size contrast creates instant reading order without extra decoration
+  brandTaglinePrimary: {
+    fontSize: 22,
+    fontWeight: '700' as const,
+    color: Colors.text,
+    textAlign: 'center',
+    lineHeight: 30,
+    marginBottom: 4,
+  },
+  brandTaglineSub: {
+    fontSize: 16,
+    fontWeight: '500' as const,
     color: Colors.textSub,
     textAlign: 'center',
-    lineHeight: 28,
-    marginBottom: Spacing.sm,
+    fontStyle: 'italic',
+    marginBottom: 16,
   },
-  forEveryoneLabel: {
-    fontSize: FontSize.xs,
-    color: Colors.primary,
-    fontWeight: '700',
-    letterSpacing: 1.5,
+
+  // ── Value proposition ─────────────────────────────────────────────────────
+  // Answers the 3-second question: "what does this app do?"
+  // Positioned after tagline so aspiration comes first, explanation second
+  valueProp: {
+    fontSize: 14,
+    color: Colors.textSub,
     textAlign: 'center',
-    textTransform: 'uppercase',
-    marginBottom: Spacing.xl,
+    lineHeight: 22,
+    marginBottom: 10,
+    maxWidth: 300,
   },
-  proofPills: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+
+  // ── Scope line (retained) ─────────────────────────────────────────────────
+  forEveryoneLabel: {
+    fontSize: 11,
+    color: Colors.primary,
+    fontWeight: '700' as const,
+    letterSpacing: 1.8,
+    textAlign: 'center',
+    textTransform: 'uppercase' as const,
+    marginBottom: 20,
+  },
+
+  // ── Social proof strip ────────────────────────────────────────────────────
+  // Lightweight trust signal — numbers anchor credibility without cluttering
+  socialProofRow: {
+    flexDirection: 'row' as const,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    marginBottom: 22,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    backgroundColor: Colors.card,
+    borderRadius: Radius.lg,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  socialProofItem: {
+    fontSize: 12,
+    color: Colors.textSub,
+    fontWeight: '500' as const,
+  },
+  socialProofDot: {
+    fontSize: 12,
+    color: Colors.textMuted,
+  },
+
+  // ── Outcome chips ─────────────────────────────────────────────────────────
+  // 3 chips (not 4) — Miller's Law: 3 items is the sweet spot for recall
+  // Outcome-centric labels replace feature jargon ("Log Output" → "Real Projects")
+  outcomeChips: {
+    flexDirection: 'row' as const,
     justifyContent: 'center',
     gap: 8,
-    marginBottom: Spacing.md,
+    marginBottom: Spacing.xxl,
   },
-  proofPill: {
+  outcomeChip: {
+    flex: 1,
     backgroundColor: Colors.card,
     borderWidth: 1,
     borderColor: Colors.border,
-    borderRadius: Radius.full,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    borderRadius: Radius.md,
+    paddingHorizontal: 8,
+    paddingVertical: 10,
+    alignItems: 'center' as const,
+    gap: 4,
+    maxWidth: 110,
   },
-  proofPillText: {
-    fontSize: FontSize.sm,
+  outcomeChipEmoji: {
+    fontSize: 20,
+    lineHeight: 24,
+  },
+  outcomeChipLabel: {
+    fontSize: 11,
+    fontWeight: '600' as const,
     color: Colors.textSub,
-    fontWeight: '500',
+    textAlign: 'center' as const,
+    lineHeight: 14,
   },
-  proofTagline: {
-    fontSize: FontSize.sm,
+
+  // ── Philosophy line ───────────────────────────────────────────────────────
+  // Elevated from buried italic to a visible brand statement below the CTA
+  philosophyLine: {
+    fontSize: 12,
     color: Colors.textMuted,
-    textAlign: 'center',
-    lineHeight: 20,
-    marginBottom: Spacing.xxl,
-    fontStyle: 'italic',
+    textAlign: 'center' as const,
+    marginTop: 14,
+    fontWeight: '500' as const,
+    letterSpacing: 0.3,
   },
 
   // Primary button
