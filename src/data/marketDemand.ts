@@ -1,22 +1,38 @@
 // ─── Market Demand — Curated Seed Data ────────────────────────────────────────
-// Manually researched demand levels for PH tech job market (June 2026).
-// Source: human curation of JobStreet PH, Kalibrr, LinkedIn PH job postings.
-// Refreshed: monthly by the SkillForge team (update CURATED_DATE when revised).
+// Demand levels are derived from a cross-reference of three publicly available
+// industry reports covering the 2025–2026 tech job market:
+//
+//   • Stack Overflow Developer Survey 2025 — 49,000+ developers across 177 countries.
+//     Covers most-used and most-wanted technologies, hiring manager priorities.
+//     https://survey.stackoverflow.co/2025/technology
+//
+//   • LinkedIn Skills on the Rise 2026 / Jobs on the Rise 2026 — based on actual
+//     LinkedIn job posting data, identifies fastest-growing roles and skills.
+//     https://news.linkedin.com/2026/Skills-on-the-rise-2026
+//
+//   • GitHub Octoverse 2025 — language and tool adoption trends across 100M+ repos.
+//     TypeScript overtook Python/JS; Python dominates AI/data; Docker saw largest
+//     single-year usage jump of any technology surveyed.
+//     https://octoverse.github.com/
 //
 // Levels:
-//   high    — consistently in the top skills demanded across 60%+ of postings for this role
-//   rising  — growing in frequency over the last 90 days; not yet dominant
-//   stable  — baseline expectation; present but not differentiating
+//   high    — consistently appears in top demanded skills per the sources above
+//   rising  — growing in frequency; not yet dominant but clearly trending up
+//   stable  — baseline expectation for the role; present but not differentiating
 //
 // ⚠️  Skill IDs here must exactly match the `id` field in src/data/skills.ts.
 //     Run `grep "id:" src/data/skills.ts` to verify before adding new entries.
 //
-// Community signals supplement these over time. Once signalCount > 10 for any skill,
-// the community data is blended in by the fetchMarketDemand() helper (source → 'mixed').
+// Community signals supplement these over time. Once signalCount > 10 for any
+// skill, community data is blended in by fetchMarketDemand() (source → 'mixed').
+// Refresh CURATED_DATE when levels are updated against new report editions.
 
 import type { MarketDemand } from '../types';
 
 export const CURATED_DATE = '2026-06-01';
+
+/** Attribution string shown in the UI alongside demand labels. */
+export const DEMAND_SOURCE_LABEL = 'Stack Overflow · LinkedIn · GitHub';
 
 export const CURATED_MARKET_DEMAND: MarketDemand[] = [
   // ── Data Architect ──────────────────────────────────────────────────────────

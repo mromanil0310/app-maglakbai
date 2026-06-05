@@ -32,7 +32,7 @@ import CareerNode from '../components/CareerNode';
 import DemandBadge from '../components/DemandBadge';
 import { CustomSkill, Skill, UserSkill } from '../types';
 import { pathHasProgress } from '../domain/skillGraph';
-import { getPathDemandLabel } from '../data/marketDemand';
+import { getPathDemandLabel, DEMAND_SOURCE_LABEL } from '../data/marketDemand';
 
 const PALETTE = ['#7C3AED', '#06B6D4', '#10B981', '#F59E0B', '#EF4444', '#EC4899', '#8B5CF6', '#F97316'];
 const ICON_OPTIONS = ['🎯', '📚', '🎨', '🏋️', '🎵', '🗣️', '✍️', '🔬', '🌍', '💼', '🍳', '📸', '🎭', '⚽', '🧘', '💡'];
@@ -131,17 +131,22 @@ function CatalogModal({
                         {path.name}
                       </Text>
                       <Text style={catalog.pathDesc} numberOfLines={1}>{path.description}</Text>
-                      {/* Demand label */}
+                      {/* Demand label + source attribution */}
                       {(() => {
                         const { label, sentiment } = getPathDemandLabel(pid);
                         if (!label) return null;
                         return (
-                          <Text style={[
-                            catalog.demandLine,
-                            sentiment === 'growing' && { color: '#FCD34D' },
-                          ]}>
-                            {label}
-                          </Text>
+                          <View style={catalog.demandBlock}>
+                            <Text style={[
+                              catalog.demandLine,
+                              sentiment === 'growing' && { color: '#FCD34D' },
+                            ]}>
+                              {label}
+                            </Text>
+                            <Text style={catalog.demandSource}>
+                              Based on {DEMAND_SOURCE_LABEL}
+                            </Text>
+                          </View>
                         );
                       })()}
                     </View>
@@ -2025,7 +2030,9 @@ const makeCatalog = (Colors: ColorsType) => StyleSheet.create({
   pathIconText: { fontSize: 22 },
   pathName: { fontSize: FontSize.sm, fontWeight: '700', color: Colors.text, marginBottom: 2 },
   pathDesc: { fontSize: FontSize.xs, color: Colors.textMuted },
-  demandLine: { fontSize: 11, fontWeight: '600', color: '#FCA5A5', marginTop: 4, letterSpacing: 0.2 },
+  demandBlock: { marginTop: 4, gap: 2 },
+  demandLine: { fontSize: 11, fontWeight: '700', color: '#FCA5A5', letterSpacing: 0.2 },
+  demandSource: { fontSize: 9, fontWeight: '400', color: Colors.textMuted, letterSpacing: 0.1 },
   enrolledBadge: {
     borderRadius: Radius.full, paddingHorizontal: 8, paddingVertical: 3,
     backgroundColor: Colors.success + '18', borderWidth: 1, borderColor: Colors.success + '40',

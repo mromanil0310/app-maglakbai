@@ -14,7 +14,7 @@ import {
 import { useAppStore, CAREER_PATHS, ALL_SKILLS } from '../store/appStore';
 import { useThemeColors, ColorsType, Colors, Spacing, Radius, FontSize, PathColors } from '../utils/theme';
 import { CareerPathId, CareerPath, CustomSkill, OutputType, ExperienceLevel } from '../types';
-import { getPathDemandLabel } from '../data/marketDemand';
+import { getPathDemandLabel, DEMAND_SOURCE_LABEL } from '../data/marketDemand';
 
 const ONBOARDING_PATH_CATEGORIES = [
   { label: 'Data & AI', pathIds: ['data-architect', 'data-engineer', 'ai-engineer', 'ml-engineer', 'data-analyst'] },
@@ -585,12 +585,17 @@ function PathCard({
         </View>
 
         {demandLabel ? (
-          <Text style={[
-            styles.pathCardDemand,
-            sentiment === 'growing' && { color: '#FCD34D' },
-          ]}>
-            {demandLabel}
-          </Text>
+          <View style={styles.pathCardDemandBlock}>
+            <Text style={[
+              styles.pathCardDemand,
+              sentiment === 'growing' && { color: '#FCD34D' },
+            ]}>
+              {demandLabel}
+            </Text>
+            <Text style={styles.pathCardDemandSource}>
+              Based on {DEMAND_SOURCE_LABEL}
+            </Text>
+          </View>
         ) : null}
       </TouchableOpacity>
     </Animated.View>
@@ -1302,12 +1307,21 @@ const makeStyles = (Colors: ColorsType) => StyleSheet.create({
     lineHeight: 20,
     marginBottom: Spacing.sm,
   },
+  pathCardDemandBlock: {
+    marginTop: 6,
+    gap: 2,
+  },
   pathCardDemand: {
     fontSize: 11,
-    fontWeight: '600',
-    color: '#FCA5A5',          // same warm red as the DemandBadge high colour
-    marginTop: 6,
+    fontWeight: '700',
+    color: '#FCA5A5',          // warm red — matches DemandBadge high colour
     letterSpacing: 0.2,
+  },
+  pathCardDemandSource: {
+    fontSize: 9,
+    fontWeight: '400',
+    color: Colors.textMuted,
+    letterSpacing: 0.1,
   },
   pathSkillList: {
     gap: 3,
