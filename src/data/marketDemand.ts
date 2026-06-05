@@ -8,6 +8,9 @@
 //   rising  — growing in frequency over the last 90 days; not yet dominant
 //   stable  — baseline expectation; present but not differentiating
 //
+// ⚠️  Skill IDs here must exactly match the `id` field in src/data/skills.ts.
+//     Run `grep "id:" src/data/skills.ts` to verify before adding new entries.
+//
 // Community signals supplement these over time. Once signalCount > 10 for any skill,
 // the community data is blended in by the fetchMarketDemand() helper (source → 'mixed').
 
@@ -54,102 +57,114 @@ export const CURATED_MARKET_DEMAND: MarketDemand[] = [
   { skillId: 'ml-feature-engineering', pathId: 'ml-engineer', level: 'high',   signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
 
   // ── Backend Engineer ─────────────────────────────────────────────────────────
-  { skillId: 'be-language-core',       pathId: 'backend-engineer', level: 'high',   signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
-  { skillId: 'be-rest-design',         pathId: 'backend-engineer', level: 'high',   signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
-  { skillId: 'be-database-optimization', pathId: 'backend-engineer', level: 'high', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
-  { skillId: 'be-auth-security',       pathId: 'backend-engineer', level: 'rising', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
-  { skillId: 'be-microservices',       pathId: 'backend-engineer', level: 'rising', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  { skillId: 'be-language-core',         pathId: 'backend-engineer', level: 'high',   signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  { skillId: 'be-rest-design',           pathId: 'backend-engineer', level: 'high',   signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  { skillId: 'be-database-optimization', pathId: 'backend-engineer', level: 'high',   signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  { skillId: 'be-auth-security',         pathId: 'backend-engineer', level: 'rising', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  { skillId: 'be-microservices',         pathId: 'backend-engineer', level: 'rising', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
 
   // ── Frontend Engineer ────────────────────────────────────────────────────────
-  { skillId: 'fe-html-css-js',         pathId: 'frontend-engineer', level: 'stable', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
-  { skillId: 'fe-react-framework',     pathId: 'frontend-engineer', level: 'high',   signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
-  { skillId: 'fe-typescript',          pathId: 'frontend-engineer', level: 'high',   signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
-  { skillId: 'fe-performance',         pathId: 'frontend-engineer', level: 'rising', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
-  { skillId: 'fe-testing-a11y',        pathId: 'frontend-engineer', level: 'rising', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  { skillId: 'fe-html-css-js',     pathId: 'frontend-engineer', level: 'stable', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  { skillId: 'fe-react-framework', pathId: 'frontend-engineer', level: 'high',   signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  { skillId: 'fe-typescript',      pathId: 'frontend-engineer', level: 'high',   signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  { skillId: 'fe-performance',     pathId: 'frontend-engineer', level: 'rising', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  { skillId: 'fe-testing-a11y',    pathId: 'frontend-engineer', level: 'rising', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
 
   // ── Cloud Engineer ───────────────────────────────────────────────────────────
-  { skillId: 'cloud-core-services',    pathId: 'cloud-engineer', level: 'high',   signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
-  { skillId: 'cloud-iac',              pathId: 'cloud-engineer', level: 'rising', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
-  { skillId: 'cloud-containers',       pathId: 'cloud-engineer', level: 'high',   signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
-  { skillId: 'cloud-networking',       pathId: 'cloud-engineer', level: 'stable', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
-  { skillId: 'cloud-security',         pathId: 'cloud-engineer', level: 'rising', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  // Actual skill IDs: ce-cloud-fundamentals, ce-networking, ce-iac, ce-kubernetes, ce-cost-optimization
+  { skillId: 'ce-cloud-fundamentals', pathId: 'cloud-engineer', level: 'high',   signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  { skillId: 'ce-kubernetes',         pathId: 'cloud-engineer', level: 'high',   signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  { skillId: 'ce-iac',                pathId: 'cloud-engineer', level: 'rising', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  { skillId: 'ce-cost-optimization',  pathId: 'cloud-engineer', level: 'rising', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  { skillId: 'ce-networking',         pathId: 'cloud-engineer', level: 'stable', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
 
   // ── DevOps ───────────────────────────────────────────────────────────────────
-  { skillId: 'devops-linux',           pathId: 'devops', level: 'stable', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
-  { skillId: 'devops-cicd',            pathId: 'devops', level: 'high',   signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
-  { skillId: 'devops-kubernetes',      pathId: 'devops', level: 'rising', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
-  { skillId: 'devops-monitoring',      pathId: 'devops', level: 'rising', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
-  { skillId: 'devops-security',        pathId: 'devops', level: 'rising', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  // Actual skill IDs: do-linux-shell, do-cicd, do-docker-k8s, do-monitoring, do-security
+  { skillId: 'do-cicd',       pathId: 'devops', level: 'high',   signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  { skillId: 'do-docker-k8s', pathId: 'devops', level: 'rising', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  { skillId: 'do-monitoring',  pathId: 'devops', level: 'rising', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  { skillId: 'do-security',    pathId: 'devops', level: 'rising', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  { skillId: 'do-linux-shell', pathId: 'devops', level: 'stable', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
 
   // ── Cybersecurity ────────────────────────────────────────────────────────────
-  { skillId: 'cyber-networking',       pathId: 'cybersecurity', level: 'stable', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
-  { skillId: 'cyber-threat-analysis',  pathId: 'cybersecurity', level: 'high',   signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
-  { skillId: 'cyber-pentesting',       pathId: 'cybersecurity', level: 'rising', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
-  { skillId: 'cyber-siem',             pathId: 'cybersecurity', level: 'rising', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
-  { skillId: 'cyber-cloud-security',   pathId: 'cybersecurity', level: 'high',   signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  // Actual skill IDs: cs-networking, cs-linux-security, cs-vulnerability, cs-pentest, cs-incident-response
+  { skillId: 'cs-vulnerability',      pathId: 'cybersecurity', level: 'high',   signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  { skillId: 'cs-linux-security',     pathId: 'cybersecurity', level: 'high',   signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  { skillId: 'cs-pentest',            pathId: 'cybersecurity', level: 'rising', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  { skillId: 'cs-incident-response',  pathId: 'cybersecurity', level: 'rising', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  { skillId: 'cs-networking',         pathId: 'cybersecurity', level: 'stable', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
 
   // ── Product Manager ──────────────────────────────────────────────────────────
-  { skillId: 'pm-discovery',           pathId: 'product-manager', level: 'high',   signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
-  { skillId: 'pm-roadmapping',         pathId: 'product-manager', level: 'high',   signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
-  { skillId: 'pm-metrics',             pathId: 'product-manager', level: 'high',   signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
-  { skillId: 'pm-stakeholders',        pathId: 'product-manager', level: 'stable', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
-  { skillId: 'pm-ai-product',          pathId: 'product-manager', level: 'rising', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  // Actual skill IDs: pm-discovery, pm-roadmap, pm-stakeholders, pm-data-driven, pm-launch
+  { skillId: 'pm-discovery',    pathId: 'product-manager', level: 'high',   signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  { skillId: 'pm-roadmap',      pathId: 'product-manager', level: 'high',   signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  { skillId: 'pm-data-driven',  pathId: 'product-manager', level: 'high',   signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  { skillId: 'pm-launch',       pathId: 'product-manager', level: 'rising', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  { skillId: 'pm-stakeholders', pathId: 'product-manager', level: 'stable', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
 
   // ── Business Analyst ─────────────────────────────────────────────────────────
-  { skillId: 'ba-requirements',        pathId: 'business-analyst', level: 'high',   signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
-  { skillId: 'ba-sql-reporting',       pathId: 'business-analyst', level: 'high',   signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
-  { skillId: 'ba-process-mapping',     pathId: 'business-analyst', level: 'stable', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
-  { skillId: 'ba-excel-advanced',      pathId: 'business-analyst', level: 'stable', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
-  { skillId: 'ba-ai-tools',            pathId: 'business-analyst', level: 'rising', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  // Actual skill IDs: ba-requirements, ba-data-analysis, ba-process-mapping, ba-sql-business, ba-reporting
+  { skillId: 'ba-requirements',    pathId: 'business-analyst', level: 'high',   signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  { skillId: 'ba-sql-business',    pathId: 'business-analyst', level: 'high',   signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  { skillId: 'ba-reporting',       pathId: 'business-analyst', level: 'rising', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  { skillId: 'ba-process-mapping', pathId: 'business-analyst', level: 'stable', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  { skillId: 'ba-data-analysis',   pathId: 'business-analyst', level: 'stable', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
 
   // ── Data Analyst ─────────────────────────────────────────────────────────────
-  { skillId: 'da-sql',                 pathId: 'data-analyst', level: 'high',   signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
-  { skillId: 'da-visualization',       pathId: 'data-analyst', level: 'high',   signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
-  { skillId: 'da-python-analysis',     pathId: 'data-analyst', level: 'rising', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
-  { skillId: 'da-statistics',          pathId: 'data-analyst', level: 'stable', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
-  { skillId: 'da-storytelling',        pathId: 'data-analyst', level: 'rising', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  // Actual skill IDs: da-excel-spreadsheets, da-sql-analysis, da-visualization, da-python-analysis, da-statistics
+  { skillId: 'da-sql-analysis',      pathId: 'data-analyst', level: 'high',   signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  { skillId: 'da-visualization',     pathId: 'data-analyst', level: 'high',   signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  { skillId: 'da-python-analysis',   pathId: 'data-analyst', level: 'rising', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  { skillId: 'da-excel-spreadsheets', pathId: 'data-analyst', level: 'stable', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  { skillId: 'da-statistics',        pathId: 'data-analyst', level: 'stable', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
 
   // ── Project Manager ──────────────────────────────────────────────────────────
-  { skillId: 'pjm-agile',              pathId: 'project-manager', level: 'high',   signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
-  { skillId: 'pjm-risk',               pathId: 'project-manager', level: 'stable', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
-  { skillId: 'pjm-tools',              pathId: 'project-manager', level: 'stable', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
-  { skillId: 'pjm-stakeholders',       pathId: 'project-manager', level: 'stable', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
-  { skillId: 'pjm-ai-automation',      pathId: 'project-manager', level: 'rising', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  // Actual skill IDs: pjm-planning, pjm-agile, pjm-risk, pjm-communication, pjm-budget
+  { skillId: 'pjm-agile',        pathId: 'project-manager', level: 'high',   signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  { skillId: 'pjm-budget',       pathId: 'project-manager', level: 'rising', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  { skillId: 'pjm-planning',     pathId: 'project-manager', level: 'stable', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  { skillId: 'pjm-risk',         pathId: 'project-manager', level: 'stable', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  { skillId: 'pjm-communication', pathId: 'project-manager', level: 'stable', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
 
   // ── Solutions Architect ──────────────────────────────────────────────────────
-  { skillId: 'sa-cloud-platforms',     pathId: 'solutions-architect', level: 'high',   signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
-  { skillId: 'sa-system-design',       pathId: 'solutions-architect', level: 'high',   signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
-  { skillId: 'sa-security-arch',       pathId: 'solutions-architect', level: 'rising', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
-  { skillId: 'sa-cost-optimization',   pathId: 'solutions-architect', level: 'rising', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
-  { skillId: 'sa-ai-integration',      pathId: 'solutions-architect', level: 'rising', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  // Actual skill IDs: sa-systems-design, sa-cloud-arch, sa-integration, sa-security-arch, sa-cost-scalability
+  { skillId: 'sa-cloud-arch',       pathId: 'solutions-architect', level: 'high',   signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  { skillId: 'sa-systems-design',   pathId: 'solutions-architect', level: 'high',   signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  { skillId: 'sa-security-arch',    pathId: 'solutions-architect', level: 'rising', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  { skillId: 'sa-cost-scalability', pathId: 'solutions-architect', level: 'rising', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  { skillId: 'sa-integration',      pathId: 'solutions-architect', level: 'rising', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
 
   // ── Software Architect ───────────────────────────────────────────────────────
-  { skillId: 'swa-design-patterns',    pathId: 'software-architect', level: 'high',   signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
-  { skillId: 'swa-microservices',      pathId: 'software-architect', level: 'rising', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
-  { skillId: 'swa-api-strategy',       pathId: 'software-architect', level: 'high',   signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
-  { skillId: 'swa-observability',      pathId: 'software-architect', level: 'rising', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
-  { skillId: 'swa-ai-architecture',    pathId: 'software-architect', level: 'rising', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  // Actual skill IDs: arch-design-patterns, arch-distributed-systems, arch-api-design, arch-system-modeling, arch-tech-leadership
+  { skillId: 'arch-design-patterns',    pathId: 'software-architect', level: 'high',   signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  { skillId: 'arch-api-design',         pathId: 'software-architect', level: 'high',   signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  { skillId: 'arch-distributed-systems', pathId: 'software-architect', level: 'rising', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  { skillId: 'arch-system-modeling',    pathId: 'software-architect', level: 'rising', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  { skillId: 'arch-tech-leadership',    pathId: 'software-architect', level: 'rising', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
 
   // ── Mobile Developer ─────────────────────────────────────────────────────────
-  { skillId: 'mob-react-native',       pathId: 'mobile-developer', level: 'high',   signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
-  { skillId: 'mob-state-management',   pathId: 'mobile-developer', level: 'high',   signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
-  { skillId: 'mob-native-apis',        pathId: 'mobile-developer', level: 'stable', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
-  { skillId: 'mob-performance',        pathId: 'mobile-developer', level: 'rising', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
-  { skillId: 'mob-publishing',         pathId: 'mobile-developer', level: 'stable', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  // Actual skill IDs: mob-ui-fundamentals, mob-react-native, mob-state-management, mob-native-apis, mob-app-store
+  { skillId: 'mob-react-native',    pathId: 'mobile-developer', level: 'high',   signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  { skillId: 'mob-state-management', pathId: 'mobile-developer', level: 'high',  signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  { skillId: 'mob-ui-fundamentals', pathId: 'mobile-developer', level: 'rising', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  { skillId: 'mob-native-apis',     pathId: 'mobile-developer', level: 'stable', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  { skillId: 'mob-app-store',       pathId: 'mobile-developer', level: 'stable', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
 
   // ── UI/UX Designer ───────────────────────────────────────────────────────────
-  { skillId: 'ux-research',            pathId: 'ui-ux-designer', level: 'high',   signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
-  { skillId: 'ux-figma',               pathId: 'ui-ux-designer', level: 'high',   signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
-  { skillId: 'ux-design-systems',      pathId: 'ui-ux-designer', level: 'rising', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
-  { skillId: 'ux-prototyping',         pathId: 'ui-ux-designer', level: 'stable', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
-  { skillId: 'ux-ai-ux',               pathId: 'ui-ux-designer', level: 'rising', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  // Actual skill IDs: ux-fundamentals, ux-wireframing, ux-user-research, ux-figma, ux-design-thinking
+  { skillId: 'ux-user-research',   pathId: 'ui-ux-designer', level: 'high',   signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  { skillId: 'ux-figma',           pathId: 'ui-ux-designer', level: 'high',   signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  { skillId: 'ux-design-thinking', pathId: 'ui-ux-designer', level: 'rising', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  { skillId: 'ux-fundamentals',    pathId: 'ui-ux-designer', level: 'rising', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  { skillId: 'ux-wireframing',     pathId: 'ui-ux-designer', level: 'stable', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
 
   // ── Startup Founder ──────────────────────────────────────────────────────────
-  { skillId: 'sf-validation',          pathId: 'startup-founder', level: 'high',   signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
-  { skillId: 'sf-mvp-building',        pathId: 'startup-founder', level: 'high',   signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
-  { skillId: 'sf-growth',              pathId: 'startup-founder', level: 'rising', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
-  { skillId: 'sf-fundraising',         pathId: 'startup-founder', level: 'stable', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
-  { skillId: 'sf-ai-leverage',         pathId: 'startup-founder', level: 'rising', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  // Actual skill IDs: sf-validation, sf-mvp, sf-growth, sf-fundraising, sf-operations
+  { skillId: 'sf-validation',  pathId: 'startup-founder', level: 'high',   signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  { skillId: 'sf-mvp',         pathId: 'startup-founder', level: 'high',   signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  { skillId: 'sf-growth',      pathId: 'startup-founder', level: 'rising', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  { skillId: 'sf-operations',  pathId: 'startup-founder', level: 'rising', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
+  { skillId: 'sf-fundraising', pathId: 'startup-founder', level: 'stable', signalCount: 0, lastUpdated: CURATED_DATE, source: 'curated' },
 ];
 
 /** O(1) lookup: skillId → MarketDemand */
