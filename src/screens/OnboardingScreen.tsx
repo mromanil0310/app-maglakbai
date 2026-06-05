@@ -14,7 +14,7 @@ import {
 import { useAppStore, CAREER_PATHS, ALL_SKILLS } from '../store/appStore';
 import { useThemeColors, ColorsType, Colors, Spacing, Radius, FontSize, PathColors } from '../utils/theme';
 import { CareerPathId, CareerPath, CustomSkill, OutputType, ExperienceLevel } from '../types';
-import { getPathDemandSummary } from '../data/marketDemand';
+import { getPathDemandLabel } from '../data/marketDemand';
 
 const ONBOARDING_PATH_CATEGORIES = [
   { label: 'Data & AI', pathIds: ['data-architect', 'data-engineer', 'ai-engineer', 'ml-engineer', 'data-analyst'] },
@@ -540,7 +540,7 @@ function PathCard({
   const styles = makeStyles(Colors);
   const pathColor = PathColors[path.id] ?? { primary: path.color, dim: path.color + '15', text: path.textColor, border: path.color + '40' };
   const scaleAnim = useRef(new Animated.Value(1)).current;
-  const demand = getPathDemandSummary(path.id);
+  const { label: demandLabel, sentiment } = getPathDemandLabel(path.id);
 
   const handlePress = () => {
     Animated.sequence([
@@ -549,12 +549,6 @@ function PathCard({
     ]).start();
     onSelect();
   };
-
-  // Build a compact demand label, e.g. "🔥 3 in demand · ↗ 2 rising"
-  const demandParts: string[] = [];
-  if (demand.high > 0)   demandParts.push(`🔥 ${demand.high} in demand`);
-  if (demand.rising > 0) demandParts.push(`↗ ${demand.rising} rising`);
-  const demandLabel = demandParts.join(' · ');
 
   return (
     <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
@@ -591,7 +585,12 @@ function PathCard({
         </View>
 
         {demandLabel ? (
-          <Text style={styles.pathCardDemand}>{demandLabel}</Text>
+          <Text style={[
+            styles.pathCardDemand,
+            sentiment === 'growing' && { color: '#FCD34D' },
+          ]}>
+            {demandLabel}
+          </Text>
         ) : null}
       </TouchableOpacity>
     </Animated.View>

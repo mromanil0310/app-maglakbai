@@ -32,7 +32,7 @@ import CareerNode from '../components/CareerNode';
 import DemandBadge from '../components/DemandBadge';
 import { CustomSkill, Skill, UserSkill } from '../types';
 import { pathHasProgress } from '../domain/skillGraph';
-import { getPathDemandSummary } from '../data/marketDemand';
+import { getPathDemandLabel } from '../data/marketDemand';
 
 const PALETTE = ['#7C3AED', '#06B6D4', '#10B981', '#F59E0B', '#EF4444', '#EC4899', '#8B5CF6', '#F97316'];
 const ICON_OPTIONS = ['🎯', '📚', '🎨', '🏋️', '🎵', '🗣️', '✍️', '🔬', '🌍', '💼', '🍳', '📸', '🎭', '⚽', '🧘', '💡'];
@@ -131,15 +131,17 @@ function CatalogModal({
                         {path.name}
                       </Text>
                       <Text style={catalog.pathDesc} numberOfLines={1}>{path.description}</Text>
-                      {/* Demand summary */}
+                      {/* Demand label */}
                       {(() => {
-                        const d = getPathDemandSummary(pid);
-                        if (d.high === 0 && d.rising === 0) return null;
-                        const parts: string[] = [];
-                        if (d.high > 0)   parts.push(`🔥 ${d.high} in demand`);
-                        if (d.rising > 0) parts.push(`↗ ${d.rising} rising`);
+                        const { label, sentiment } = getPathDemandLabel(pid);
+                        if (!label) return null;
                         return (
-                          <Text style={catalog.demandLine}>{parts.join(' · ')}</Text>
+                          <Text style={[
+                            catalog.demandLine,
+                            sentiment === 'growing' && { color: '#FCD34D' },
+                          ]}>
+                            {label}
+                          </Text>
                         );
                       })()}
                     </View>

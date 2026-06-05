@@ -174,13 +174,43 @@ export const MARKET_DEMAND_MAP: Record<string, MarketDemand> = Object.fromEntrie
 
 /**
  * Returns the count of high-demand and rising skills for a given career path.
- * Used to show demand context on path selection screens (onboarding, catalog).
- * Returns { high: 0, rising: 0 } for custom paths or paths with no data.
+ * Used internally; prefer getPathDemandLabel() for UI display.
  */
-export function getPathDemandSummary(pathId: string): { high: number; rising: number } {
+export function getPathDemandSummary(pathId: string): { high: number; rising: number; total: number } {
   const entries = CURATED_MARKET_DEMAND.filter((d) => d.pathId === pathId);
   return {
     high:   entries.filter((d) => d.level === 'high').length,
     rising: entries.filter((d) => d.level === 'rising').length,
+    total:  entries.length,
   };
+}
+
+/**
+ * Returns a qualitative demand label for a career path — meant for path
+ * selection screens (onboarding picker, catalog) where raw counts are confusing.
+ *
+ * Logic:
+ *   🔥 High demand — ≥50% of the path's skills appear in the top demanded skills
+ *      for that role in current job postings.
+ *   ↗  Growing     — the field has momentum; some high-demand skills + rising trends.
+ *   (empty string) — no curated data (custom paths, or paths not yet researched).
+ *
+ * Color guidance: 'high' → #FCA5A5 (warm red), 'growing' → #FCD34D (amber)
+ */
+export function getPathDemandLabel(
+  pathId: string,
+): { label: string; sentiment: 'high' | 'growing' | 'none' } {
+  const entries = CURATED_MARKET_DEMAND.filter((d) => d.pathId === pathId);
+  if (entries.length === 0) return { label: '', sentiment: 'none' };
+
+  const highCount   = entries.filter((d) => d.level === 'high').length;
+  const risingCount = entries.filter((d) => d.level === 'rising').length;
+
+  if (highCount / entries.length >= 0.5) {
+    return { label: '🔥 High demand', sentiment: 'high' };
+  }
+  if (highCount > 0 || risingCount > 0) {
+    return { label: '↗ Growing', sentiment: 'growing' };
+  }
+  return { label: '', sentiment: 'none' };
 }
