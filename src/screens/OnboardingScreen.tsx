@@ -331,42 +331,43 @@ function LakbAIIcon({ size = 120 }: { size?: number }) {
       <rect x="0" y="0" width="120" height="120" rx="26" ry="26" fill="url(#lb2bg)" />
 
       {/* ── Filipino sun DNA: 8-ray halo behind A peak ───────────── */}
-      {/* Opacity 0.12 — barely perceptible; a gift for Filipino users */}
+      {/* Centre moved to (74,8) — the new A peak. Rays overflow top  */}
+      {/* edge are clipped by overflow:hidden; that's intentional.    */}
       {/* @ts-ignore */}
-      <g opacity="0.12" stroke="#00C8FF" strokeWidth="2" strokeLinecap="round">
-        {/* @ts-ignore */}<line x1="76" y1="14" x2="76" y2="2"  />  {/* N  */}
-        {/* @ts-ignore */}<line x1="76" y1="14" x2="86" y2="4"  />  {/* NE */}
-        {/* @ts-ignore */}<line x1="76" y1="14" x2="88" y2="14" />  {/* E  */}
-        {/* @ts-ignore */}<line x1="76" y1="14" x2="86" y2="24" />  {/* SE */}
-        {/* @ts-ignore */}<line x1="76" y1="14" x2="76" y2="26" />  {/* S  */}
-        {/* @ts-ignore */}<line x1="76" y1="14" x2="66" y2="24" />  {/* SW */}
-        {/* @ts-ignore */}<line x1="76" y1="14" x2="64" y2="14" />  {/* W  */}
-        {/* @ts-ignore */}<line x1="76" y1="14" x2="66" y2="4"  />  {/* NW */}
+      <g opacity="0.14" stroke="#00C8FF" strokeWidth="2" strokeLinecap="round">
+        {/* @ts-ignore */}<line x1="74" y1="8" x2="74" y2="-4" />  {/* N  — clipped at canvas top */}
+        {/* @ts-ignore */}<line x1="74" y1="8" x2="83" y2="-1" />  {/* NE */}
+        {/* @ts-ignore */}<line x1="74" y1="8" x2="86" y2="8"  />  {/* E  */}
+        {/* @ts-ignore */}<line x1="74" y1="8" x2="83" y2="17" />  {/* SE */}
+        {/* @ts-ignore */}<line x1="74" y1="8" x2="74" y2="20" />  {/* S  */}
+        {/* @ts-ignore */}<line x1="74" y1="8" x2="65" y2="17" />  {/* SW */}
+        {/* @ts-ignore */}<line x1="74" y1="8" x2="62" y2="8"  />  {/* W  */}
+        {/* @ts-ignore */}<line x1="74" y1="8" x2="65" y2="-1" />  {/* NW */}
       </g>
 
       {/* ── A letter (drawn FIRST so L sits in front) ────────────── */}
-      {/* Bold open triangle; peak above L's top = aspiration > foundation */}
-      {/* strokeWidth 16 gives it the heavy weight visible at 60px    */}
+      {/* Peak pushed to y=8 (was 12), base to y=108 (was 94).       */}
+      {/* Letters now fill 100px of 120px canvas = 83% — vs 68% before */}
       {/* @ts-ignore */}
       <g fill="none" stroke="url(#lb2a)" strokeWidth="16" strokeLinecap="round" strokeLinejoin="round">
         {/* @ts-ignore */}
-        <polyline points="60,94 76,12 92,94" />
+        <polyline points="58,108 74,8 90,108" />
       </g>
 
       {/* ── L letter ─────────────────────────────────────────────── */}
-      {/* Sits in front of A; where they overlap creates natural depth */}
+      {/* Top pushed to y=10 (was 16), base to y=108 (was 94).       */}
       {/* @ts-ignore */}
       <g fill="none" stroke="url(#lb2l)" strokeWidth="16" strokeLinecap="round" strokeLinejoin="miter">
         {/* @ts-ignore */}
-        <polyline points="16,16 16,94 52,94" />
+        <polyline points="14,10 14,108 50,108" />
       </g>
 
       {/* ── Swoosh arc ──────────────────────────────────────────── */}
-      {/* The journey metaphor: starts at L's foot, sweeps right and up */}
-      {/* Filled ribbon (not just stroke) for premium look at all sizes */}
+      {/* Moved down to follow the new base (y=108); still sweeps    */}
+      {/* from L foot across and upward — the journey/path metaphor  */}
       {/* @ts-ignore */}
       <path
-        d="M14,104 C44,90 72,76 104,64 L104,70 C72,82 44,96 14,110 Z"
+        d="M10,114 C40,100 72,86 110,74 L110,81 C72,93 40,107 10,121 Z"
         fill="url(#lb2sw)"
       />
     </svg>
