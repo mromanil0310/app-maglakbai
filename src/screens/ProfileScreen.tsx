@@ -56,7 +56,7 @@ const OUTCOME_META: Record<OutcomeType, { icon: string; label: string; color: st
   interview:       { icon: '🤝', label: 'Interview',       color: '#6366F1', caption: 'You landed an interview — your skills are visible.' },
   offer:           { icon: '🎉', label: 'Job Offer',        color: '#10B981', caption: 'Someone wants to hire you. The path is working.' },
   promotion:       { icon: '📈', label: 'Promotion',        color: '#F59E0B', caption: 'Your growth was recognized. Keep building.' },
-  role_change:     { icon: '🚀', label: 'Role Change',      color: '#8B5CF6', caption: 'New role, new chapter. SkillForge got you here.' },
+  role_change:     { icon: '🚀', label: 'Role Change',      color: '#8B5CF6', caption: 'New role, new chapter. LakbAI got you here.' },
   certification:   { icon: '🏅', label: 'Certification',    color: '#F59E0B', caption: 'Official proof of what you know.' },
   salary_increase: { icon: '💰', label: 'Salary Bump',      color: '#10B981', caption: 'Your skills literally paid off.' },
   portfolio:       { icon: '🔗', label: 'Portfolio Piece',  color: '#7C3AED', caption: 'Your work is public and findable.' },
@@ -339,13 +339,13 @@ export default function ProfileScreen() {
   );
 
   const shareText = [
-    `My SkillForge progress 🚀`,
+    `My LakbAI progress 🚀`,
     ``,
     `Level ${displayLevel} · ${getLevelTitle(displayLevel)}`,
     `⚡ ${user.xp.toLocaleString()} XP   🔥 ${user.streak}-day streak`,
     `🎯 ${completedCount} skills mastered · 📦 ${outputs.length} outputs`,
     ``,
-    `Building real proof of work. Not just watching. #SkillForge`,
+    `Building real proof of work. Not just watching. #LakbAI`,
   ].join('\n');
 
   const copyShareText = () => {
@@ -379,12 +379,12 @@ export default function ProfileScreen() {
   };
 
   const shareOnLinkedIn = () => {
-    const url = `https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent('https://skillforge.app')}&title=${encodeURIComponent('My SkillForge Progress')}&summary=${encodeURIComponent(shareText)}`;
+    const url = `https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent('https://lakbai.app')}&title=${encodeURIComponent('My LakbAI Progress')}&summary=${encodeURIComponent(shareText)}`;
     openShareURL(url);
   };
 
   const shareOnFacebook = () => {
-    const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent('https://skillforge.app')}&quote=${encodeURIComponent(shareText)}`;
+    const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent('https://lakbai.app')}&quote=${encodeURIComponent(shareText)}`;
     openShareURL(url);
   };
 
@@ -868,7 +868,7 @@ export default function ProfileScreen() {
                   </View>
                 </View>
                 <Text style={styles.paceSectionSub}>
-                  Tell SkillForge how you're feeling. Your coaching adapts to match.
+                  Tell LakbAI how you're feeling. Your coaching adapts to match.
                 </Text>
                 <View style={styles.paceCards}>
                   {([
@@ -1118,7 +1118,7 @@ export default function ProfileScreen() {
               <Text style={styles.outcomeEmptyIcon}>🏆</Text>
               <Text style={styles.outcomeEmptyTitle}>Track your real-world wins</Text>
               <Text style={styles.outcomeEmptyBody}>
-                Got an interview? Landed an offer? Earned a cert? Log it here — this is the proof that SkillForge is working.
+                Got an interview? Landed an offer? Earned a cert? Log it here — this is the proof that LakbAI is working.
               </Text>
               <TouchableOpacity
                 style={styles.outcomeEmptyCTA}
@@ -1481,7 +1481,7 @@ export default function ProfileScreen() {
             <View style={styles.outcomeSheet}>
               <View style={styles.pickerHandle} />
               <Text style={styles.outcomeSheetTitle}>Log a Career Win 🏆</Text>
-              <Text style={styles.outcomeSheetSub}>Self-report real outcomes. This is the proof SkillForge worked.</Text>
+              <Text style={styles.outcomeSheetSub}>Self-report real outcomes. This is the proof LakbAI worked.</Text>
 
               {/* Outcome type grid */}
               <View style={styles.outcomeTypeGrid}>

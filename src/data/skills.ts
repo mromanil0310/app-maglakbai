@@ -1,4 +1,4 @@
-// SkillForge skill node catalog — pure static data extracted from appStore.ts (ARCH-002).
+// LakbAI skill node catalog — pure static data extracted from appStore.ts (ARCH-002).
 import type { Skill } from '../types';
 
 export const ALL_SKILLS: Skill[] = [

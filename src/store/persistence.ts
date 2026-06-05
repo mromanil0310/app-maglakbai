@@ -1,5 +1,5 @@
 // ─── Persistence ────────────────────────────────────────────────────────────────
-// localStorage persistence for the SkillForge store, extracted from appStore.ts
+// localStorage persistence for the LakbAI store, extracted from appStore.ts
 // (ARCH-002) and made schema-versioned (ARCH-003).
 //
 // On disk the payload is a versioned envelope: `{ v: SCHEMA_VERSION, data: {...} }`.

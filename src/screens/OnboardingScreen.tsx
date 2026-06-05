@@ -301,9 +301,9 @@ function WelcomeStep({
       </Animated.View>
 
       {/* Brand */}
-      <Text style={styles.brandName}>SkillForge</Text>
+      <Text style={styles.brandName}>LakbAI</Text>
       <Text style={styles.brandTagline}>
-        Level up through proof,{'\n'}not promises.
+        Navigate Your Future.{'\n'}Isulong Ang Pangarap.
       </Text>
       <Text style={styles.forEveryoneLabel}>
         Any skill. Any field. Any level.
@@ -651,7 +651,7 @@ function ExperienceLevelStep({
         Where are you starting from{name ? `, ${name.split(' ')[0]}` : ''}?
       </Text>
       <Text style={styles.stepSub}>
-        SkillForge adapts your roadmap to your level. No wasted steps.
+        LakbAI adapts your roadmap to your level. No wasted steps.
       </Text>
 
       <View style={styles.expCards}>

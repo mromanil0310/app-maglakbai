@@ -262,7 +262,7 @@ export default function MilestoneScreen() {
 
   const pathName = path?.name ?? 'Custom';
   const generatedPost = skill && user
-    ? `⚡ Milestone Unlocked: ${skill.name}\n\nCompleted ${skill.name} on my ${pathName} evolution path.\n\n${skill.description}\n\nCurrent Evolution: ${pathName} Path\nStreak: ${user.streak} days 🔥\n\n#${pathName.replace(/\s/g, '')} #SkillForge #CareerGrowth #TechEvolution`
+    ? `⚡ Milestone Unlocked: ${skill.name}\n\nCompleted ${skill.name} on my ${pathName} evolution path.\n\n${skill.description}\n\nCurrent Evolution: ${pathName} Path\nStreak: ${user.streak} days 🔥\n\n#${pathName.replace(/\s/g, '')} #LakbAI #CareerGrowth #TechEvolution`
     : '';
 
   const handleShare = async () => {

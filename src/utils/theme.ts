@@ -297,7 +297,7 @@ export const Shadow = {
   },
 };
 
-// Level titles matching SkillForge PRD
+// Level titles matching LakbAI PRD
 export const LEVEL_TITLES: Record<number, string> = {
   1: 'Learner',
   2: 'Builder',

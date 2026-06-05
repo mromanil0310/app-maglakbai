@@ -12,7 +12,7 @@ const SECTIONS: Section[] = [
   {
     heading: 'The short version',
     body:
-      'SkillForge is a pilot. Your progress — your outputs, XP, skills, and posts — is saved on this device. If you choose to use Cloud Backup (Settings → Cloud Backup), your email address and progress are also stored securely with Supabase, our cloud provider. We never share your data with third parties, and nothing you log is visible to other users.',
+      'LakbAI is a pilot. Your progress — your outputs, XP, skills, and posts — is saved on this device. If you choose to use Cloud Backup (Settings → Cloud Backup), your email address and progress are also stored securely with Supabase, our cloud provider. We never share your data with third parties, and nothing you log is visible to other users.',
   },
   {
     heading: 'Where your data lives',
@@ -42,7 +42,7 @@ const SECTIONS: Section[] = [
   {
     heading: 'Children',
     body:
-      'SkillForge is intended for users aged 16 and older. It is not directed at children.',
+      'LakbAI is intended for users aged 16 and older. It is not directed at children.',
   },
   {
     heading: 'Changes & contact',

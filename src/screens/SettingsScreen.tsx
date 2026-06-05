@@ -58,7 +58,7 @@ function importProgress(onResult: (ok: boolean, msg: string) => void): void {
           const text = reader.result as string;
           const parsed = JSON.parse(text);
           if (!parsed || typeof parsed !== 'object' || !('user' in parsed || 'hasOnboarded' in parsed)) {
-            onResult(false, 'That file is not a SkillForge backup.');
+            onResult(false, 'That file is not a LakbAI backup.');
             return;
           }
           localStorage.setItem(STORAGE_KEY, text);

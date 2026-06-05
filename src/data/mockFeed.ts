@@ -1,4 +1,4 @@
-// SkillForge community feed SEED/PREVIEW data (not live) — extracted from appStore.ts (ARCH-002).
+// LakbAI community feed SEED/PREVIEW data (not live) — extracted from appStore.ts (ARCH-002).
 import type { FeedPost } from '../types';
 
 export const MOCK_FEED: FeedPost[] = [
@@ -624,7 +624,7 @@ export const MOCK_FEED: FeedPost[] = [
     timestamp: '2026-04-29T16:00:00Z',
   },
 
-  // ── Career Win seed posts — social proof of SkillForge outcomes ──────────
+  // ── Career Win seed posts — social proof of LakbAI outcomes ──────────
   {
     id: 'fp-win-001',
     userId: 'kenji_ml_sf',
@@ -659,7 +659,7 @@ export const MOCK_FEED: FeedPost[] = [
     pathColor: '#2563EB',
     type: 'career_win' as const,
     outcomeType: 'promotion' as const,
-    content: '🚀 Got promoted: Promoted to Senior Frontend Engineer at Shopify. 6 months of consistent logging on SkillForge. My manager literally cited my React architecture project as the reason I was ready for the promotion. Keep building in public.',
+    content: '🚀 Got promoted: Promoted to Senior Frontend Engineer at Shopify. 6 months of consistent logging on LakbAI. My manager literally cited my React architecture project as the reason I was ready for the promotion. Keep building in public.',
     xpGained: 400,
     reactions: { '🚀': 72, '🏆': 53, '🔥': 44, '💰': 29 },
     userReactions: [],

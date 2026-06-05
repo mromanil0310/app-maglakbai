@@ -1,7 +1,7 @@
 {
-  "name": "SkillForge",
-  "short_name": "SkillForge",
-  "description": "Proof-based professional growth tracking. Build it, log it, level up.",
+  "name": "LakbAI",
+  "short_name": "LakbAI",
+  "description": "Navigate your career journey with proof. Any skill. Any field. Any level.",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",

@@ -1268,7 +1268,7 @@ export default function DashboardScreen() {
           <Animated.View style={[styles.welcomeCard, { opacity: welcomeAnim, transform: [{ scale: welcomeScaleAnim }] }]}>
             <View style={styles.welcomeGlow} />
             <Text style={styles.welcomeEmoji}>⚡</Text>
-            <Text style={styles.welcomeTitle}>Welcome to SkillForge!</Text>
+            <Text style={styles.welcomeTitle}>Welcome to LakbAI!</Text>
             <Text style={styles.welcomeSub}>
               Your proof-based journey starts now.{'\n'}Every output you log builds your legacy.
             </Text>
