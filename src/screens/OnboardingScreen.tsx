@@ -394,10 +394,20 @@ function LakbAIIcon({ size = 120 }: { size?: number }) {
 // Reading order (5 elements only):
 //   Icon → Brand → Tagline (2-line bilingual) → Value prop → CTA
 //
-// Removed from v1: social proof strip, outcome chips, philosophy line.
-// Reason: every added element costs 0.3s of processing. At 5 elements
-// the screen reads in 2.1 seconds; at 9 elements it was 4.5 seconds.
-// The removed elements appear inside the app where context makes them land.
+// Brand positioning (v3):
+//   LakbAI is NOT a learning app. NOT an AI app.
+//   It is the platform where people build VISIBLE PROOF of their growth
+//   through real outputs, earned achievements, and community recognition.
+//   Roadmaps, AI, and market signals are supporting features — not the story.
+//
+// Core identity delivered in 4 lines:
+//   Navigate Your Future.           ← where you're headed (aspiration)
+//   Isulong Ang Pangarap.           ← the heart (Filipino soul)
+//   Stop collecting certificates.   ← the problem (what NOT to do)
+//   Start building proof.           ← the solution (what LakbAI is)
+//
+// "Start building proof." is the line that makes people immediately
+// understand what LakbAI could become. It earns its own visual weight.
 function WelcomeStep({
   logoScale,
   logoOpacity,
@@ -414,7 +424,7 @@ function WelcomeStep({
       contentContainerStyle={styles.stepContainer}
       showsVerticalScrollIndicator={false}
     >
-      {/* 1 — Signature icon (dominant, large) */}
+      {/* 1 — Signature icon */}
       <Animated.View
         style={[
           styles.logoWrapper,
@@ -427,32 +437,33 @@ function WelcomeStep({
       {/* 2 — Brand name */}
       <Text style={styles.brandName}>LakbAI</Text>
 
-      {/* 3 — Tagline: two-line bilingual with intentional size contrast */}
-      {/* English primary (bold, large) — Filipino secondary (italic, smaller) */}
-      {/* The size gap signals hierarchy without needing extra decoration   */}
+      {/* 3 — Bilingual tagline: aspiration layer */}
       <Text style={styles.brandTaglinePrimary}>Navigate Your Future.</Text>
       <Text style={styles.brandTaglineSub}>Isulong Ang Pangarap.</Text>
 
-      {/* 4 — Value proposition (one line — answers "what does this do?") */}
-      <Text style={styles.valueProp}>
-        AI-guided roadmaps. Build real skills.{'\n'}Prove you're ready.
-      </Text>
+      {/* 4 — Core identity: the contrast statement that defines LakbAI */}
+      {/* Line 1: the old behaviour being left behind (quieter, smaller) */}
+      {/* Line 2: the new identity (bold, primary colour — owns the screen) */}
+      {/* Together they read as a manifesto, not a feature description.   */}
+      {/* AI, roadmaps, signals are NOT mentioned here — they're inside.  */}
+      <View style={styles.manifesto}>
+        <Text style={styles.manifestoOld}>Stop collecting certificates.</Text>
+        <Text style={styles.manifestoNew}>Start building proof.</Text>
+      </View>
 
-      {/* Retained per brand requirement — positioned here as scope qualifier */}
+      {/* 5 — Scope qualifier (retained per brand requirement) */}
       <Text style={styles.forEveryoneLabel}>
         Any skill. Any field. Any level.
       </Text>
 
-      {/* Vertical spacer — breathing room before CTA */}
-      <View style={{ height: 32 }} />
-
-      {/* 5 — Primary CTA */}
+      {/* 6 — CTA: "Start Building" mirrors the identity directly */}
+      <View style={{ height: 36 }} />
       <TouchableOpacity
         style={styles.primaryBtn}
         onPress={onNext}
         activeOpacity={0.85}
         accessibilityRole="button"
-        accessibilityLabel="Start building your future with LakbAI"
+        accessibilityLabel="Start building proof of your growth with LakbAI"
       >
         <Text style={styles.primaryBtnText}>Start Building →</Text>
       </TouchableOpacity>
@@ -1265,23 +1276,43 @@ const makeStyles = (Colors: ColorsType) => StyleSheet.create({
     marginBottom: 20,
   },
 
-  // ── Value proposition ─────────────────────────────────────────────────────
-  // Single purpose: answer "what does this app do?" in under 3 seconds
-  // Kept to 2 short lines; generous lineHeight aids scanning
-  valueProp: {
-    fontSize: 15,
-    color: Colors.textSub,
+  // ── Core identity manifesto ───────────────────────────────────────────────
+  // Two-line contrast statement — the heart of LakbAI's positioning.
+  // This replaces any "AI/learning" value prop. LakbAI is not a learning app.
+  // It is the place where growth becomes VISIBLE through proof.
+  //
+  // Line 1 (manifestoOld): the behaviour being left behind — quieter.
+  //   • Smaller (17px), textMuted weight, normal weight
+  //   • Reads fast, sets up the contrast
+  // Line 2 (manifestoNew): the new identity — owns the visual space.
+  //   • Larger (26px), bold, primaryLight colour
+  //   • The line users remember after closing the app
+  manifesto: {
+    alignItems: 'center' as const,
+    marginBottom: 20,
+    gap: 6,
+  },
+  manifestoOld: {
+    fontSize: 17,
+    fontWeight: '400' as const,
+    color: Colors.textMuted,
     textAlign: 'center',
-    lineHeight: 24,
-    marginBottom: 14,
-    maxWidth: 290,
+    letterSpacing: 0.1,
+  },
+  manifestoNew: {
+    fontSize: 26,
+    fontWeight: '800' as const,
+    color: Colors.primaryLight,
+    textAlign: 'center',
+    letterSpacing: 0.2,
+    lineHeight: 32,
   },
 
   // ── Scope line (retained) ─────────────────────────────────────────────────
   forEveryoneLabel: {
     fontSize: 11,
-    color: Colors.primary,
-    fontWeight: '700' as const,
+    color: Colors.textSub,
+    fontWeight: '600' as const,
     letterSpacing: 1.8,
     textAlign: 'center',
     textTransform: 'uppercase' as const,
