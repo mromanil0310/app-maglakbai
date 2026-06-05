@@ -311,12 +311,19 @@ function LakbAIIcon({ size = 120 }: { size?: number }) {
           {/* @ts-ignore */}<stop offset="100%" stopColor="#1E3A8A" />
         </linearGradient>
 
-        {/* Swoosh: teal → deep blue (left to right) */}
+        {/* Arrow stroke gradient (teal → deep blue, left to right) */}
         {/* @ts-ignore */}
         <linearGradient id="lb2sw" x1="0%" y1="0%" x2="100%" y2="0%">
           {/* @ts-ignore */}<stop offset="0%" stopColor="#06B6D4" />
           {/* @ts-ignore */}<stop offset="100%" stopColor="#1D4ED8" />
         </linearGradient>
+
+        {/* Arrowhead marker — auto-rotates to match the curve tangent at endpoint */}
+        {/* @ts-ignore */}
+        <marker id="lb2arr" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+          {/* @ts-ignore */}
+          <polygon points="0,0 10,4 0,8" fill="#1D4ED8" />
+        </marker>
 
         {/* L letter: pure white at top to off-white at base for depth */}
         {/* @ts-ignore */}
@@ -362,13 +369,19 @@ function LakbAIIcon({ size = 120 }: { size?: number }) {
         <polyline points="14,10 14,108 50,108" />
       </g>
 
-      {/* ── Swoosh arc ──────────────────────────────────────────── */}
-      {/* Moved down to follow the new base (y=108); still sweeps    */}
-      {/* from L foot across and upward — the journey/path metaphor  */}
+      {/* ── Curved arrow ──────────────────────────────────────── */}
+      {/* Replaces filled ribbon — now a directed arrow sweeping    */}
+      {/* from lower-left (L's side) diagonally up to upper-right  */}
+      {/* (A's peak area). Reads as: "navigate forward and upward." */}
+      {/* markerEnd auto-rotates the arrowhead to the curve tangent */}
       {/* @ts-ignore */}
       <path
-        d="M10,114 C40,100 72,86 110,74 L110,81 C72,93 40,107 10,121 Z"
-        fill="url(#lb2sw)"
+        d="M10,85 C38,72 70,57 106,44"
+        fill="none"
+        stroke="url(#lb2sw)"
+        strokeWidth="5"
+        strokeLinecap="round"
+        markerEnd="url(#lb2arr)"
       />
     </svg>
   );
