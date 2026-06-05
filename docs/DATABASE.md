@@ -399,3 +399,41 @@ create index milestones_shared_idx on public.milestones(shared_at desc) where sh
 ## Realtime
 
 Enable Realtime on the `feed_posts` and `reactions` tables in the Supabase dashboard so the feed updates live without polling.
+
+---
+
+## Market Demand (Community Signal Layer)
+
+Added for the market demand feature. One signal per user per skill, enforced by unique constraint. Counts are aggregated client-side in `fetchMarketDemand()` in `src/lib/db.ts`.
+
+### `market_signals`
+
+```sql
+create table public.market_signals (
+  id           uuid primary key default gen_random_uuid(),
+  user_id      uuid not null references public.profiles(id) on delete cascade,
+  skill_id     text not null,
+  path_id      text not null,
+  submitted_at timestamptz not null default now(),
+  unique(user_id, skill_id)
+);
+
+create index market_signals_path_idx on public.market_signals(path_id);
+create index market_signals_skill_idx on public.market_signals(skill_id);
+```
+
+**RLS:**
+```sql
+alter table public.market_signals enable row level security;
+
+create policy "Market signals are public" on public.market_signals
+  for select using (true);
+
+create policy "Users can insert own signals" on public.market_signals
+  for insert with check (auth.uid() = user_id);
+
+create policy "Users can delete own signals" on public.market_signals
+  for delete using (auth.uid() = user_id);
+```
+
+> Run this migration in the Supabase SQL editor for project `wovceouygyobczkkeyxy`.

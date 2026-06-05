@@ -8,7 +8,8 @@ import { sessionStarted, track } from './src/utils/analytics';
 import { ThemeContext } from './src/utils/theme';
 import { useAppStore } from './src/store/appStore';
 
-const IS_DEV = typeof import.meta !== 'undefined' && (import.meta as any).env?.DEV;
+declare const __DEV__: boolean;
+const IS_DEV = typeof __DEV__ !== 'undefined' && __DEV__;
 
 interface ErrorState { error: Error | null; showDetails: boolean }
 class ErrorBoundary extends React.Component<{ children: React.ReactNode }, ErrorState> {
@@ -48,6 +49,9 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, Error
 export default function App() {
   const sessionStart = useRef(Date.now());
   const colorScheme = useAppStore((s) => s.colorScheme);
+  // UX-028: only show the consent banner after onboarding is complete so it
+  // never overlaps the "Begin Your Journey" CTA on the welcome screen.
+  const hasOnboarded = useAppStore((s) => s.hasOnboarded);
 
   useEffect(() => {
     sessionStarted();
@@ -74,7 +78,7 @@ export default function App() {
         <ErrorBoundary>
           <ToastProvider>
             <AppNavigator />
-            <ConsentBanner />
+            {hasOnboarded && <ConsentBanner />}
           </ToastProvider>
         </ErrorBoundary>
       </SafeAreaProvider>

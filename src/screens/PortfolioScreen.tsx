@@ -330,7 +330,7 @@ export default function PortfolioScreen() {
                 {skillsDemonstrated}
               </Text>
               <Text style={styles.identityStatLabel}>
-                {skillsDemonstrated === 1 ? 'skill' : 'skills'}
+                {skillsDemonstrated === 1 ? 'skill started' : 'skills started'}
               </Text>
             </View>
           </View>

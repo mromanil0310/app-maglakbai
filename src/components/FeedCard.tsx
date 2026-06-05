@@ -412,8 +412,8 @@ const makeStyles = (Colors: ColorsType) => StyleSheet.create({
     borderRadius: Radius.lg,
     padding: 14,
     marginBottom: Spacing.sm,
-    // @ts-ignore - web gradient for milestone
-    background: 'linear-gradient(135deg, rgba(124,58,237,0.18), rgba(79,70,229,0.10))',
+    // @ts-ignore - web-only gradient
+    backgroundImage: 'linear-gradient(135deg, rgba(124,58,237,0.18), rgba(79,70,229,0.10))',
     backgroundColor: Colors.primaryDim,
     borderWidth: 1,
     borderColor: Colors.primary + '35',
@@ -450,8 +450,8 @@ const makeStyles = (Colors: ColorsType) => StyleSheet.create({
     borderRadius: Radius.lg,
     padding: 14,
     marginBottom: Spacing.sm,
-    // @ts-ignore - web gradient for win
-    background: 'linear-gradient(135deg, rgba(245,158,11,0.14), rgba(251,191,36,0.07))',
+    // @ts-ignore - web-only gradient
+    backgroundImage: 'linear-gradient(135deg, rgba(245,158,11,0.14), rgba(251,191,36,0.07))',
     backgroundColor: 'rgba(245,158,11,0.08)',
     borderWidth: 1,
     borderColor: 'rgba(245,158,11,0.35)',

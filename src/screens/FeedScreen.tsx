@@ -259,7 +259,7 @@ export default function FeedScreen() {
               Inline style is intentional: RN-web strips `background` gradients
               from StyleSheet.create(), but honours them as inline style props. */}
           <View
-            style={[styles.filterFade, { background: `linear-gradient(to right, transparent, ${Colors.bg})` } as any]}
+            style={[styles.filterFade, { backgroundImage: `linear-gradient(to right, transparent, ${Colors.bg})` } as any]}
             pointerEvents="none"
           />
         </View>
@@ -300,7 +300,7 @@ export default function FeedScreen() {
         {/* Weekly Leaderboard */}
         <View style={styles.leaderboard}>
           <View style={styles.leaderboardTitleRow}>
-            <Text style={styles.leaderboardTitle}>🏅 WEEKLY XP LEADERBOARD</Text>
+            <Text style={styles.leaderboardTitle}>🏅 WEEKLY XP</Text>
             {/* ISSUE-007: disclose that non-user entries are sample benchmarks */}
             <Text style={styles.leaderboardSampleNote}>sample benchmarks</Text>
           </View>

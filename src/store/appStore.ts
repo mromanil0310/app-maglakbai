@@ -22,6 +22,7 @@ import {
   OutcomeType,
   ExperienceLevel,
   PaceMode,
+  MarketDemand,
 } from '../types';
 import { getLevelFromXP, Colors } from '../utils/theme';
 import { track, identify } from '../utils/analytics';
@@ -84,6 +85,8 @@ import { CAREER_PATHS } from '../data/careerPaths';
 import { ALL_SKILLS } from '../data/skills';
 import { ALL_ACHIEVEMENTS } from '../data/achievements';
 import { MOCK_FEED } from '../data/mockFeed';
+import { MARKET_DEMAND_MAP } from '../data/marketDemand';
+import { fetchMarketDemand, submitMarketSignal as dbSubmitSignal } from '../lib/db';
 
 // Re-exported so existing `from '../store/appStore'` imports keep working.
 export { CAREER_PATHS, ALL_SKILLS, ALL_ACHIEVEMENTS };
@@ -125,6 +128,8 @@ export interface AppState {
   savedPostIds: string[]; // post IDs bookmarked by the user
   colorScheme: 'dark' | 'light'; // persisted theme preference
   careerOutcomes: CareerOutcome[]; // self-reported real-world career wins
+  marketDemand: Record<string, MarketDemand>; // demand signals keyed by skillId — loaded on first EvolveScreen mount
+  submittedSignalSkillIds: string[]; // skillIds the user has already contributed a signal for (no re-prompting)
 
   completeOnboarding: (name: string, pathId: CareerPathId | string, email?: string, experienceLevel?: ExperienceLevel) => void;
   logOutput: (payload: LogOutputPayload) => LogOutputResult;
@@ -174,6 +179,9 @@ export interface AppState {
   setSupabaseSession: (userId: string | null, email: string | null) => void;
   setSupabaseSyncing: (syncing: boolean) => void;
   syncFromSupabase: () => Promise<void>; // pull remote → merge into local state
+  // Market demand
+  loadMarketDemand: (pathId: string) => Promise<void>; // fetch + merge demand for a path
+  submitMarketSignal: (skillId: string, pathId: string) => Promise<void>; // contribute one community signal
 }
 
 const saved = loadFromStorage();
@@ -236,12 +244,47 @@ export const useAppStore = create<AppState>((set, get) => ({
   savedPostIds: saved?.savedPostIds ?? [],
   colorScheme: saved?.colorScheme ?? 'dark',
   careerOutcomes: saved?.careerOutcomes ?? [],
+  marketDemand: { ...MARKET_DEMAND_MAP }, // seeded from curated data; community signals merged on load
+  submittedSignalSkillIds: saved?.submittedSignalSkillIds ?? [],
 
   ...createCoreSlice(set, get),
   ...createRoadmapSlice(set, get),
   ...createFeedSlice(set, get),
   ...createProfileSlice(set, get),
   ...createAuthSlice(set, get),
+
+  // ── Market demand actions ──────────────────────────────────────────────────
+
+  loadMarketDemand: async (pathId: string) => {
+    const merged = await fetchMarketDemand(pathId);
+    set((s) => ({ marketDemand: { ...s.marketDemand, ...merged } }));
+  },
+
+  submitMarketSignal: async (skillId: string, pathId: string) => {
+    const { supabaseUserId, submittedSignalSkillIds } = get();
+    if (submittedSignalSkillIds.includes(skillId)) return; // already contributed
+    const signal = { skillId, pathId, submittedAt: new Date().toISOString() };
+    // Optimistically bump signal count locally
+    set((s) => {
+      const existing = s.marketDemand[skillId];
+      if (!existing) return {};
+      return {
+        marketDemand: {
+          ...s.marketDemand,
+          [skillId]: {
+            ...existing,
+            signalCount: existing.signalCount + 1,
+            source: 'mixed' as const,
+          },
+        },
+        submittedSignalSkillIds: [...s.submittedSignalSkillIds, skillId],
+      };
+    });
+    // Persist to Supabase (fire-and-forget)
+    if (supabaseUserId) {
+      await dbSubmitSignal(supabaseUserId, signal);
+    }
+  },
 }));
 
 // Persist the store to localStorage on every change (see src/store/persistence.ts).

@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, Modal, ScrollView, TouchableOpacity } from 'react-native';
 import { useThemeColors, ColorsType, Spacing, Radius, FontSize } from '../utils/theme';
 
-export const PRIVACY_POLICY_EFFECTIVE = 'June 1, 2026';
+export const PRIVACY_POLICY_EFFECTIVE = 'June 3, 2026';
 
 export const PRIVACY_CONTACT = 'marlo.romanillos@gmail.com';
 
@@ -12,12 +12,12 @@ const SECTIONS: Section[] = [
   {
     heading: 'The short version',
     body:
-      'SkillForge is a pilot. Your progress — your name, outputs, XP, skills, and posts — is stored only on this device, in your browser. We do not have a server, we cannot see your data, and nothing you log is shared with other people.',
+      'SkillForge is a pilot. Your progress — your outputs, XP, skills, and posts — is saved on this device. If you choose to use Cloud Backup (Settings → Cloud Backup), your email address and progress are also stored securely with Supabase, our cloud provider. We never share your data with third parties, and nothing you log is visible to other users.',
   },
   {
     heading: 'Where your data lives',
     body:
-      'Everything you create is saved in your browser’s local storage on this device. It is not uploaded anywhere. If you clear your browser data, switch devices or browsers, or use private/incognito mode, your progress may be lost. You can back it up anytime from Settings → Export Data.',
+      'By default, everything is saved in your browser\'s local storage on this device only. If you sign in via Cloud Backup, your progress is also synced to Supabase (supabase.com), a secure cloud database. This allows you to access your progress from any device. Without Cloud Backup, clearing your browser data or switching devices may result in lost progress — use Settings → Export Data as a local backup.',
   },
   {
     heading: 'Analytics (optional, off by default)',
@@ -30,14 +30,14 @@ const SECTIONS: Section[] = [
       'We do not sell your data. We do not show third-party ads. We do not send your personal information to anyone. We do not track you across other websites.',
   },
   {
-    heading: 'Your email',
+    heading: 'Your email (Cloud Backup)',
     body:
-      'If you choose to add an email in onboarding or Settings, it is stored only on your device for now. It is reserved for future account recovery and is never sent to our analytics.',
+      'If you use Cloud Backup, your email address is stored with Supabase solely to send you a sign-in link. It is never used for marketing, never sold, and never shared with any third party. Supabase is a SOC 2 compliant cloud provider. You can sign out of Cloud Backup at any time from Settings.',
   },
   {
     heading: 'Deleting your data',
     body:
-      'You are always in control. Use Settings → Reset All Progress to permanently erase everything from this device. Turning analytics off also clears your anonymous analytics ID.',
+      'You are always in control. Use Settings → Reset All Progress to permanently erase everything from this device. If you signed in via Cloud Backup, contact us at ' + PRIVACY_CONTACT + ' to request deletion of your cloud data. Turning analytics off also clears your anonymous analytics ID.',
   },
   {
     heading: 'Children',

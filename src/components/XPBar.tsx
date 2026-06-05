@@ -135,14 +135,12 @@ const makeStyles = (Colors: ColorsType) => StyleSheet.create({
     borderRadius: 3,
     overflow: 'hidden',
     position: 'relative',
-    // @ts-ignore - web only
-    background: Colors.border,
   },
   barFill: {
     height: '100%',
     borderRadius: 3,
-    // @ts-ignore - web only: gradient fill
-    background: 'linear-gradient(90deg, #7C3AED, #A855F7, #818CF8)',
+    // @ts-ignore - web-only gradient
+    backgroundImage: 'linear-gradient(90deg, #7C3AED, #A855F7, #818CF8)',
     backgroundColor: Colors.primaryLight,
     // @ts-ignore - web only
     boxShadow: '0 0 8px rgba(168,85,247,0.5)',

@@ -41,6 +41,7 @@ function getPersistable(state: AppState) {
     savedPostIds: state.savedPostIds,
     colorScheme: state.colorScheme,
     careerOutcomes: state.careerOutcomes,
+    submittedSignalSkillIds: state.submittedSignalSkillIds,
   };
 }
 
@@ -122,7 +123,8 @@ export function attachPersistence(store: StoreApi<AppState>): void {
       last.userFeedPosts === p.userFeedPosts &&
       last.savedPostIds === p.savedPostIds &&
       last.colorScheme === p.colorScheme &&
-      last.careerOutcomes === p.careerOutcomes
+      last.careerOutcomes === p.careerOutcomes &&
+      last.submittedSignalSkillIds === p.submittedSignalSkillIds
     ) return;
     last = p;
     saveToStorage(p);

@@ -264,8 +264,8 @@ export default function CareerNode({
                   styles.progressFill,
                   {
                     width: `${progressPct}%` as any,
-                    // @ts-ignore - web gradient
-                    background: `linear-gradient(90deg, ${pathColor.primary}, ${pathColor.text})`,
+                    // @ts-ignore - web-only gradient
+                    backgroundImage: `linear-gradient(90deg, ${pathColor.primary}, ${pathColor.text})`,
                     backgroundColor: pathColor.primary,
                   },
                 ]}
@@ -393,8 +393,6 @@ const makeStyles = (Colors: ColorsType) => StyleSheet.create({
     borderRadius: 2,
     overflow: 'hidden',
     marginTop: 4,
-    // @ts-ignore
-    background: Colors.border,
   },
   progressFill: {
     height: '100%',

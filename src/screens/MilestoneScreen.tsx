@@ -11,7 +11,8 @@ import {
 } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { useAppStore, ALL_SKILLS, CAREER_PATHS } from '../store/appStore';
-import { useThemeColors, ColorsType, Colors, Spacing, Radius, FontSize, PathColors, RarityColors } from '../utils/theme';
+import { useThemeColors, ColorsType, Colors, Spacing, Radius, FontSize, PathColors, getPathColor, ThemeContext, RarityColors } from '../utils/theme';
+import { useContext } from 'react';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { track } from '../utils/analytics';
 import { CustomPath, CustomSkill } from '../types';
@@ -124,6 +125,7 @@ const PARTICLE_POSITIONS = [
 
 export default function MilestoneScreen() {
   const Colors = useThemeColors();
+  const colorScheme = useContext(ThemeContext);
   const styles = React.useMemo(() => makeStyles(Colors), [Colors]);
   const navigation = useNavigation<any>();
   const route = useRoute<MilestoneRouteProps>();
@@ -186,16 +188,16 @@ export default function MilestoneScreen() {
 
   // ── Path color: built-in lookup, then derive from custom path color ───────
   const pathColor = user
-    ? (PathColors[user.careerPathId] ?? (
-        resolvedCustomPath
+    ? (PathColors[user.careerPathId]
+        ? getPathColor(user.careerPathId, colorScheme)
+        : resolvedCustomPath
           ? {
               primary: resolvedCustomPath.color,
               dim: resolvedCustomPath.color + '20',
               text: resolvedCustomPath.color,
-              border: resolvedCustomPath.color + '40',
+              border: resolvedCustomPath.color + (colorScheme === 'light' ? '35' : '40'),
             }
-          : null
-      ))
+          : null)
     : null;
 
   const rarity = skill ? RarityColors[builtInSkill?.rarity ?? 'common'] : RarityColors.common;

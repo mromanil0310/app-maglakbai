@@ -15,7 +15,11 @@ const env: Record<string, string | undefined> =
 const supabaseUrl  = env.VITE_SUPABASE_URL;
 const supabaseKey  = env.VITE_SUPABASE_ANON_KEY;
 
-export const isSupabaseEnabled = !!(supabaseUrl && supabaseKey);
+// Only enable Supabase in a real browser environment. In Node.js (Vitest), the
+// Realtime client tries to create a WebSocket and crashes on Node < 22 without
+// the 'ws' package — all sync helpers no-op gracefully without this flag.
+const isBrowserEnv = typeof window !== 'undefined';
+export const isSupabaseEnabled = !!(supabaseUrl && supabaseKey) && isBrowserEnv;
 
 // Typed client — exported as `supabase`; screens/slices never import createClient directly.
 export const supabase: SupabaseClient = isSupabaseEnabled

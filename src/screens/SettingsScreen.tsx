@@ -420,7 +420,7 @@ export default function SettingsScreen() {
                     <Text style={styles.rowIcon}>☁️</Text>
                     <View style={{ flex: 1 }}>
                       <Text style={styles.rowLabel}>Back up to cloud</Text>
-                      <Text style={styles.rowSubValue}>Sign in to keep progress safe across devices. No password needed.</Text>
+                      <Text style={styles.rowSubValue}>Sign in to keep your progress safe across devices. Your email is stored securely with Supabase — used only for sign-in, never shared.</Text>
                     </View>
                   </View>
                   <TextInput

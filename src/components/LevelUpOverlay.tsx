@@ -126,8 +126,8 @@ const makeStyles = (Colors: ColorsType) => StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    // @ts-ignore
-    background: 'radial-gradient(ellipse at center, rgba(245,158,11,0.12) 0%, rgba(8,8,16,0.94) 70%)',
+    // @ts-ignore - web-only gradient
+    backgroundImage: 'radial-gradient(ellipse at center, rgba(245,158,11,0.12) 0%, rgba(8,8,16,0.94) 70%)',
     backgroundColor: 'rgba(8,8,16,0.92)',
     zIndex: 9998,
     alignItems: 'center',
@@ -145,8 +145,8 @@ const makeStyles = (Colors: ColorsType) => StyleSheet.create({
     padding: 32,
     alignItems: 'center',
     gap: 8,
-    // @ts-ignore
-    background: 'linear-gradient(160deg, #1A140A, #110D06)',
+    // @ts-ignore - web-only gradient
+    backgroundImage: 'linear-gradient(160deg, #1A140A, #110D06)',
     backgroundColor: '#1A140A',
     borderWidth: 1.5,
     borderColor: 'rgba(245,158,11,0.45)',
@@ -158,8 +158,8 @@ const makeStyles = (Colors: ColorsType) => StyleSheet.create({
     width: 200,
     height: 200,
     borderRadius: 100,
-    // @ts-ignore
-    background: 'radial-gradient(circle, rgba(245,158,11,0.15) 0%, transparent 70%)',
+    // @ts-ignore - web-only gradient
+    backgroundImage: 'radial-gradient(circle, rgba(245,158,11,0.15) 0%, transparent 70%)',
   },
   levelUpBanner: {
     backgroundColor: 'rgba(245,158,11,0.15)',

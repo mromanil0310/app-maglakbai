@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import CelebrationOverlay from '../components/CelebrationOverlay';
+import DemandBadge from '../components/DemandBadge';
 import { useAppStore, CAREER_PATHS, ALL_SKILLS, getDecayStage, DecayStage, getBurnoutSignal, BurnoutSignal } from '../store/appStore';
 import { PaceMode } from '../types';
 import {
@@ -499,6 +500,7 @@ export default function DashboardScreen() {
   const setComebackGoal = useAppStore((s) => s.setComebackGoal);
   const setSelectedSkill = useAppStore((s) => s.setSelectedSkill);
   const setPaceMode = useAppStore((s) => s.setPaceMode);
+  const marketDemand = useAppStore((s) => s.marketDemand);
 
   const [showCelebration, setShowCelebration] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
@@ -955,7 +957,7 @@ export default function DashboardScreen() {
                     </>
                   )}
                   <Text style={styles.skillsDone}>
-                    {focusPath?.completed ?? 0} / {focusPath?.total ?? 0} skills
+                    {focusPath?.completed ?? 0} / {focusPath?.total ?? 0} skills completed
                   </Text>
                 </View>
               </View>
@@ -1104,6 +1106,37 @@ export default function DashboardScreen() {
                 </View>
               </TouchableOpacity>
             )}
+
+            {/* ── Market Demand Gap Strip ── */}
+            {(() => {
+              const pathSkillIds = CAREER_PATHS.find(p => p.id === user?.careerPathId)?.skillIds ?? [];
+              const gapSkills = ALL_SKILLS
+                .filter(s =>
+                  pathSkillIds.includes(s.id) &&
+                  marketDemand[s.id]?.level === 'high' &&
+                  (!userSkills[s.id] || userSkills[s.id].status === 'locked')
+                )
+                .slice(0, 3);
+              if (gapSkills.length === 0) return null;
+              return (
+                <View style={styles.gapStrip}>
+                  <Text style={styles.gapStripTitle}>🔥 High demand — not started yet</Text>
+                  {gapSkills.map(s => (
+                    <TouchableOpacity
+                      key={s.id}
+                      style={styles.gapSkillRow}
+                      onPress={() => navigation.navigate('Map')}
+                      activeOpacity={0.8}
+                    >
+                      <Text style={styles.gapSkillIcon}>{s.icon}</Text>
+                      <Text style={styles.gapSkillName} numberOfLines={1}>{s.name}</Text>
+                      <DemandBadge level="high" compact />
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              );
+            })()}
+
           </ScrollView>
         )}
 
@@ -1430,8 +1463,8 @@ const makeStyles = (Colors: ColorsType) => StyleSheet.create({
     width: '100%',
     marginTop: 4,
     backgroundColor: Colors.primary,
-    // @ts-ignore
-    background: 'linear-gradient(135deg, #7C3AED, #4F46E5)',
+    // @ts-ignore - web-only gradient
+    backgroundImage: 'linear-gradient(135deg, #7C3AED, #4F46E5)',
     // @ts-ignore
     boxShadow: '0 4px 20px rgba(124,58,237,0.45)',
   },
@@ -1861,6 +1894,40 @@ const makeStyles = (Colors: ColorsType) => StyleSheet.create({
     fontSize: FontSize.base,
     fontWeight: '700',
     color: Colors.white,
+  },
+  // ── Market demand gap strip ────────────────────────────────────────────────
+  gapStrip: {
+    marginTop: 12,
+    marginHorizontal: Spacing.md,
+    backgroundColor: 'rgba(239,68,68,0.07)',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(239,68,68,0.18)',
+    padding: 14,
+    gap: 8,
+  },
+  gapStripTitle: {
+    fontSize: FontSize.xs,
+    fontWeight: '700' as const,
+    color: '#FCA5A5',
+    letterSpacing: 0.4,
+    marginBottom: 4,
+  },
+  gapSkillRow: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    gap: 8,
+  },
+  gapSkillIcon: {
+    fontSize: 16,
+    width: 22,
+    textAlign: 'center' as const,
+  },
+  gapSkillName: {
+    flex: 1,
+    fontSize: FontSize.sm,
+    color: Colors.text,
+    fontWeight: '500' as const,
   },
 });
 

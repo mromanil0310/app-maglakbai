@@ -24,6 +24,8 @@ import {
   Radius,
   FontSize,
   PathColors,
+  getPathColor,
+  ThemeContext,
   RarityColors,
   getLevelTitle,
   getLevelBounds,
@@ -31,6 +33,7 @@ import {
   derivePathTagline,
   timeAgo,
 } from '../utils/theme';
+import { useContext } from 'react';
 import XPBar from '../components/XPBar';
 import AchievementBadge from '../components/AchievementBadge';
 import { useToast } from '../components/Toast';
@@ -114,6 +117,7 @@ function getAchievementProgress(
 
 export default function ProfileScreen() {
   const Colors = useThemeColors();
+  const colorScheme = useContext(ThemeContext);
   const styles = React.useMemo(() => makeStyles(Colors), [Colors]);
   const user = useAppStore((s) => s.user);
   const userSkills = useAppStore((s) => s.userSkills);
@@ -275,12 +279,12 @@ export default function ProfileScreen() {
   const builtInPrioritized = CAREER_PATHS.find(p => p.id === resolvedPriorityId);
   const customPrioritizedPath = customPaths.find(p => p.id === resolvedPriorityId);
   const pillColorObj = builtInPrioritized
-    ? PathColors[resolvedPriorityId]
+    ? getPathColor(resolvedPriorityId, colorScheme)
     : {
         primary: customPrioritizedPath?.color ?? Colors.primary,
         dim: (customPrioritizedPath?.color ?? Colors.primary) + '18',
-        text: Colors.primaryLight,
-        border: (customPrioritizedPath?.color ?? Colors.primary) + '40',
+        text: colorScheme === 'light' ? (customPrioritizedPath?.color ?? Colors.primary) : Colors.primaryLight,
+        border: (customPrioritizedPath?.color ?? Colors.primary) + (colorScheme === 'light' ? '35' : '40'),
       };
   const pillTitle = builtInPrioritized?.title
     ?? (customPrioritizedPath?.name ? derivePathTagline(customPrioritizedPath.name) : 'Mastery in Progress');
@@ -294,13 +298,14 @@ export default function ProfileScreen() {
     icon: customCareerPath?.icon ?? '⚡',
   };
   // PathColors only covers built-in paths — fall back gracefully for custom paths
-  const pathColorObj = PathColors[resolvedPriorityId];
-  const pathColor = pathColorObj ?? {
-    primary: customCareerPath?.color ?? Colors.primary,
-    dim: (customCareerPath?.color ?? Colors.primary) + '18',
-    text: Colors.primaryLight,
-    border: (customCareerPath?.color ?? Colors.primary) + '40',
-  };
+  const pathColor = PathColors[resolvedPriorityId]
+    ? getPathColor(resolvedPriorityId, colorScheme)
+    : {
+        primary: customCareerPath?.color ?? Colors.primary,
+        dim: (customCareerPath?.color ?? Colors.primary) + '18',
+        text: colorScheme === 'light' ? (customCareerPath?.color ?? Colors.primary) : Colors.primaryLight,
+        border: (customCareerPath?.color ?? Colors.primary) + (colorScheme === 'light' ? '35' : '40'),
+      };
   const pathSkills = builtInPath
     ? ALL_SKILLS.filter((s) => s.pathId === resolvedPriorityId)
     : (customCareerPath?.skills ?? []);
@@ -638,7 +643,7 @@ export default function ProfileScreen() {
             <Text style={[styles.statValue, { color: Colors.success }]}>
               {totalSkillsDone}
             </Text>
-            <Text style={styles.statLabel}>Skills Done</Text>
+            <Text style={styles.statLabel}>Skills Completed</Text>
           </View>
         </View>
 
@@ -709,8 +714,8 @@ export default function ProfileScreen() {
                   {
                     width: `${evolutionPercent}%` as any,
                     backgroundColor: pathColor.primary,
-                    // @ts-ignore
-                    background: `linear-gradient(90deg, ${pathColor.primary}, ${pathColor.text})`,
+                    // @ts-ignore - web-only gradient
+                    backgroundImage: `linear-gradient(90deg, ${pathColor.primary}, ${pathColor.text})`,
                     // @ts-ignore
                     boxShadow: `0 0 8px ${pathColor.primary}70`,
                   },
@@ -2066,8 +2071,8 @@ const makeStyles = (Colors: ColorsType) => StyleSheet.create({
     borderColor: Colors.border,
     marginBottom: 8,
     alignItems: 'center',
-    // @ts-ignore
-    background: 'linear-gradient(135deg, rgba(124,58,237,0.10), rgba(79,70,229,0.05))',
+    // @ts-ignore - web-only gradient
+    backgroundImage: 'linear-gradient(135deg, rgba(124,58,237,0.10), rgba(79,70,229,0.05))',
   },
   levelCardLeft: {
     flex: 1,

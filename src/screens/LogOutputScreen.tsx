@@ -184,6 +184,9 @@ export default function LogOutputScreen() {
   const selectedSkillId = useAppStore((s) => s.selectedSkillId);
   const setSelectedSkill = useAppStore((s) => s.setSelectedSkill);
   const logOutput = useAppStore((s) => s.logOutput);
+  const submitMarketSignal = useAppStore((s) => s.submitMarketSignal);
+  const submittedSignalSkillIds = useAppStore((s) => s.submittedSignalSkillIds);
+  const marketDemand = useAppStore((s) => s.marketDemand);
   const outputs = useAppStore((s) => s.outputs);
   const customPaths = useAppStore((s) => s.customPaths);
   const addRoadmapItem = useAppStore((s) => s.addRoadmapItem);
@@ -203,6 +206,8 @@ export default function LogOutputScreen() {
   const [levelUpData, setLevelUpData] = useState<{ newLevel: number; xpGained: number } | null>(null);
   const [showRecap, setShowRecap] = useState(false);
   const [recapData, setRecapData] = useState<RecapData | null>(null);
+  const [showSignalPrompt, setShowSignalPrompt] = useState(false);
+  const [pendingSignalSkillId, setPendingSignalSkillId] = useState<string | null>(null);
   const hasSubmitted = useRef(false);
   const formStateRef = useRef({ skillId: '', title: '', description: '', keyTakeaway: '', outputType: 'project' as OutputType });
 
@@ -330,6 +335,33 @@ export default function LogOutputScreen() {
   const showAddToRoadmap = titleTrimmed.length >= 2 &&
     !allOptions.some((o) => o.name.toLowerCase() === titleTrimmed.toLowerCase());
 
+  // After recap: optionally show the signal prompt (once per skill, only if skill has demand data)
+  const maybeShowSignalPrompt = (loggedSkillId: string) => {
+    const hasSignal = submittedSignalSkillIds.includes(loggedSkillId);
+    const hasDemandData = !!marketDemand[loggedSkillId];
+    if (!hasSignal && hasDemandData && loggedSkillId) {
+      setPendingSignalSkillId(loggedSkillId);
+      setShowSignalPrompt(true);
+    } else {
+      navigation.navigate('Home');
+    }
+  };
+
+  const handleSignalYes = async () => {
+    if (!pendingSignalSkillId) return;
+    const pathId = user?.careerPathId ?? '';
+    await submitMarketSignal(pendingSignalSkillId, pathId);
+    setShowSignalPrompt(false);
+    setPendingSignalSkillId(null);
+    navigation.navigate('Home');
+  };
+
+  const handleSignalSkip = () => {
+    setShowSignalPrompt(false);
+    setPendingSignalSkillId(null);
+    navigation.navigate('Home');
+  };
+
   const handleSubmit = () => {
     if (!title.trim() || !description.trim() || submitting) return;
 
@@ -424,7 +456,7 @@ export default function LogOutputScreen() {
         setShowRecap(true);
         setTimeout(() => {
           setShowRecap(false);
-          navigation.navigate('Home');
+          maybeShowSignalPrompt(effectiveSkillId);
         }, 3500);
       } else if (result.leveledUp) {
         // Level-up without skill completion — show the level-up overlay, then go to Map
@@ -447,7 +479,7 @@ export default function LogOutputScreen() {
         setShowRecap(true);
         setTimeout(() => {
           setShowRecap(false);
-          navigation.navigate('Home');
+          maybeShowSignalPrompt(effectiveSkillId);
         }, 3500);
       }
     });
@@ -800,6 +832,32 @@ export default function LogOutputScreen() {
           />
         )}
       </Modal>
+
+      {/* Market Signal Prompt — shown once per skill after recap dismisses */}
+      {showSignalPrompt && (
+        <Modal visible transparent animationType="fade" onRequestClose={handleSignalSkip}>
+          <View style={signalStyles.backdrop}>
+            <View style={signalStyles.card}>
+              <Text style={signalStyles.emoji}>📋</Text>
+              <Text style={signalStyles.title}>Quick question</Text>
+              <Text style={signalStyles.body}>
+                Was this skill listed as a requirement in a job or interview you applied to?
+              </Text>
+              <Text style={signalStyles.sub}>
+                Your answer helps other builders know what's in demand — anonymous & takes 1 second.
+              </Text>
+              <View style={signalStyles.buttons}>
+                <TouchableOpacity style={signalStyles.btnYes} onPress={handleSignalYes}>
+                  <Text style={signalStyles.btnYesText}>Yes, it was 🎯</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={signalStyles.btnSkip} onPress={handleSignalSkip}>
+                  <Text style={signalStyles.btnSkipText}>Skip</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
+      )}
 
       {/* Level-Up Overlay — shown when user levels up from a non-skill-completion output */}
       {showLevelUp && levelUpData && (
@@ -1418,8 +1476,8 @@ const makeStyles = (Colors: ColorsType) => StyleSheet.create({
     paddingVertical: 17,
     alignItems: 'center',
     marginTop: Spacing.lg,
-    // @ts-ignore - web gradient
-    background: 'linear-gradient(135deg, #7C3AED, #4F46E5)',
+    // @ts-ignore - web-only gradient
+    backgroundImage: 'linear-gradient(135deg, #7C3AED, #4F46E5)',
     backgroundColor: Colors.primary,
     // @ts-ignore
     boxShadow: '0 4px 20px rgba(124,58,237,0.45)',
@@ -1437,5 +1495,73 @@ const makeStyles = (Colors: ColorsType) => StyleSheet.create({
     fontWeight: '700',
     color: Colors.white,
     letterSpacing: 0.5,
+  },
+});
+
+// ── Market signal prompt styles ──────────────────────────────────────────────
+const signalStyles = StyleSheet.create({
+  backdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.75)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+  },
+  card: {
+    backgroundColor: Colors.surface,
+    borderRadius: 20,
+    padding: 28,
+    width: '100%',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+  },
+  emoji: {
+    fontSize: 36,
+    marginBottom: 12,
+  },
+  title: {
+    fontSize: FontSize.lg,
+    fontWeight: '700',
+    color: Colors.text,
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  body: {
+    fontSize: FontSize.sm,
+    color: Colors.text,
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: 8,
+  },
+  sub: {
+    fontSize: 12,
+    color: Colors.textSub,
+    textAlign: 'center',
+    lineHeight: 17,
+    marginBottom: 24,
+  },
+  buttons: {
+    width: '100%',
+    gap: 10,
+  },
+  btnYes: {
+    backgroundColor: Colors.primary,
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  btnYesText: {
+    color: Colors.white,
+    fontWeight: '700',
+    fontSize: FontSize.sm,
+  },
+  btnSkip: {
+    paddingVertical: 10,
+    alignItems: 'center',
+  },
+  btnSkipText: {
+    color: Colors.textSub,
+    fontSize: FontSize.sm,
   },
 });

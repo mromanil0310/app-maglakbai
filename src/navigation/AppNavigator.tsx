@@ -98,12 +98,15 @@ function TabIcon({
   label: string;
   focused: boolean;
 }) {
+  const Colors = useThemeColors();
+  // In light mode 0.38 becomes nearly invisible — use 0.60 for better contrast
+  const inactiveOpacity = Colors.bg === '#F0EDFF' ? 0.60 : 0.38;
   return (
     <View style={{ alignItems: 'center', gap: 3, paddingTop: 4 }}>
       <Text
         style={{
           fontSize: 20,
-          opacity: focused ? 1 : 0.38,
+          opacity: focused ? 1 : inactiveOpacity,
         }}
       >
         {icon}
@@ -141,8 +144,8 @@ function LogTabIcon({ focused, isStreakAtRisk }: { focused: boolean; isStreakAtR
           alignItems: 'center',
           justifyContent: 'center',
           marginBottom: 10,
-          // @ts-ignore - web gradient
-          background: focused
+          // @ts-ignore - web-only gradient (backgroundImage accepted by react-native-web)
+          backgroundImage: focused
             ? 'linear-gradient(135deg, #A855F7, #4F46E5)'
             : 'linear-gradient(135deg, #7C3AED, #4F46E5)',
           backgroundColor: focused ? Colors.primaryLight : Colors.primary,

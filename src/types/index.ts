@@ -218,3 +218,24 @@ export interface LogOutputResult {
   newStreak?: number;        // updated streak value after this output
   evidenceRequired?: boolean; // true when skill would complete but lacks quality evidence
 }
+
+// ── Market Demand (community-sourced signal layer) ────────────────────────────
+
+export type MarketDemandLevel = 'high' | 'rising' | 'stable';
+
+/** Aggregated demand record for a single skill. */
+export interface MarketDemand {
+  skillId: string;
+  pathId: string;
+  level: MarketDemandLevel;
+  signalCount: number;   // community signal count (excludes curated seeds)
+  lastUpdated: string;   // YYYY-MM-DD
+  source: 'curated' | 'community' | 'mixed';
+}
+
+/** One community signal contributed by the current user. */
+export interface MarketSignal {
+  skillId: string;
+  pathId: string;
+  submittedAt: string; // ISO
+}

@@ -22,10 +22,14 @@ import {
   Radius,
   FontSize,
   PathColors,
+  getPathColor,
   RarityColors,
+  ThemeContext,
 } from '../utils/theme';
+import { useContext } from 'react';
 import { page, track } from '../utils/analytics';
 import CareerNode from '../components/CareerNode';
+import DemandBadge from '../components/DemandBadge';
 import { CustomSkill, Skill, UserSkill } from '../types';
 import { pathHasProgress } from '../domain/skillGraph';
 
@@ -1074,6 +1078,7 @@ function DeleteRebuildConfirmModal({
 
 export default function EvolveScreen() {
   const Colors = useThemeColors();
+  const colorScheme = useContext(ThemeContext);
   const styles = React.useMemo(() => makeStyles(Colors), [Colors]);
   const detail = React.useMemo(() => makeDetail(Colors), [Colors]);
   const navigation = useNavigation<any>();
@@ -1095,6 +1100,8 @@ export default function EvolveScreen() {
   const forkBuiltInPath = useAppStore((s) => s.forkBuiltInPath);
   const deleteRoadmap = useAppStore((s) => s.deleteRoadmap);
   const lockRoadmap = useAppStore((s) => s.lockRoadmap);
+  const marketDemand = useAppStore((s) => s.marketDemand);
+  const loadMarketDemand = useAppStore((s) => s.loadMarketDemand);
 
   // Which roadmap's skill tree is currently shown
   const [activeViewPathId, setActiveViewPathId] = useState<string | null>(null);
@@ -1114,6 +1121,8 @@ export default function EvolveScreen() {
   useEffect(() => {
     Animated.timing(fadeAnim, { toValue: 1, duration: 400, useNativeDriver: false }).start();
     page('evolve', { career_path: user?.careerPathId });
+    // Load community market demand for the user's primary path on first mount
+    if (user?.careerPathId) loadMarketDemand(user.careerPathId);
   }, []);
 
   useEffect(() => {
@@ -1134,11 +1143,14 @@ export default function EvolveScreen() {
   const secondaryRoadmaps = roadmaps.filter(r => r.priorityStatus === 'SECONDARY' && r.roadmapStatus === 'ACTIVE');
   const enrolledPathIds = roadmaps.map(r => r.pathId);
 
-  // Build path display info
+  // Build path display info (theme-aware: text/border adapt for light mode)
   const getPathInfo = (pathId: string) => {
     const builtIn = CAREER_PATHS.find(p => p.id === pathId);
     const custom = customPaths.find(p => p.id === pathId);
-    const pc = PathColors[pathId] ?? { primary: custom?.color ?? '#7C3AED', text: custom?.color ?? '#C4B5FD', dim: 'rgba(124,58,237,0.08)', border: 'rgba(124,58,237,0.3)' };
+    const customColor = custom?.color ?? '#7C3AED';
+    const pc = PathColors[pathId]
+      ? getPathColor(pathId, colorScheme)
+      : { primary: customColor, dim: `rgba(124,58,237,0.08)`, text: colorScheme === 'light' ? customColor : '#C4B5FD', border: customColor + (colorScheme === 'light' ? '35' : '30') };
     const skills = builtIn
       ? ALL_SKILLS.filter(s => s.pathId === pathId).sort((a, b) => a.order - b.order)
       : (custom?.skills ?? []).map((s, i) => ({
@@ -1472,19 +1484,26 @@ export default function EvolveScreen() {
                 dim: viewInfo.dimColor,
                 border: viewInfo.borderColor,
               };
+              const demand = marketDemand[skill.id];
               return (
-                <CareerNode
-                  key={skill.id}
-                  skill={skill}
-                  userSkill={userSkill}
-                  pathColor={pathColor}
-                  isFirst={index === 0}
-                  isLast={index === viewInfo.skills.length - 1}
-                  onPress={() => handleNodePress(skill.id, userSkill.status)}
-                  completedAt={userSkill.completedAt}
-                  skillStreak={getSkillStreak(skill.id, outputs)}
-                  validated={userSkill.validated ?? false}
-                />
+                <View key={skill.id} style={{ position: 'relative' }}>
+                  <CareerNode
+                    skill={skill}
+                    userSkill={userSkill}
+                    pathColor={pathColor}
+                    isFirst={index === 0}
+                    isLast={index === viewInfo.skills.length - 1}
+                    onPress={() => handleNodePress(skill.id, userSkill.status)}
+                    completedAt={userSkill.completedAt}
+                    skillStreak={getSkillStreak(skill.id, outputs)}
+                    validated={userSkill.validated ?? false}
+                  />
+                  {demand && demand.level !== 'stable' && (
+                    <View style={demandBadgeOverlayStyle}>
+                      <DemandBadge level={demand.level} compact />
+                    </View>
+                  )}
+                </View>
               );
             })}
           </View>
@@ -2360,3 +2379,11 @@ const makeDetail = (Colors: ColorsType) => StyleSheet.create({
   dismissBtn: { alignItems: 'center', paddingVertical: 10 },
   dismissBtnText: { fontSize: FontSize.sm, color: Colors.textMuted, fontWeight: '500' },
 });
+
+// Demand badge pinned to top-right corner of each skill node
+const demandBadgeOverlayStyle = {
+  position: 'absolute' as const,
+  top: 12,
+  right: 16,
+  zIndex: 10,
+};

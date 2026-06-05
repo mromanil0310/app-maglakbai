@@ -37,33 +37,33 @@ export const ColorsDark = {
 };
 
 export const ColorsLight = {
-  bg: '#F5F3FF',
-  surface: '#FFFFFF',
-  card: '#FFFFFF',
-  cardAlt: '#EDE9FF',
-  border: 'rgba(0,0,0,0.07)',
-  borderHex: '#00000012',
+  bg: '#F0EDFF',           // slightly richer lavender — more character
+  surface: '#FBFAFF',      // off-white surface — lifts above bg
+  card: '#FFFFFF',          // pure white cards pop against surface
+  cardAlt: '#E8E2FF',       // more vivid tinted card for highlights
+  border: 'rgba(0,0,0,0.11)', // slightly stronger — card definition
+  borderHex: '#0000001C',
 
   primary: '#7C3AED',
-  primaryLight: '#6D28D9',
+  primaryLight: '#8B5CF6',   // more vibrant on white than the old #6D28D9
   primaryDim: 'rgba(124,58,237,0.10)',
-  primaryDimActive: 'rgba(124,58,237,0.18)',
+  primaryDimActive: 'rgba(124,58,237,0.20)',
   accent2: '#4F46E5',
 
   accent: '#0891B2',
   accentDim: '#E0F2FE',
 
-  gold: '#D97706',
-  goldDim: 'rgba(217,119,6,0.10)',
+  gold: '#B45309',           // richer amber — more pop on light
+  goldDim: 'rgba(180,83,9,0.10)',
 
-  success: '#059669',
-  successDim: 'rgba(5,150,105,0.10)',
+  success: '#047857',        // richer green
+  successDim: 'rgba(4,120,87,0.10)',
 
   danger: '#DC2626',
   warning: '#EA580C',
 
   text: '#111827',
-  textSub: '#374151',
+  textSub: '#4B5563',        // was #374151 — better hierarchy, less heavy
   textMuted: '#6B7280',
 
   white: '#FFFFFF',
@@ -201,6 +201,34 @@ export const PathColors: Record<string, { primary: string; dim: string; text: st
     border: '#701A75',
   },
 };
+
+/**
+ * Theme-aware path color lookup.
+ * In dark mode, `text` is a light pastel (readable on dark) and `border` is a
+ * deep shade. In light mode, `text` uses the saturated primary (readable on white)
+ * and `border` is lightened so it doesn't look muddy on white cards.
+ *
+ * Use this instead of `PathColors[id]` wherever the color scheme matters.
+ */
+export function getPathColor(
+  pathId: string,
+  scheme: ColorScheme,
+): { primary: string; dim: string; text: string; border: string } {
+  const base = PathColors[pathId] ?? {
+    primary: '#7C3AED',
+    dim: 'rgba(124,58,237,0.08)',
+    text: '#C4B5FD',
+    border: '#3D1B7A',
+  };
+  if (scheme === 'dark') return base;
+  // Light mode: pastels become saturated primaries; dark borders become light-alpha
+  return {
+    primary: base.primary,
+    dim: base.dim,                      // rgba tints already work on light
+    text: base.primary,                 // saturated, not pastel — readable on white
+    border: base.primary + '35',        // light alpha border, not deep shade
+  };
+}
 
 export const RarityColors: Record<string, { color: string; label: string }> = {
   common: { color: '#8888AA', label: 'COMMON' },
