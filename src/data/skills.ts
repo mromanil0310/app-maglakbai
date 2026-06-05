@@ -14,7 +14,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: [],
     order: 1,
-    whyItMatters: 'SQL is the universal language of data — every data role requires fluency in it.',
+    whyItMatters: 'SQL appears in 69% of data-adjacent job postings in 2026 (365 Data Science) — it\'s the universal query language across every modern data tool from BigQuery to Snowflake.',
     outputExamples: [
       'Write a query comparing YoY revenue by region using window functions',
       'Build a CTE chain to de-duplicate a 1M-row customer table',
@@ -62,7 +62,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: ['sql-foundations'],
     order: 2,
-    whyItMatters: 'Python automation multiplies your impact — replace hours of manual work with a 20-line script.',
+    whyItMatters: 'Python is mentioned in 70% of data engineer job postings (365 Data Science 2026) and is the #1 scripting language for pipelines across AWS, GCP, and Azure environments.',
     outputExamples: [
       'Automate a CSV-to-Postgres ETL pipeline with error handling',
       'Write a script that pulls from an API and loads to a data warehouse',
@@ -110,7 +110,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 3,
     prerequisites: ['python-automation'],
     order: 3,
-    whyItMatters: 'Snowflake runs mission-critical warehouses at Fortune 500 companies — it\'s the most in-demand cloud data skill.',
+    whyItMatters: 'Cloud data warehouse skills appear in 74.5% of enterprise data engineering job listings — Snowflake is the dominant platform for cloud-native analytics at scale.',
     outputExamples: [
       'Design separate virtual warehouses for reporting vs. ingestion workloads',
       'Implement Snowflake data sharing between two accounts',
@@ -163,7 +163,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: ['python-automation'],
     order: 4,
-    whyItMatters: 'Good data models make reports 10x faster to build and 10x easier for stakeholders to trust.',
+    whyItMatters: 'Data modeling is a consistently cited core competency for senior data roles — well-designed schemas make analytics 10x faster to build and dramatically reduce downstream technical debt.',
     outputExamples: [
       'Build a star schema for a retail sales data mart (fact + 4 dimensions)',
       'Design a Type 2 slowly changing dimension table for customer history',
@@ -211,7 +211,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 3,
     prerequisites: ['snowflake-engineering', 'data-modeling'],
     order: 5,
-    whyItMatters: 'AI-native data pipelines are the next frontier — this skill will define the data architect role for the next decade.',
+    whyItMatters: 'AI fluency in data roles has grown nearly sevenfold in job postings over two years (LinkedIn 2026) — data architects who design AI-augmented pipelines command significantly higher compensation.',
     outputExamples: [
       'Build a pipeline that triggers an LLM to classify and route support tickets',
       'Design a DAG that pulls raw data, enriches with AI, and writes to a data mart',
@@ -265,7 +265,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: [],
     order: 1,
-    whyItMatters: 'Python is the language of AI — you cannot build AI applications without it.',
+    whyItMatters: '84% of developers now use or plan to use AI-assisted tools built on Python SDKs (Stack Overflow 2025) — Python is the lingua franca of every LLM framework, vector DB, and AI pipeline.',
     outputExamples: [
       'Build a CLI weather app that pulls from a public API',
       'Write an OOP inventory tracker with file-based persistence',
@@ -318,7 +318,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: ['python-fundamentals'],
     order: 2,
-    whyItMatters: 'Every AI product communicates with external services — REST fluency is non-negotiable.',
+    whyItMatters: 'AI engineers spend the majority of their time calling and serving REST APIs — every production LLM application routes through HTTP endpoints, and well-designed APIs are what make integrations reliable.',
     outputExamples: [
       'Build a FastAPI endpoint that serves ML model predictions',
       'Write a Python client that wraps the GitHub or Stripe API',
@@ -361,7 +361,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: ['rest-apis'],
     order: 3,
-    whyItMatters: 'Prompting is the difference between a flaky GPT-4 demo and a reliable production feature.',
+    whyItMatters: 'Prompt engineering is LinkedIn\'s fastest-growing skill in 2026, with job postings requiring it growing over 70% year-over-year. It is now core literacy for anyone building with LLMs.',
     outputExamples: [
       'Build a chain-of-thought system that outputs structured JSON from unstructured text',
       'Write an evaluation rubric and test 5 prompt variants against it with scoring',
@@ -414,7 +414,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: ['rest-apis'],
     order: 4,
-    whyItMatters: 'Vector search powers every modern AI assistant and recommendation engine — it\'s the backbone of AI apps.',
+    whyItMatters: 'Over 1.1 million public repositories now use an LLM SDK (GitHub Octoverse 2025) — vector databases are the memory layer that makes AI applications contextually aware and useful.',
     outputExamples: [
       'Build a semantic search engine over 1,000 documents using Pinecone',
       'Implement embedding-based deduplication on a product catalog',
@@ -462,7 +462,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 3,
     prerequisites: ['prompt-engineering', 'vector-databases'],
     order: 5,
-    whyItMatters: 'RAG is how companies deploy AI on private data — it is the production standard at every serious AI team.',
+    whyItMatters: 'LangChain and RAG are the top two skills in AI engineer job postings (LinkedIn 2026) — the job is now orchestration-first, not training-first.',
     outputExamples: [
       'Build a chatbot that answers questions from a company PDF knowledge base',
       'Implement hybrid search (keyword + semantic) over a document library',
@@ -515,7 +515,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 3,
     prerequisites: ['rag-systems'],
     order: 6,
-    whyItMatters: 'Agents are the next leap in AI — from models that answer to systems that act autonomously.',
+    whyItMatters: 'LinkedIn Jobs on the Rise 2026 identifies agent-building as a core requirement, not a nice-to-have — AI Engineer is the fastest-growing job title in the US for two consecutive years.',
     outputExamples: [
       'Build a research agent that searches the web and synthesizes a structured report',
       'Create a coding agent that writes, runs, and debugs Python scripts in a loop',
@@ -569,7 +569,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: [],
     order: 1,
-    whyItMatters: 'HTML/CSS is the foundation every frontend engineer builds on — mastering the basics makes everything else faster.',
+    whyItMatters: 'HTML and CSS are used by 53% of all professional developers (Stack Overflow 2025) — the foundation that makes every product visible and usable.',
     outputExamples: [
       'Build a responsive portfolio page using Flexbox and CSS Grid',
       'Recreate a Dribbble design pixel-perfectly in pure HTML/CSS',
@@ -617,7 +617,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: ['html-css'],
     order: 2,
-    whyItMatters: 'JS runs everywhere — browser, server, and mobile. It is the most versatile skill in modern tech.',
+    whyItMatters: 'JavaScript is used by 66% of professional developers (Stack Overflow 2025), making it the most-used language in the world for the 13th year running.',
     outputExamples: [
       'Build a personal budget tracker with DOM manipulation and local storage',
       'Write a data fetching layer with async/await, retry logic, and error handling',
@@ -670,7 +670,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 3,
     prerequisites: ['javascript'],
     order: 3,
-    whyItMatters: 'React powers 40%+ of web apps and React Native runs on iOS/Android — one skill, every platform.',
+    whyItMatters: 'React leads all web frameworks in Stack Overflow\'s 2025 Developer Survey — it is the dominant production UI choice at companies from Meta to early-stage startups.',
     outputExamples: [
       'Build a Kanban board with drag-and-drop using React and Zustand',
       'Publish a cross-platform to-do app to Expo Go with offline support',
@@ -723,7 +723,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: ['javascript'],
     order: 4,
-    whyItMatters: 'Backend APIs are the plumbing of every product — without them, there is no data, auth, or business logic.',
+    whyItMatters: 'Node.js and Express top the back-end framework list (Stack Overflow 2025) — full-stack developers who own the API layer are significantly more autonomous and hireable.',
     outputExamples: [
       'Build a REST API with JWT auth, role-based access, and rate limiting',
       'Implement OAuth 2.0 login with GitHub or Google',
@@ -771,7 +771,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 3,
     prerequisites: ['backend-apis'],
     order: 5,
-    whyItMatters: 'Bad database design causes outages and data loss — good design is what separates senior from junior engineers.',
+    whyItMatters: 'Redis usage jumped 8% and PostgreSQL remains the #1 database (Stack Overflow 2025) — strong data modeling skills allow full-stack engineers to build products that actually scale.',
     outputExamples: [
       'Design a normalized PostgreSQL schema for a multi-tenant SaaS app',
       'Write migrations that add indexes and backfill data without downtime',
@@ -824,7 +824,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 3,
     prerequisites: ['database-design'],
     order: 6,
-    whyItMatters: 'Shipping to production is the goal — cloud deployment is the final mile that turns code into a real product.',
+    whyItMatters: 'Docker hit 71% developer adoption in 2025, the largest single-year jump (+17 points) of any technology in Stack Overflow survey history — cloud-deploy skills separate junior from senior engineers.',
     outputExamples: [
       'Dockerize a Node app and deploy to Railway with a CI/CD pipeline',
       'Set up GitHub Actions to run tests, lint, and deploy on every merged PR',
@@ -878,6 +878,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: [],
     order: 1,
+    whyItMatters: 'Python is cited in 70% of data engineer job postings in 2026 (365 Data Science) — pandas, PySpark, and DuckDB are the daily tools of the modern data engineering stack.',
   },
   {
     id: 'de-sql-advanced',
@@ -890,6 +891,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: ['de-python-data'],
     order: 2,
+    whyItMatters: 'SQL appears alongside Python in 69% of data engineer job listings — advanced SQL (window functions, CTEs, query optimization) is the skill that separates candidates in interviews.',
   },
   {
     id: 'de-spark-processing',
@@ -902,6 +904,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 3,
     prerequisites: ['de-sql-advanced'],
     order: 3,
+    whyItMatters: 'Apache Spark is the standard for distributed data processing in 2026 — data engineers working with large datasets need Spark to do their job efficiently at scale.',
   },
   {
     id: 'de-airflow-pipelines',
@@ -914,6 +917,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: ['de-sql-advanced'],
     order: 4,
+    whyItMatters: 'Apache Airflow is the de facto standard for workflow orchestration by 2026 — knowing Airflow is practically required for pipeline engineering roles (365 Data Science).',
   },
   {
     id: 'de-kafka-streaming',
@@ -926,6 +930,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 3,
     prerequisites: ['de-spark-processing', 'de-airflow-pipelines'],
     order: 5,
+    whyItMatters: 'Real-time data streaming is a core expectation in 2026 data roles — engineers who handle live event ingestion alongside batch pipelines command a significant salary premium.',
   },
   // ── ML Engineer ──
   {
@@ -939,7 +944,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: [],
     order: 1,
-    whyItMatters: 'Statistics is the engine under every ML model — without it you are tuning knobs you don\'t understand.',
+    whyItMatters: 'Python dominates AI and data science (Stack Overflow 2025) — NumPy, pandas, and SciPy form the statistical foundation every ML engineer builds on before touching any model.',
     outputExamples: [
       'Run a hypothesis test to compare two A/B test conversion rates with confidence intervals',
       'Visualize distributions of a dataset and identify outliers using numpy and matplotlib',
@@ -957,7 +962,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: ['ml-python-stats'],
     order: 2,
-    whyItMatters: 'scikit-learn is the industry workhorse for classical ML — mastering it opens 80% of real ML job tasks.',
+    whyItMatters: 'scikit-learn remains the industry standard for production classical ML — understanding algorithms deeply, not just calling .fit(), is what interviewers test for ML engineering roles.',
     outputExamples: [
       'Build a churn prediction classifier with Random Forest and evaluate with precision/recall',
       'Implement k-means clustering on customer data and visualize segment profiles',
@@ -975,7 +980,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 3,
     prerequisites: ['ml-sklearn-algorithms'],
     order: 3,
-    whyItMatters: 'Deep learning powers image recognition, NLP, and recommendation systems — the frontier of AI applications.',
+    whyItMatters: 'PyTorch is one of the top three skills in AI engineer job postings (LinkedIn 2026) — deep learning has moved from a research specialty to a production expectation across the industry.',
     outputExamples: [
       'Train a CNN to classify images from CIFAR-10 with >85% accuracy using PyTorch',
       'Fine-tune a pre-trained BERT model on a custom text classification dataset',
@@ -993,7 +998,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 3,
     prerequisites: ['ml-sklearn-algorithms'],
     order: 4,
-    whyItMatters: 'A model that isn\'t deployed is just a research project — MLOps is what turns ML into product value.',
+    whyItMatters: 'A model that cannot be reliably deployed and monitored in production creates no business value — MLOps is the discipline that closes the gap between research and real-world impact.',
     outputExamples: [
       'Track 5 experiment runs in MLflow and promote the best model to the model registry',
       'Dockerize a scikit-learn model and serve it via a FastAPI endpoint',
@@ -1011,7 +1016,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 3,
     prerequisites: ['ml-deep-learning', 'ml-mlops'],
     order: 5,
-    whyItMatters: 'Feature engineering often matters more than model choice — the best ML engineers spend 70% of their time here.',
+    whyItMatters: 'Feature engineering consistently separates junior from senior ML engineers — better features beat better models in the majority of real-world production tasks.',
     outputExamples: [
       'Apply target encoding, binning, and interaction features to a tabular dataset and measure AUC lift',
       'Use SHAP values to explain individual predictions on a black-box model',
@@ -1030,6 +1035,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: [],
     order: 1,
+    whyItMatters: 'Node.js and Python lead back-end development (Stack Overflow 2025) — mastery of a server-side language is the non-negotiable foundation every back-end role builds on.',
   },
   {
     id: 'be-rest-design',
@@ -1042,6 +1048,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: ['be-language-core'],
     order: 2,
+    whyItMatters: 'Well-designed REST APIs are cited in the majority of back-end job descriptions — clean, versioned, documented APIs are what downstream teams and clients rely on in production.',
   },
   {
     id: 'be-database-optimization',
@@ -1054,6 +1061,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: ['be-rest-design'],
     order: 3,
+    whyItMatters: 'PostgreSQL is the #1 database and Redis jumped 8% in usage (Stack Overflow 2025) — query optimization and indexing skills directly impact system performance and infrastructure cost.',
   },
   {
     id: 'be-auth-security',
@@ -1066,6 +1074,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: ['be-rest-design'],
     order: 4,
+    whyItMatters: 'Auth and API security are rising requirements in back-end roles (LinkedIn 2026) — every team that has shipped a security incident wishes they had invested here before going to production.',
   },
   {
     id: 'be-microservices',
@@ -1078,6 +1087,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 3,
     prerequisites: ['be-database-optimization', 'be-auth-security'],
     order: 5,
+    whyItMatters: 'Microservices architecture is a rising skill (LinkedIn 2026), aligning with Docker\'s record 71% adoption — back-end engineers who can design and decompose services are highly sought.',
   },
   // ── Frontend Engineer ──
   {
@@ -1091,6 +1101,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: [],
     order: 1,
+    whyItMatters: 'HTML/CSS and JavaScript underpin 53% and 66% of all development work (Stack Overflow 2025) — you cannot skip this foundation without hitting walls you cannot debug.',
   },
   {
     id: 'fe-react-framework',
@@ -1103,6 +1114,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: ['fe-html-css-js'],
     order: 2,
+    whyItMatters: 'React leads all web frameworks in Stack Overflow\'s 2025 survey and is the most-requested front-end skill in job postings — React experience is the entry ticket to most front-end roles.',
   },
   {
     id: 'fe-typescript',
@@ -1115,6 +1127,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: ['fe-react-framework'],
     order: 3,
+    whyItMatters: 'TypeScript overtook Python and JavaScript to become the #1 language on GitHub Octoverse 2025, adding over 1 million new contributors — it is now the production standard for serious front-end work.',
   },
   {
     id: 'fe-performance',
@@ -1127,6 +1140,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: ['fe-react-framework'],
     order: 4,
+    whyItMatters: 'Core Web Vitals are a Google ranking factor and measurable retention driver — front-end engineers who understand LCP, CLS, and INP are increasingly requested in senior job descriptions.',
   },
   {
     id: 'fe-testing-a11y',
@@ -1139,6 +1153,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 3,
     prerequisites: ['fe-typescript', 'fe-performance'],
     order: 5,
+    whyItMatters: 'Testing and accessibility are rising requirements (LinkedIn 2026) — companies that have shipped regressions or accessibility failures always invest in this after the fact, at 10x the cost.',
   },
   // ── Cloud Engineer ──
   {
@@ -1152,7 +1167,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: [],
     order: 1,
-    whyItMatters: 'Every company runs on cloud — fluency in AWS/GCP/Azure is now a baseline expectation for engineers.',
+    whyItMatters: 'AWS is used by 43% of developers (Stack Overflow 2025) and cloud platform skills appear in 74.5% of enterprise engineering job listings — cloud fluency is the entry ticket to modern infrastructure roles.',
     outputExamples: [
       'Deploy a simple web app on EC2 with an S3 bucket for static assets and RDS for data',
       'Configure IAM roles and policies to enforce least-privilege access across services',
@@ -1170,7 +1185,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: ['ce-cloud-fundamentals'],
     order: 2,
-    whyItMatters: 'Misconfigured networking is the #1 cause of cloud security breaches — this skill protects companies from catastrophe.',
+    whyItMatters: 'Misconfigured VPCs and security groups are the leading cause of cloud security breaches — networking knowledge is the non-negotiable foundation for every cloud certification and role.',
     outputExamples: [
       'Design a VPC with public and private subnets, NAT gateway, and route tables',
       'Set up an Application Load Balancer that routes to two target groups by path',
@@ -1188,7 +1203,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 3,
     prerequisites: ['ce-networking'],
     order: 3,
-    whyItMatters: 'IaC means your infra is version-controlled, reviewable, and reproducible — manual console clicks are a liability.',
+    whyItMatters: 'Infrastructure as Code with Terraform is a top cloud engineering skill — cloud-native tooling (Kubernetes, Terraform, AWS/Azure/GCP advanced certs) is in high demand (Robert Half 2026).',
     outputExamples: [
       'Provision a full VPC + EC2 + RDS stack with Terraform and commit it to GitHub',
       'Write reusable Terraform modules for a VPC and an ECS service',
@@ -1206,7 +1221,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 3,
     prerequisites: ['ce-iac'],
     order: 4,
-    whyItMatters: 'Kubernetes is the de-facto standard for container orchestration — it runs the majority of production workloads in tech.',
+    whyItMatters: 'Docker hit 71% adoption in 2025 (+17 points, the largest single-year jump of any technology surveyed) — Kubernetes is the production orchestration layer that runs most cloud-native workloads.',
     outputExamples: [
       'Dockerize a Node app and deploy it to a local Kubernetes cluster with 3 replicas',
       'Write a Helm chart for a microservice with configurable resource limits and readiness probes',
@@ -1224,7 +1239,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: ['ce-kubernetes'],
     order: 5,
-    whyItMatters: 'Cloud bills spiral without governance — FinOps engineers save companies millions and get recognized for it.',
+    whyItMatters: 'Companies overspend billions annually on unused cloud resources — FinOps engineers who can right-size infrastructure save millions and earn recognition across the business.',
     outputExamples: [
       'Audit an AWS account with Cost Explorer and identify 3 savings opportunities with estimated savings',
       'Configure an auto-scaling group with spot instances to cut EC2 costs by 60%',
@@ -1243,6 +1258,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: [],
     order: 1,
+    whyItMatters: 'Linux runs 96% of the world\'s servers — shell scripting and system administration are the language of infrastructure automation and real-world incident response.',
   },
   {
     id: 'do-cicd',
@@ -1255,6 +1271,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: ['do-linux-shell'],
     order: 2,
+    whyItMatters: 'CI/CD is the highest-demand DevOps skill in 2026 (LinkedIn) — every team that has shipped a broken release to production immediately prioritizes pipeline quality and automation.',
   },
   {
     id: 'do-docker-k8s',
@@ -1267,6 +1284,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 3,
     prerequisites: ['do-cicd'],
     order: 3,
+    whyItMatters: 'Docker saw the largest single-year adoption jump (+17 points to 71%) of any technology in Stack Overflow\'s 2025 survey — containers are now the default deployment unit across cloud platforms.',
   },
   {
     id: 'do-monitoring',
@@ -1279,6 +1297,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: ['do-docker-k8s'],
     order: 4,
+    whyItMatters: 'Observability is a rising DevOps skill — teams flying blind on production systems accumulate technical debt silently and face unpredictable outages that destroy user trust.',
   },
   {
     id: 'do-security',
@@ -1291,6 +1310,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 3,
     prerequisites: ['do-monitoring'],
     order: 5,
+    whyItMatters: 'DevSecOps roles grew 35% in 2025-2026 — security built into the pipeline costs a fraction of what it costs to remediate after a breach, and 53% of employers pay more for security skills.',
   },
   // ── Cybersecurity ──
   {
@@ -1304,6 +1324,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: [],
     order: 1,
+    whyItMatters: 'Networking is the foundation every cybersecurity role builds on — you cannot defend what you do not understand, and network misconfiguration is the #1 attack vector in cloud environments.',
   },
   {
     id: 'cs-linux-security',
@@ -1316,6 +1337,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: ['cs-networking'],
     order: 2,
+    whyItMatters: '96% of servers run Linux, making it the primary attack surface in enterprise environments — Linux security skills are a baseline expectation in virtually every SOC and red-team role.',
   },
   {
     id: 'cs-vulnerability',
@@ -1328,6 +1350,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: ['cs-linux-security'],
     order: 3,
+    whyItMatters: 'Vulnerability assessment is consistently the top-demanded cybersecurity skill (ISC2 2026) — organizations face an average of 1,600 new vulnerabilities per month, and manual review does not scale.',
   },
   {
     id: 'cs-pentest',
@@ -1340,6 +1363,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 3,
     prerequisites: ['cs-vulnerability'],
     order: 4,
+    whyItMatters: 'Penetration testing roles are projected to grow 29% through 2034 (Bureau of Labor Statistics) — with 514,000+ open cybersecurity positions nationally (CyberSeek 2026), pentest skills open the widest range of roles.',
   },
   {
     id: 'cs-incident-response',
@@ -1352,6 +1376,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 3,
     prerequisites: ['cs-pentest'],
     order: 5,
+    whyItMatters: 'SIEM and incident response professionals are among the most valued in 2026 (Robert Half) — the average cost of a data breach is nearly 5 million USD (IBM 2024), making IR skills a direct business priority.',
   },
   // ── Product Manager ──
   {
@@ -1365,6 +1390,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: [],
     order: 1,
+    whyItMatters: 'Demand for AI-fluent PMs has grown nearly sevenfold in job postings over two years (LinkedIn 2026) — discovery skills that identify AI-solvable problems are the highest-value PM capability right now.',
   },
   {
     id: 'pm-roadmap',
@@ -1377,6 +1403,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: ['pm-discovery'],
     order: 2,
+    whyItMatters: 'AI-driven roadmap tools are now mainstream — PMs who combine strategic thinking with data-backed prioritization command 133K-200K+ USD in the US (LinkedIn 2026).',
   },
   {
     id: 'pm-stakeholders',
@@ -1389,6 +1416,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: ['pm-roadmap'],
     order: 3,
+    whyItMatters: 'Translating complex technical decisions into stakeholder narratives is a top PM competency — communication and storytelling consistently appear in the top 5 PM skills per LinkedIn 2026.',
   },
   {
     id: 'pm-data-driven',
@@ -1401,6 +1429,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: ['pm-roadmap'],
     order: 4,
+    whyItMatters: 'Data analysis is cited as crucial for product decision-making (LinkedIn 2026) — PMs who can define KPIs, evaluate experiments, and interpret model performance are materially more effective.',
   },
   {
     id: 'pm-launch',
@@ -1413,6 +1442,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 3,
     prerequisites: ['pm-stakeholders', 'pm-data-driven'],
     order: 5,
+    whyItMatters: 'Gartner predicts 80%+ of software products will include foundational AI capabilities by 2026 — PMs who can scope, launch, and iterate on AI features have a clear career advantage.',
   },
   // ── Business Analyst ──
   {
@@ -1426,6 +1456,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: [],
     order: 1,
+    whyItMatters: 'Requirements quality is a top cause of project failure across every project management survey — BAs who gather and document requirements clearly save organizations millions in rework.',
   },
   {
     id: 'ba-data-analysis',
@@ -1438,6 +1469,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: ['ba-requirements'],
     order: 2,
+    whyItMatters: 'AI tools are helping BAs analyze data faster and derive actionable insights — AI literacy in job postings grew over 70% year-over-year (LinkedIn 2026), including for business intelligence roles.',
   },
   {
     id: 'ba-process-mapping',
@@ -1450,6 +1482,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: ['ba-data-analysis'],
     order: 3,
+    whyItMatters: 'Process mapping is foundational to digital transformation — companies that document and improve processes before automating them consistently report higher ROI from technology investments.',
   },
   {
     id: 'ba-sql-business',
@@ -1462,6 +1495,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: ['ba-data-analysis'],
     order: 4,
+    whyItMatters: 'SQL appears in 69% of data-adjacent roles in 2026 (365 Data Science) — BAs who can query data directly are significantly more autonomous and in demand than those who rely entirely on data teams.',
   },
   {
     id: 'ba-reporting',
@@ -1474,6 +1508,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 3,
     prerequisites: ['ba-process-mapping', 'ba-sql-business'],
     order: 5,
+    whyItMatters: 'Reporting and visualization skills are a rising expectation for BAs — stakeholders expect real-time dashboards, not monthly slide decks, and the ability to build them is now table stakes.',
   },
   // ── Data Analyst ──
   {
@@ -1487,6 +1522,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: [],
     order: 1,
+    whyItMatters: 'Excel and Sheets remain the most-used analytics tools in non-engineering organizations — mastery here creates immediate business impact from day one and is the entry point to most analyst roles.',
   },
   {
     id: 'da-sql-analysis',
@@ -1499,6 +1535,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: ['da-excel-spreadsheets'],
     order: 2,
+    whyItMatters: 'SQL appears in 69% of data-adjacent job postings in 2026 (365 Data Science) — analysts who can query and transform data directly are far more autonomous than those who depend on data teams.',
   },
   {
     id: 'da-visualization',
@@ -1511,6 +1548,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: ['da-sql-analysis'],
     order: 3,
+    whyItMatters: 'Data visualization is consistently in the top 5 data analyst skills in job postings — turning numbers into decisions is the core value-add of the analyst role.',
   },
   {
     id: 'da-python-analysis',
@@ -1523,6 +1561,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: ['da-sql-analysis'],
     order: 4,
+    whyItMatters: 'Python showed the largest year-over-year language growth (Stack Overflow 2025) — analysts who add Python to SQL and Excel skills see a significant jump in both job options and compensation.',
   },
   {
     id: 'da-statistics',
@@ -1535,6 +1574,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 3,
     prerequisites: ['da-visualization', 'da-python-analysis'],
     order: 5,
+    whyItMatters: 'Statistical literacy separates analysts who describe data from those who derive insight — understanding confidence intervals, regression, and hypothesis testing is essential for data-backed recommendations.',
   },
   // ── Project Manager ──
   {
@@ -1548,6 +1588,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: [],
     order: 1,
+    whyItMatters: 'Project planning is the foundation of every PM methodology — scope, schedule, and resource planning are the non-negotiable baseline for PMP, PRINCE2, and Agile certifications alike.',
   },
   {
     id: 'pjm-agile',
@@ -1560,6 +1601,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: ['pjm-planning'],
     order: 2,
+    whyItMatters: 'Agile is the top in-demand Project Manager skill (LinkedIn 2026) — Scrum Master and PMP are the most-requested PM certifications, with Agile experience cited by 70%+ of employers.',
   },
   {
     id: 'pjm-risk',
@@ -1572,6 +1614,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: ['pjm-agile'],
     order: 3,
+    whyItMatters: 'Risk management is an evergreen PM skill — organizations that mature their risk practices recover from setbacks faster and deliver projects within budget more consistently.',
   },
   {
     id: 'pjm-communication',
@@ -1584,6 +1627,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: ['pjm-agile'],
     order: 4,
+    whyItMatters: 'Stakeholder communication is a top PM competency — conflict mitigation and adaptability made up half of LinkedIn\'s top skills list in 2025, and projects fail more often from communication gaps than technical ones.',
   },
   {
     id: 'pjm-budget',
@@ -1596,6 +1640,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 3,
     prerequisites: ['pjm-risk', 'pjm-communication'],
     order: 5,
+    whyItMatters: 'Budget management literacy is increasingly required as organizations tighten control over cloud, AI, and project costs — PMs who understand financial modeling speak the language of the C-suite.',
   },
   // ── Solutions Architect ──
   {
@@ -1609,6 +1654,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: [],
     order: 1,
+    whyItMatters: 'Systems design is the most-tested topic in solutions architect interviews at major tech companies — designing for scale, reliability, and cost is the core value proposition of every architect.',
   },
   {
     id: 'sa-cloud-arch',
@@ -1621,6 +1667,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: ['sa-systems-design'],
     order: 2,
+    whyItMatters: 'Cloud architecture skills appear in 74.5% of enterprise engineering job listings (365 Data Science 2026) — AWS, Azure, and GCP certifications are the credential baseline for solutions architect roles.',
   },
   {
     id: 'sa-integration',
@@ -1633,6 +1680,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: ['sa-systems-design'],
     order: 3,
+    whyItMatters: 'Integration patterns are rising skills (LinkedIn 2026) — complex enterprises run 900+ applications on average, and architects who design clean integrations prevent years of maintenance costs.',
   },
   {
     id: 'sa-security-arch',
@@ -1645,6 +1693,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 3,
     prerequisites: ['sa-cloud-arch'],
     order: 4,
+    whyItMatters: 'Cloud security is the #2 most demanded skill for architecture roles (ISC2 2026) — 53% of US employers increase starting compensation for candidates with demonstrated cloud security expertise.',
   },
   {
     id: 'sa-cost-scalability',
@@ -1657,6 +1706,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 3,
     prerequisites: ['sa-integration', 'sa-security-arch'],
     order: 5,
+    whyItMatters: 'Cost and scalability architecture are rising requirements — FinOps practices identify significant annual savings for mid-sized enterprises, making this skill visible to executive leadership.',
   },
   // ── Software Architect ──
   {
@@ -1670,6 +1720,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: [],
     order: 1,
+    whyItMatters: 'Design patterns are the shared vocabulary of software engineering — architects who speak this language reduce review cycles and allow distributed teams to make consistent, maintainable decisions.',
   },
   {
     id: 'arch-distributed-systems',
@@ -1682,6 +1733,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 3,
     prerequisites: ['arch-design-patterns'],
     order: 2,
+    whyItMatters: 'Microservices architecture is a rising skill (LinkedIn 2026), aligning with Docker\'s 71% adoption — distributed systems knowledge is what separates senior engineers from architects at scale.',
   },
   {
     id: 'arch-api-design',
@@ -1694,6 +1746,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: ['arch-design-patterns'],
     order: 3,
+    whyItMatters: 'API design is a top skill for software architects (LinkedIn 2026) — well-designed APIs compound in value as every integration, partner feature, and product built on them benefits from the investment.',
   },
   {
     id: 'arch-system-modeling',
@@ -1706,6 +1759,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: ['arch-distributed-systems'],
     order: 4,
+    whyItMatters: 'Observability and system modeling are rising engineering skills (LinkedIn 2026) — architects who model failure modes before building prevent the most expensive production incidents.',
   },
   {
     id: 'arch-tech-leadership',
@@ -1718,6 +1772,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 3,
     prerequisites: ['arch-api-design', 'arch-system-modeling'],
     order: 5,
+    whyItMatters: 'Forward-deployed engineering roles grew 800%+ in 2025 (LinkedIn) — architects who combine technical depth with leadership and communication command the highest compensation in software engineering.',
   },
   // ── Mobile Developer ──
   {
@@ -1731,6 +1786,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: [],
     order: 1,
+    whyItMatters: 'Mobile UI fundamentals are the non-skippable foundation — React Native builds on these primitives, and developers who skip them hit walls they cannot debug in real-world applications.',
   },
   {
     id: 'mob-react-native',
@@ -1743,6 +1799,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: ['mob-ui-fundamentals'],
     order: 2,
+    whyItMatters: 'React Native is the leading cross-platform mobile framework (LinkedIn 2026) — it enables code sharing across iOS and Android and is cited in the majority of cross-platform mobile job postings.',
   },
   {
     id: 'mob-state-management',
@@ -1755,6 +1812,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: ['mob-react-native'],
     order: 3,
+    whyItMatters: 'State management is the most common source of bugs in production mobile apps — React Query, Zustand, and Redux are the frameworks used at most companies shipping React Native at scale.',
   },
   {
     id: 'mob-native-apis',
@@ -1767,6 +1825,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: ['mob-react-native'],
     order: 4,
+    whyItMatters: 'Native API integration (camera, push notifications, biometrics, location) separates basic mobile developers from those who can deliver complete, production-quality mobile experiences.',
   },
   {
     id: 'mob-app-store',
@@ -1779,6 +1838,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 3,
     prerequisites: ['mob-state-management', 'mob-native-apis'],
     order: 5,
+    whyItMatters: 'App Store and Play Store submission experience is required for any mobile role that ships to customers — the review process, signing, and provisioning workflows are non-trivial and rarely self-taught cleanly.',
   },
   // ── UI/UX Designer ──
   {
@@ -1792,6 +1852,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: [],
     order: 1,
+    whyItMatters: '58% of hiring managers say visual polish is in the top 5 most important designer skills (Figma Design Survey 2026) — UX fundamentals are the consistent hiring baseline across all design roles.',
   },
   {
     id: 'ux-wireframing',
@@ -1804,6 +1865,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: ['ux-fundamentals'],
     order: 2,
+    whyItMatters: 'Wireframing and prototyping are core design skills — communicating ideas before pixels are finalized separates fast, cost-effective designers from those who redo work after developer feedback.',
   },
   {
     id: 'ux-user-research',
@@ -1816,6 +1878,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: ['ux-wireframing'],
     order: 3,
+    whyItMatters: 'UX researcher is the #1 most in-demand design role in 2026 (UX Design Institute) — 82% of design leaders say their organization\'s need for user researchers has increased or stayed the same.',
   },
   {
     id: 'ux-figma',
@@ -1828,6 +1891,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: ['ux-wireframing'],
     order: 4,
+    whyItMatters: 'Figma is the most widely used interface design tool among professional designers (UX Tools Design Survey 2025) — Figma proficiency is a prerequisite in virtually every design job posting.',
   },
   {
     id: 'ux-design-thinking',
@@ -1840,6 +1904,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 3,
     prerequisites: ['ux-user-research', 'ux-figma'],
     order: 5,
+    whyItMatters: 'Design systems and systems thinking are cited as critical by 45% of hiring managers (Figma 2026) — designers who think in components and patterns deliver consistent experiences at scale.',
   },
   // ── Startup Founder ──
   {
@@ -1853,6 +1918,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: [],
     order: 1,
+    whyItMatters: 'The majority of startups fail due to building something nobody wants — customer validation before building is the highest-ROI founder activity and is increasingly scrutinized by investors during due diligence.',
   },
   {
     id: 'sf-mvp',
@@ -1865,6 +1931,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: ['sf-validation'],
     order: 2,
+    whyItMatters: 'LinkedIn Jobs on the Rise 2026 shows founders and independent consultants among the fastest-growing roles — the rise in self-employment reflects professionals adapting to uncertainty by shipping their own products.',
   },
   {
     id: 'sf-growth',
@@ -1877,6 +1944,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 2,
     prerequisites: ['sf-mvp'],
     order: 3,
+    whyItMatters: 'Distribution and growth skills are rising (LinkedIn 2026) — founders who can acquire users without relying entirely on paid channels have structurally better unit economics and longer runways.',
   },
   {
     id: 'sf-fundraising',
@@ -1889,6 +1957,7 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 3,
     prerequisites: ['sf-mvp'],
     order: 4,
+    whyItMatters: 'Understanding cap tables, term sheets, and investor dynamics is what separates first-time founders who get funded from those who do not — fundraising literacy is a competitive advantage at every stage.',
   },
   {
     id: 'sf-operations',
@@ -1901,5 +1970,6 @@ export const ALL_SKILLS: Skill[] = [
     requiredOutputs: 3,
     prerequisites: ['sf-growth', 'sf-fundraising'],
     order: 5,
+    whyItMatters: 'AI leverage for operations is a rising skill (LinkedIn 2026) — founders who use AI tools to multiply their output run leaner, faster companies and can compete with teams five times their size.',
   },
 ];
