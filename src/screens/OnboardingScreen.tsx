@@ -14,6 +14,7 @@ import {
 import { useAppStore, CAREER_PATHS, ALL_SKILLS } from '../store/appStore';
 import { useThemeColors, ColorsType, Colors, Spacing, Radius, FontSize, PathColors } from '../utils/theme';
 import { CareerPathId, CareerPath, CustomSkill, OutputType, ExperienceLevel } from '../types';
+import { getPathDemandSummary } from '../data/marketDemand';
 
 const ONBOARDING_PATH_CATEGORIES = [
   { label: 'Data & AI', pathIds: ['data-architect', 'data-engineer', 'ai-engineer', 'ml-engineer', 'data-analyst'] },
@@ -539,6 +540,7 @@ function PathCard({
   const styles = makeStyles(Colors);
   const pathColor = PathColors[path.id] ?? { primary: path.color, dim: path.color + '15', text: path.textColor, border: path.color + '40' };
   const scaleAnim = useRef(new Animated.Value(1)).current;
+  const demand = getPathDemandSummary(path.id);
 
   const handlePress = () => {
     Animated.sequence([
@@ -547,6 +549,12 @@ function PathCard({
     ]).start();
     onSelect();
   };
+
+  // Build a compact demand label, e.g. "🔥 3 in demand · ↗ 2 rising"
+  const demandParts: string[] = [];
+  if (demand.high > 0)   demandParts.push(`🔥 ${demand.high} in demand`);
+  if (demand.rising > 0) demandParts.push(`↗ ${demand.rising} rising`);
+  const demandLabel = demandParts.join(' · ');
 
   return (
     <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
@@ -563,7 +571,7 @@ function PathCard({
         onPress={handlePress}
         activeOpacity={0.88}
         accessibilityRole="button"
-        accessibilityLabel={`${path.name}${selected ? ', selected' : ''}`}
+        accessibilityLabel={`${path.name}${selected ? ', selected' : ''}${demandLabel ? `. ${demandLabel}` : ''}`}
         accessibilityState={{ selected }}
       >
         {selected && (
@@ -581,6 +589,10 @@ function PathCard({
             <Text style={styles.pathCardTitle} numberOfLines={1}>{path.description}</Text>
           </View>
         </View>
+
+        {demandLabel ? (
+          <Text style={styles.pathCardDemand}>{demandLabel}</Text>
+        ) : null}
       </TouchableOpacity>
     </Animated.View>
   );
@@ -1290,6 +1302,13 @@ const makeStyles = (Colors: ColorsType) => StyleSheet.create({
     color: Colors.textSub,
     lineHeight: 20,
     marginBottom: Spacing.sm,
+  },
+  pathCardDemand: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#FCA5A5',          // same warm red as the DemandBadge high colour
+    marginTop: 6,
+    letterSpacing: 0.2,
   },
   pathSkillList: {
     gap: 3,

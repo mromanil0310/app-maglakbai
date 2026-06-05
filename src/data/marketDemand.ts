@@ -171,3 +171,16 @@ export const CURATED_MARKET_DEMAND: MarketDemand[] = [
 export const MARKET_DEMAND_MAP: Record<string, MarketDemand> = Object.fromEntries(
   CURATED_MARKET_DEMAND.map((d) => [d.skillId, d])
 );
+
+/**
+ * Returns the count of high-demand and rising skills for a given career path.
+ * Used to show demand context on path selection screens (onboarding, catalog).
+ * Returns { high: 0, rising: 0 } for custom paths or paths with no data.
+ */
+export function getPathDemandSummary(pathId: string): { high: number; rising: number } {
+  const entries = CURATED_MARKET_DEMAND.filter((d) => d.pathId === pathId);
+  return {
+    high:   entries.filter((d) => d.level === 'high').length,
+    rising: entries.filter((d) => d.level === 'rising').length,
+  };
+}

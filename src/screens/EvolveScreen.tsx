@@ -32,6 +32,7 @@ import CareerNode from '../components/CareerNode';
 import DemandBadge from '../components/DemandBadge';
 import { CustomSkill, Skill, UserSkill } from '../types';
 import { pathHasProgress } from '../domain/skillGraph';
+import { getPathDemandSummary } from '../data/marketDemand';
 
 const PALETTE = ['#7C3AED', '#06B6D4', '#10B981', '#F59E0B', '#EF4444', '#EC4899', '#8B5CF6', '#F97316'];
 const ICON_OPTIONS = ['🎯', '📚', '🎨', '🏋️', '🎵', '🗣️', '✍️', '🔬', '🌍', '💼', '🍳', '📸', '🎭', '⚽', '🧘', '💡'];
@@ -130,6 +131,17 @@ function CatalogModal({
                         {path.name}
                       </Text>
                       <Text style={catalog.pathDesc} numberOfLines={1}>{path.description}</Text>
+                      {/* Demand summary */}
+                      {(() => {
+                        const d = getPathDemandSummary(pid);
+                        if (d.high === 0 && d.rising === 0) return null;
+                        const parts: string[] = [];
+                        if (d.high > 0)   parts.push(`🔥 ${d.high} in demand`);
+                        if (d.rising > 0) parts.push(`↗ ${d.rising} rising`);
+                        return (
+                          <Text style={catalog.demandLine}>{parts.join(' · ')}</Text>
+                        );
+                      })()}
                     </View>
                     {alreadyEnrolled ? (
                       <View style={catalog.enrolledBadge}>
@@ -2011,6 +2023,7 @@ const makeCatalog = (Colors: ColorsType) => StyleSheet.create({
   pathIconText: { fontSize: 22 },
   pathName: { fontSize: FontSize.sm, fontWeight: '700', color: Colors.text, marginBottom: 2 },
   pathDesc: { fontSize: FontSize.xs, color: Colors.textMuted },
+  demandLine: { fontSize: 11, fontWeight: '600', color: '#FCA5A5', marginTop: 4, letterSpacing: 0.2 },
   enrolledBadge: {
     borderRadius: Radius.full, paddingHorizontal: 8, paddingVertical: 3,
     backgroundColor: Colors.success + '18', borderWidth: 1, borderColor: Colors.success + '40',
