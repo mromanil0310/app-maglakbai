@@ -1,4 +1,4 @@
-# SkillForge — Problem Validation (BAEF Phase 1)
+# MaglakbAI — Problem Validation (BAEF Phase 1)
 
 > The BAEF Phase 1 artifact: *"Are we solving a problem worth solving?"* This formalizes the assumptions the PRD builds on. Several items are **hypotheses to validate in the pilot**, not proven facts — flagged as such.
 

@@ -1,6 +1,6 @@
-# SkillForge — Deployment
+# MaglakbAI — Deployment
 
-SkillForge ships as a **web/PWA** app (Vite build → static `dist/`). There is no native build in the pilot. This doc covers local build, production deploy (Netlify), the user-guide page (GitHub Pages), environment variables, and the sandbox build workaround.
+MaglakbAI ships as a **web/PWA** app (Vite build → static `dist/`). There is no native build in the pilot. This doc covers local build, production deploy (Netlify), the user-guide page (GitHub Pages), environment variables, and the sandbox build workaround.
 
 ---
 
@@ -58,8 +58,8 @@ That's it. No CLI needed.
 Magic Link emails redirect the user back to the app. You must tell Supabase your production URL:
 
 1. Supabase dashboard → **Authentication → URL Configuration**
-2. **Site URL**: set to your Netlify URL (e.g. `https://skillforge.netlify.app`)
-3. **Redirect URLs**: add `https://skillforge.netlify.app` (and keep `http://localhost:8082` for local dev)
+2. **Site URL**: set to your Netlify URL (e.g. `https://maglakbai.netlify.app`)
+3. **Redirect URLs**: add `https://maglakbai.netlify.app` (and keep `http://localhost:8082` for local dev)
 
 Without this, Magic Links from production will redirect to localhost instead of the live app.
 

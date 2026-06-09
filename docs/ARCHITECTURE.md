@@ -1,4 +1,4 @@
-# SkillForge — Architecture & Technical Decisions
+# MaglakbAI — Architecture & Technical Decisions
 
 > Describes the **current implemented architecture** (web/PWA pilot, as of sprint 39 — post ARCH-001 Supabase integration). This is the BAEF Phase 3 artifact; it must match the code. If you change structure, update this doc (see DOC-002 history in `reports/skillforge-audit-report.md`).
 

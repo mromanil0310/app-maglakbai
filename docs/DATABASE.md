@@ -1,4 +1,4 @@
-# SkillForge — Database Schema (Supabase / PostgreSQL)
+# MaglakbAI — Database Schema (Supabase / PostgreSQL)
 
 **Status:** Live — project `wovceouygyobczkkeyxy.supabase.co` (implemented sprint 39, ARCH-001).
 

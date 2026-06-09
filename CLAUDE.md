@@ -1,4 +1,4 @@
-# SkillForge — Claude Code Project Context
+# MaglakbAI — Claude Code Project Context
 
 > "Level up through proof, not promises."
 > Any skill. Any field. Any level.
@@ -21,7 +21,7 @@
 
 ## What This App Is
 
-SkillForge is a skill gamification app for anyone who wants to grow — not just tech professionals. Users log real proof-of-work outputs — projects, scripts, books, certifications, GitHub repos — to earn XP, unlock milestone achievements, and share progress on a social feed.
+MaglakbAI is a skill gamification app for anyone who wants to grow — not just tech professionals. Users log real proof-of-work outputs — projects, scripts, books, certifications, GitHub repos — to earn XP, unlock milestone achievements, and share progress on a social feed.
 
 **Core differentiator:** Proof-based progression. XP comes from building, not watching.
 
@@ -51,7 +51,7 @@ SkillForge is a skill gamification app for anyone who wants to grow — not just
 ## Project Structure
 
 ```
-SkillForge/
+MaglakbAI/
 ├── CLAUDE.md                        ← you are here
 ├── App.tsx                          ← root: ThemeContext + SafeAreaProvider + ErrorBoundary + AppNavigator
 ├── index.ts                         ← Expo entry point (registerRootComponent)
@@ -329,7 +329,7 @@ npx expo start
 - Pace mode gameplay weight (FEAT-002 — Sprint XP multiplier, Recovery streak freeze)
 
 ### 🔲 Phase 3 — Identity & Portfolio
-- Public profile URL (`skillforge.app/@username`)
+- Public profile URL (`maglakbai.app/@username`)
 - GitHub link support on outputs
 - LinkedIn share deep link from MilestoneScreen
 - Push notifications (streak reminders)

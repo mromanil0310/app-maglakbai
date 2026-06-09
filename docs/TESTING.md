@@ -1,6 +1,6 @@
-# SkillForge — Testing
+# MaglakbAI — Testing
 
-SkillForge uses **Vitest** for unit and integration tests. The suite focuses on the logic that *is the product* — XP, leveling, streaks, the evidence gate, achievement unlocks, and the core store actions.
+MaglakbAI uses **Vitest** for unit and integration tests. The suite focuses on the logic that *is the product* — XP, leveling, streaks, the evidence gate, achievement unlocks, and the core store actions.
 
 ## Running
 

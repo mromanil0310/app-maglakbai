@@ -1,4 +1,4 @@
-# SkillForge — Product Requirements Document
+# MaglakbAI — Product Requirements Document
 
 **Version:** 1.0 (sprint 39 — live web/PWA pilot)
 **Positioning:** "Level up through proof, not promises."
@@ -183,7 +183,7 @@ The user's public identity that evolves with their skills.
 - Progress bars per skill
 - Proof-of-work gallery: projects, books, certs, scripts (counts + links)
 
-**Public URL:** `skillforge.app/@username` — shareable outside the app.
+**Public URL:** `maglakbai.app/@username` — shareable outside the app.
 
 ---
 

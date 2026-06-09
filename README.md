@@ -1,9 +1,9 @@
-# SkillForge ⚒️
+# MaglakbAI ⚒️
 
 > **Level up through proof, not promises.**
 > Any skill. Any field. Any level.
 
-SkillForge is a skill gamification app for anyone who wants to grow. You log real proof-of-work outputs — projects, scripts, books, certifications, diagrams, GitHub repos — to earn XP, unlock milestone achievements, and share your progress. XP comes from **building, not watching.**
+MaglakbAI is a skill gamification app for anyone who wants to grow. You log real proof-of-work outputs — projects, scripts, books, certifications, diagrams, GitHub repos — to earn XP, unlock milestone achievements, and share your progress. XP comes from **building, not watching.**
 
 **📱 Live app:** https://fascinating-kitten-b6a79d.netlify.app
 **📖 User guide:** https://mromanil0310.github.io/skillforge/USER_GUIDE.html
@@ -83,7 +83,7 @@ npx expo start
 ## Project structure
 
 ```
-App_SkillForge/
+App_MaglakbAI/
 ├── src/            # components, screens, navigation, store, types, utils
 ├── docs/           # PRD, ARCHITECTURE, DATABASE, USER_GUIDE.html
 ├── public/         # PWA manifest, icons, _redirects

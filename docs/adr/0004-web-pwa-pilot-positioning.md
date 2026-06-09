@@ -3,10 +3,10 @@
 **Status:** Accepted (sprint 28 release-readiness audit)
 
 ## Context
-SkillForge is built with React Native + Expo and was originally framed for an iOS App Store launch. In reality there is no native build, the app uses web-only APIs (e.g. `localStorage`, injected CSS keyframes), and it deploys as a Vite-built static site. The BAEF release-readiness audit surfaced that the native framing was aspirational, not shipped (REL-001).
+MaglakbAI is built with React Native + Expo and was originally framed for an iOS App Store launch. In reality there is no native build, the app uses web-only APIs (e.g. `localStorage`, injected CSS keyframes), and it deploys as a Vite-built static site. The BAEF release-readiness audit surfaced that the native framing was aspirational, not shipped (REL-001).
 
 ## Decision
-Position and ship SkillForge as a **web/PWA pilot**. Align release decision, P0 list, docs, and user guide to the web/PWA reality. Keep the RN/Expo codebase so a native build remains possible later, but do not claim native until one is actually built and tested.
+Position and ship MaglakbAI as a **web/PWA pilot**. Align release decision, P0 list, docs, and user guide to the web/PWA reality. Keep the RN/Expo codebase so a native build remains possible later, but do not claim native until one is actually built and tested.
 
 ## Consequences
 - Honest scope: the Conditional-Go release decision and backlog reflect what's actually shippable.

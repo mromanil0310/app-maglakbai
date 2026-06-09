@@ -1,19 +1,19 @@
 ---
 name: skillforge-daily-qa
 category: App Dev
-description: Daily QA and improvement pass on the SkillForge app. Audits the codebase, fixes the top bug or implements the highest-priority backlog item, rebuilds, and serves the updated app.
+description: Daily QA and improvement pass on the MaglakbAI app. Audits the codebase, fixes the top bug or implements the highest-priority backlog item, rebuilds, and serves the updated app.
 schedule: Mon–Fri at 9:00 AM
 status: Active
 ---
 
-You are performing a daily QA audit and improvement pass on the SkillForge app — a skill gamification PWA ("Level up through proof, not promises.") built with React Native Web, Vite, Zustand, and React Navigation. Open to any skill, any field, any level — not just tech professionals.
+You are performing a daily QA audit and improvement pass on the MaglakbAI app — a skill gamification PWA ("Level up through proof, not promises.") built with React Native Web, Vite, Zustand, and React Navigation. Open to any skill, any field, any level — not just tech professionals.
 
 ## App context
-- Root: /Users/marloromanillos/Documents/Claude/Projects/App_SkillForge
+- Root: /Users/marloromanillos/Documents/Claude/Projects/App_MaglakbAI
 - Live URL (production): https://fascinating-kitten-b6a79d.netlify.app
 - Local dev: `npx vite` → http://localhost:8082
 - Storage key: skillforge_v1 (do NOT rename)
-- Backlog report: /Users/marloromanillos/Documents/Claude/Projects/App_SkillForge/reports/skillforge-audit-report.md
+- Backlog report: /Users/marloromanillos/Documents/Claude/Projects/App_MaglakbAI/reports/skillforge-audit-report.md
 - Stack: React Native Web · Vite 5 · React Navigation v7 · Zustand · TypeScript strict · Supabase (live backend)
 - Tests: 94 passing — run via `npm test` (Vitest)
 - Deploy: Netlify auto-deploys on `git push main`
@@ -36,7 +36,7 @@ You are performing a daily QA audit and improvement pass on the SkillForge app �
 ---
 
 ## Step 1 — Read the current backlog report
-Read /Users/marloromanillos/Documents/Claude/Projects/App_SkillForge/reports/skillforge-audit-report.md. This is the BAEF-governed source of truth for open items, priorities, and run history. Focus on the **Open Items** table at the top and the **Recommended sequence**.
+Read /Users/marloromanillos/Documents/Claude/Projects/App_MaglakbAI/reports/skillforge-audit-report.md. This is the BAEF-governed source of truth for open items, priorities, and run history. Focus on the **Open Items** table at the top and the **Recommended sequence**.
 
 ## Step 2 — Audit the codebase
 Read the source files, focusing on:
@@ -72,7 +72,7 @@ Make the change. Implementation rules:
 On the local Mac, `npm run build` works directly (no workaround needed):
 
 ```bash
-cd /Users/marloromanillos/Documents/Claude/Projects/App_SkillForge
+cd /Users/marloromanillos/Documents/Claude/Projects/App_MaglakbAI
 npm test          # must be green first
 npm run build     # → dist/
 ```
@@ -85,7 +85,7 @@ node node_modules/.bin/vite build --outDir /tmp/sf_dist_today --emptyOutDir
 Fix any TypeScript or Vite errors before proceeding. Do not report success until the build output shows `✓ built`.
 
 ## Step 6 — Update the backlog report
-Update /Users/marloromanillos/Documents/Claude/Projects/App_SkillForge/reports/skillforge-audit-report.md:
+Update /Users/marloromanillos/Documents/Claude/Projects/App_MaglakbAI/reports/skillforge-audit-report.md:
 - Mark resolved items with ✅ + sprint number
 - Add a new Run Log entry (newest first) with: what was done, files changed, test count, build status
 - Update the Open Items table count

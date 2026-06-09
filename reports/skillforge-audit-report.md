@@ -1,7 +1,7 @@
-# SkillForge Audit Report
+# MaglakbAI Audit Report
 _Last updated: 2026-06-09 (sprint 42 — MaglakbAI rebrand; premium fonts + text-scale; Key Takeaway fix (BUG-014); evidence gate UX; score 7.7/10)_
 
-> **Governed by BAEF** — the [Biboy Application Excellence Framework](../Biboy_BAEF/BAEF.md) is now the operating standard for this app. The authoritative current assessment is the **BAEF Release Readiness Audit** below. The legacy product scorecard that follows is retained for history but was **superseded on 2026-06-01**: its "10/10 pilot ready" predates the release-readiness audit that reframed SkillForge as a web/PWA pilot (not a native iOS app) and surfaced the P0 blockers since resolved.
+> **Governed by BAEF** — the [Biboy Application Excellence Framework](../Biboy_BAEF/BAEF.md) is now the operating standard for this app. The authoritative current assessment is the **BAEF Release Readiness Audit** below. The legacy product scorecard that follows is retained for history but was **superseded on 2026-06-01**: its "10/10 pilot ready" predates the release-readiness audit that reframed MaglakbAI as a web/PWA pilot (not a native iOS app) and surfaced the P0 blockers since resolved.
 
 ---
 
@@ -386,7 +386,7 @@ Closed items, kept for governance history. Full implementation detail is in the 
 
 #### PRIV-002 — Placeholder privacy contact
 - **Priority:** P1 · **Severity:** 🟡 Medium · **Category:** Privacy / Documentation · **Effort:** XS
-- **Description:** Privacy policy uses `privacy@skillforge.app` placeholder.
+- **Description:** Privacy policy uses `privacy@maglakbai.app` placeholder.
 - **Acceptance criteria:** Real monitored contact before external users.
 - **QA validation:** Policy shows a real address; email deliverable.
 - **Dependencies:** Business decision on contact.
@@ -492,7 +492,7 @@ Closed items, kept for governance history. Full implementation detail is in the 
 
 - [2026-05-29] **Accessibility labels on all interactive elements — A11Y-001 (sprint 20)** — Added `accessibilityLabel` and `accessibilityRole="button"` to every interactive `TouchableOpacity` and `accessibilityLabel` to all `TextInput` fields across 7 files. Specific changes: (1) `CareerNode.tsx` — skill node card gets context-aware label describing skill name, status, output progress, and XP reward; `accessibilityState={{ disabled: isLocked }}` added. (2) `FeedCard.tsx` — active reaction chips get "React with / Remove {emoji}, N total" labels; quick-react chips get "Add {emoji} reaction"; "more comments" button, comment prompt, and send button all labeled; comment TextInput gets `accessibilityLabel`. (3) `DashboardScreen.tsx` — freeze button, "Log My First Output" CTA, NEXT MILESTONE card, Today's Challenge card, path-complete CTAs all labeled. (4) `LogOutputScreen.tsx` — output type chips get label + `accessibilityState={{ selected }}`; skill option cards get progress-context labels ("2 of 5 outputs, final push!"); title/description/link TextInputs labeled; submit button labeled with `accessibilityState={{ disabled }}`. (5) `AppNavigator.tsx` — all 5 tabs get `tabBarAccessibilityLabel`; Log tab uses dynamic label "Log output — streak at risk!" when streak is at risk. (6) `EvolveScreen.tsx` — "+ Roadmap" button, path switcher tabs (with `accessibilityState={{ selected }}`), add-path tab, empty-state CTA all labeled. (7) `ProfileScreen.tsx` — share button, edit-name/edit-bio tappable areas, bio TextInput, name TextInput, all achievement tiles (with unlocked/locked context), output filter chips (with `accessibilityState={{ selected }}`) all labeled.
 
-- [2026-05-29] **Post-onboarding welcome card — UX-015 (sprint 19)** — First-time users now see a full-screen "Welcome to SkillForge!" overlay on their first Dashboard load. Card shows the SkillForge ⚡ logo, a welcome message, and an animated XP counter counting up to their first output's XP earned. Auto-dismisses after 3.2s or tap. Implemented via `showWelcomeCard: boolean` in Zustand store (set in `completeOnboarding`, cleared by `dismissWelcomeCard`), `Modal` overlay in `DashboardScreen`, and a 30-step setInterval XP counter animation. Per-boundary: `showWelcomeCard` is ephemeral (not persisted to localStorage) so it only fires on the first session after onboarding. Files: `src/store/appStore.ts`, `src/screens/DashboardScreen.tsx`.
+- [2026-05-29] **Post-onboarding welcome card — UX-015 (sprint 19)** — First-time users now see a full-screen "Welcome to MaglakbAI!" overlay on their first Dashboard load. Card shows the MaglakbAI ⚡ logo, a welcome message, and an animated XP counter counting up to their first output's XP earned. Auto-dismisses after 3.2s or tap. Implemented via `showWelcomeCard: boolean` in Zustand store (set in `completeOnboarding`, cleared by `dismissWelcomeCard`), `Modal` overlay in `DashboardScreen`, and a 30-step setInterval XP counter animation. Per-boundary: `showWelcomeCard` is ephemeral (not persisted to localStorage) so it only fires on the first session after onboarding. Files: `src/store/appStore.ts`, `src/screens/DashboardScreen.tsx`.
 
 - [2026-05-29] **textMuted contrast fix — A11Y-005 (sprint 19)** — `Colors.textMuted` changed from `#44446A` (~2.8:1 contrast on `#11111C`) to `#7070A0` (~4.6:1 contrast), meeting WCAG AA 4.5:1 minimum for normal text. Affects timestamps, output meta labels, placeholder text, comment author names, and all secondary labels across every screen. File: `src/utils/theme.ts`.
 
@@ -524,7 +524,7 @@ Closed items, kept for governance history. Full implementation detail is in the 
 
 - [2026-05-27] **Achievement detail modal** — Tapping any achievement badge (unlocked or locked) now opens a bottom-sheet modal showing: large icon with rarity-colored background, COMMON/RARE/EPIC/LEGENDARY badge, title, description, and XP reward row. For locked achievements, a progress bar shows current progress toward the unlock requirement (e.g., "1 / 5 outputs logged" for Builder, "3 / 7 day streak" for Consistent). For unlocked achievements, a "✓ Unlocked" tag is shown. Helper function `getAchievementProgress()` maps each achievement ID to its progress metric. Closes the UX gap where users saw locked achievements with no path to unlock them. Files: `src/screens/ProfileScreen.tsx`
 
-- [2026-05-27] **Progress share card (Web Share API)** — "📤 Share Progress" button added to the Profile identity section (between bio and stats row). On tap: calls `navigator.share()` if the browser supports it (mobile web, PWA), falling back to `navigator.clipboard.writeText()` with a toast confirmation on desktop. Share card includes name, level + title, XP, streak, skills mastered, outputs logged, and `#SkillForge` hashtag. Closes the "Share → Receive Recognition" step of the core addiction loop. Files: `src/screens/ProfileScreen.tsx`
+- [2026-05-27] **Progress share card (Web Share API)** — "📤 Share Progress" button added to the Profile identity section (between bio and stats row). On tap: calls `navigator.share()` if the browser supports it (mobile web, PWA), falling back to `navigator.clipboard.writeText()` with a toast confirmation on desktop. Share card includes name, level + title, XP, streak, skills mastered, outputs logged, and `#MaglakbAI` hashtag. Closes the "Share → Receive Recognition" step of the core addiction loop. Files: `src/screens/ProfileScreen.tsx`
 
 - [2026-05-27] **Output timestamps + type filter in Profile gallery** — Output cards in ProfileScreen now show a relative timestamp (`timeAgo()` — "16m ago", "3d ago", etc.) in the metadata line. A horizontal filter chip row appears above the gallery when the user has outputs of 2+ different types, allowing one-tap filtering by type (Project / Book / Cert / GitHub / Script / Design). Section header now shows "YOUR OUTPUTS · N total" count. The filter chips correctly hide for users with only one output type. Files: `src/screens/ProfileScreen.tsx`
 
@@ -703,9 +703,9 @@ Historical artifacts kept for reference. **Not active** — the live assessment 
 ## 🏗 Build Notes
 
 - **Toolchain:** Vite 5 (web), Metro (native). Web builds go via Vite only.
-- **FUSE workaround:** FUSE-mounted workspace (`/sessions/*/mnt/App_SkillForge`) blocks `unlink` in bash, causing Vite build failures if run in-place. Workaround:
-  1. `cp -r /sessions/.../App_SkillForge /tmp/sf_<sprint>` (cp errors on node_modules are non-fatal)
-  2. `rm -rf /tmp/sf_<sprint>/node_modules && ln -s /sessions/.../App_SkillForge/node_modules /tmp/sf_<sprint>/node_modules`
+- **FUSE workaround:** FUSE-mounted workspace (`/sessions/*/mnt/App_MaglakbAI`) blocks `unlink` in bash, causing Vite build failures if run in-place. Workaround:
+  1. `cp -r /sessions/.../App_MaglakbAI /tmp/sf_<sprint>` (cp errors on node_modules are non-fatal)
+  2. `rm -rf /tmp/sf_<sprint>/node_modules && ln -s /sessions/.../App_MaglakbAI/node_modules /tmp/sf_<sprint>/node_modules`
   3. `cd /tmp/sf_<sprint> && node node_modules/.bin/vite build --outDir /tmp/sf_dist_<sprint>`
   4. Copy new `dist/` files back to workspace (old files cannot be deleted from bash; new files overwrite correctly)
 - **Dev server:** Write a static Node HTTP server to the persistent outputs path (`/sessions/.../outputs/serve_sf_<sprint>.js`) — not `/tmp` (lost between bash calls). Serve from `/tmp/sf_dist_<sprint>` on port 8083.
@@ -931,8 +931,8 @@ Historical artifacts kept for reference. **Not active** — the live assessment 
 - **Files changed:** `src/domain/progression.ts` (new), `src/domain/__tests__/progression.test.ts` (new), `src/domain/__tests__/leveling.test.ts` (new), `vitest.config.ts` (new), `src/store/appStore.ts` (logic → re-exports), `package.json` (test scripts + vitest devDep), `reports/skillforge-audit-report.md`.
 
 ### 2026-06-01 (sprint 28) — BAEF adoption + Web/PWA Pilot Release Readiness
-- **Framework:** Adopted the [Biboy Application Excellence Framework (BAEF)](../Biboy_BAEF/BAEF.md) as the permanent operating standard. Shared brand-wide location created at `Projects/Biboy_BAEF/` (BAEF.md, TEMPLATES.md, REGISTRY.md); SkillForge registered at Phase 8→9.
-- **Release-readiness audit:** Reframed SkillForge as a **web/PWA pilot** (not native iOS). Ran the BAEF 12-dimension scorecard (overall 6.9/10) and produced a **Conditional Go** for closed web/PWA pilot.
+- **Framework:** Adopted the [Biboy Application Excellence Framework (BAEF)](../Biboy_BAEF/BAEF.md) as the permanent operating standard. Shared brand-wide location created at `Projects/Biboy_BAEF/` (BAEF.md, TEMPLATES.md, REGISTRY.md); MaglakbAI registered at Phase 8→9.
+- **Release-readiness audit:** Reframed MaglakbAI as a **web/PWA pilot** (not native iOS). Ran the BAEF 12-dimension scorecard (overall 6.9/10) and produced a **Conditional Go** for closed web/PWA pilot.
 - **P0 blockers — all resolved this cycle:** SEC-001 (PII to analytics without consent → opt-in gate + `scrubPII`), PRIV-001 (no consent UI/policy → `ConsentBanner` + `PrivacyPolicyModal` + Settings toggle), A11Y-010 (pinch-zoom disabled → viewport fixed, WCAG 1.4.4), SEC-002 (error boundary stack leak → friendly screen, stack dev-only), TRUST-001 (mock feed shown as live → relabeled PREVIEW + sample markers). Also added Data export/import + local-only notice in Settings.
 - **User-facing docs:** Wrote `docs/USER_GUIDE.html` — self-contained, on-brand how-to guide with inline screen mockups (10 sections: install/PWA, consent, onboarding, Home, Log, Evolve, Community preview, Profile, data & privacy, FAQ).
 - **Files changed:** `index.html`, `App.tsx`, `src/utils/analytics.ts`, `src/store/appStore.ts`, `src/screens/SettingsScreen.tsx`, `src/screens/FeedScreen.tsx`, `src/components/ConsentBanner.tsx` (new), `src/components/PrivacyPolicyModal.tsx` (new), `docs/USER_GUIDE.html` (new), `skillforge-audit-report.md`.
@@ -1041,7 +1041,7 @@ Historical artifacts kept for reference. **Not active** — the live assessment 
 - **Files changed:** `src/store/appStore.ts`, `src/screens/LogOutputScreen.tsx`, `skillforge-audit-report.md`
 - **Build:** 0 TS errors. Clean build via FUSE workaround (`/tmp/sf_s18` → `/tmp/sf_dist_s18`). Bundles: `App-BN8Rudk8.js` (565KB), `index-DxXzNGaH.js` (329KB). Server live at http://192.168.123.37:8083 (HTTP 200 verified).
 - **Production-readiness verdict:** 8/10 overall — ship-ready for closed pilot. All blocking state bugs resolved. Remaining items (A11Y, PERF, OPS) are quality-of-life improvements for public launch.
-- **Next sprint recommendation:** **UX-015 — Post-onboarding welcome moment** — highest D1 activation impact of remaining items. After first output is logged in onboarding step 4, show a brief animated "Welcome to SkillForge 🚀 — you earned 50 XP!" card before navigating to Dashboard.
+- **Next sprint recommendation:** **UX-015 — Post-onboarding welcome moment** — highest D1 activation impact of remaining items. After first output is logged in onboarding step 4, show a brief animated "Welcome to MaglakbAI 🚀 — you earned 50 XP!" card before navigating to Dashboard.
 
 ### 2026-05-29 (sprint 17)
 - Improvement made: **Skill progress bars on LogOutputScreen** — added inline progress indicators on every built-in skill option in the Log Output form.
@@ -1049,7 +1049,7 @@ Historical artifacts kept for reference. **Not active** — the live assessment 
 - **Fix**: Updated the `allOptions.map()` render block in `LogOutputScreen`. Each built-in skill option now renders: (1) a 3px progress bar (`rgba(255,255,255,0.07)` background, filled proportionally with path-responsive color), (2) an `N/M outputs · +XP on complete` meta line in gold for the XP hint, (3) a `🎯 Final push!` gold pill badge when `outputCount + 1 >= requiredOutputs` (exactly one away), and (4) a gold border + `goldDim` background on the skill card itself in the final-push state. Selected state overrides: bar turns `primaryLight`, label tints purple. Custom path skills retain their existing `pathLabel` meta text without a progress bar (no fixed `requiredOutputs`). Added 11 new StyleSheet entries: `skillOptionFinalPush`, `skillOptionNameRow`, `finalPushBadge`, `finalPushBadgeText`, `skillProgressArea`, `skillProgressBg`, `skillProgressFill`, `skillProgressFillSelected`, `skillProgressFillFinalPush`, `skillProgressLabel`, `skillProgressLabelSelected`, `skillXpHint`.
 - Files changed: `src/screens/LogOutputScreen.tsx`, `skillforge-audit-report.md`
 - Build: 549 modules, 0 TS errors. ✓ built in 2.36s. Server live at http://192.168.123.37:8083 (HTTP 200 verified).
-- Notes: No open bugs found. All 16 previous sprints verified stable. Next highest-value item: **Onboarding post-completion welcome moment** — after the first output is logged in step 4 of onboarding, the user silently lands on the Dashboard with no celebration for their very first XP earn. A brief animated "Welcome to SkillForge — you earned 75 XP!" card before the main tabs appear would meaningfully improve D1 activation.
+- Notes: No open bugs found. All 16 previous sprints verified stable. Next highest-value item: **Onboarding post-completion welcome moment** — after the first output is logged in step 4 of onboarding, the user silently lands on the Dashboard with no celebration for their very first XP earn. A brief animated "Welcome to MaglakbAI — you earned 75 XP!" card before the main tabs appear would meaningfully improve D1 activation.
 
 ### 2026-05-28 (sprint 16)
 - Improvement made: **Comment feature on Feed posts** — users can now add comments to any community post.

@@ -1,8 +1,8 @@
-# SkillForge — Privacy Policy
+# MaglakbAI — Privacy Policy
 
 > Standalone copy of the in-app privacy policy. The authoritative version users see is rendered in-app by `src/components/PrivacyPolicyModal.tsx`; keep the two in sync. Web/PWA pilot.
 
-**SkillForge is a pilot.** Your progress — your name, outputs, XP, skills, and posts — is stored **only on this device**, in your browser. We do not have a server, we cannot see your data, and nothing you log is shared with other people.
+**MaglakbAI is a pilot.** Your progress — your name, outputs, XP, skills, and posts — is stored **only on this device**, in your browser. We do not have a server, we cannot see your data, and nothing you log is shared with other people.
 
 ## Where your data lives
 Everything you create is saved in your browser's local storage on this device. It is not uploaded anywhere. If you clear your browser data, switch devices or browsers, or use private/incognito mode, your progress may be lost. You can back it up anytime from **Settings → Export Data**.
