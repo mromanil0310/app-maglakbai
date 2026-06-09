@@ -233,7 +233,7 @@ export default function PortfolioScreen() {
 
     const shareText = [
       `${user.name} — ${pathIcon} ${pathName} Portfolio`,
-      `@${user.handle} · Built on LakbAI`,
+      `@${user.handle} · Built on MaglakbAI`,
       ``,
       featured.length > 0 ? `Featured Work:\n${featuredLines}` : null,
       ``,

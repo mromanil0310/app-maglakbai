@@ -1,5 +1,5 @@
 /**
- * LakbAI Analytics — PostHog-compatible event tracking.
+ * MaglakbAI Analytics — PostHog-compatible event tracking.
  *
  * Privacy posture (web pilot):
  *   • OPT-IN ONLY. No event is sent until the user explicitly grants consent.

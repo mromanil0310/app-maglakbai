@@ -23,6 +23,14 @@ import { sendMagicLink, signOut, isSupabaseEnabled } from '../lib/auth';
 
 const STORAGE_KEY = 'skillforge_v1';
 
+// Text-size steps (must stay within the store's 0.9–1.2 clamp).
+const FONT_SCALE_STEPS = [0.9, 1.0, 1.1, 1.2];
+const FONT_SCALE_LABELS = ['Small', 'Default', 'Large', 'X-Large'];
+const fontScaleIndex = (scale: number): number => {
+  const i = FONT_SCALE_STEPS.findIndex((s) => Math.abs(s - scale) < 0.001);
+  return i === -1 ? 1 : i;
+};
+
 // Web-only: download the on-device save as a JSON backup file.
 function exportProgress(): boolean {
   try {
@@ -58,7 +66,7 @@ function importProgress(onResult: (ok: boolean, msg: string) => void): void {
           const text = reader.result as string;
           const parsed = JSON.parse(text);
           if (!parsed || typeof parsed !== 'object' || !('user' in parsed || 'hasOnboarded' in parsed)) {
-            onResult(false, 'That file is not a LakbAI backup.');
+            onResult(false, 'That file is not a MaglakbAI backup.');
             return;
           }
           localStorage.setItem(STORAGE_KEY, text);
@@ -250,6 +258,9 @@ export default function SettingsScreen() {
   const resetApp = useAppStore((s) => s.resetApp);
   const colorScheme = useAppStore((s) => s.colorScheme);
   const setColorScheme = useAppStore((s) => s.setColorScheme);
+  const fontScale = useAppStore((s) => s.fontScale);
+  const setFontScale = useAppStore((s) => s.setFontScale);
+  const fsIdx = fontScaleIndex(fontScale);
   const Colors = useThemeColors();
   const styles = React.useMemo(() => makeStyles(Colors), [Colors]);
   const { showToast } = useToast();
@@ -489,6 +500,35 @@ export default function SettingsScreen() {
             onPress={() => setColorScheme(colorScheme === 'dark' ? 'light' : 'dark')}
           />
           <View style={styles.rowDivider} />
+          {/* Text Size — − / + stepper, scales the whole app */}
+          <View style={styles.row}>
+            <View style={styles.rowLeft}>
+              <Text style={styles.rowIcon}>🔠</Text>
+              <Text style={styles.rowLabel}>Text Size</Text>
+            </View>
+            <View style={styles.fontStepper}>
+              <TouchableOpacity
+                style={[styles.fontStepBtn, fsIdx === 0 && styles.fontStepBtnDisabled]}
+                onPress={() => setFontScale(FONT_SCALE_STEPS[Math.max(0, fsIdx - 1)])}
+                disabled={fsIdx === 0}
+                accessibilityRole="button"
+                accessibilityLabel="Decrease text size"
+              >
+                <Text style={styles.fontStepMinus}>A</Text>
+              </TouchableOpacity>
+              <Text style={styles.fontScaleLabel}>{FONT_SCALE_LABELS[fsIdx]}</Text>
+              <TouchableOpacity
+                style={[styles.fontStepBtn, fsIdx === FONT_SCALE_STEPS.length - 1 && styles.fontStepBtnDisabled]}
+                onPress={() => setFontScale(FONT_SCALE_STEPS[Math.min(FONT_SCALE_STEPS.length - 1, fsIdx + 1)])}
+                disabled={fsIdx === FONT_SCALE_STEPS.length - 1}
+                accessibilityRole="button"
+                accessibilityLabel="Increase text size"
+              >
+                <Text style={styles.fontStepPlus}>A</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+          <View style={styles.rowDivider} />
           <SettingsRow
             icon="📦"
             label="Version"
@@ -715,6 +755,43 @@ const makeStyles = (Colors: ColorsType) => StyleSheet.create({
     height: 1,
     backgroundColor: Colors.border,
     marginLeft: 52,
+  },
+
+  // ── Text Size stepper
+  fontStepper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  fontScaleLabel: {
+    fontSize: FontSize.sm,
+    fontWeight: '600',
+    color: Colors.textSub,
+    minWidth: 58,
+    textAlign: 'center',
+  },
+  fontStepBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: Radius.md,
+    backgroundColor: Colors.cardAlt,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  fontStepBtnDisabled: {
+    opacity: 0.4,
+  },
+  fontStepMinus: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: Colors.primaryLight,
+  },
+  fontStepPlus: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: Colors.primaryLight,
   },
 
   // ── Local-data notice

@@ -1,5 +1,5 @@
 // ─── Progression Domain Logic ──────────────────────────────────────────────────
-// Pure, dependency-free calculators for the LakbAI progression system:
+// Pure, dependency-free calculators for the MaglakbAI progression system:
 // motivation decay, burnout protection, evidence tiers, and skill/career mastery.
 //
 // Extracted from appStore.ts (ARCH-002) so this logic can be unit-tested in
@@ -179,7 +179,7 @@ export function calculateOutputXP(
 }
 
 // ─── Career Outcome XP ───────────────────────────────────────────────────────
-// Generous awards — these are real-world proof that LakbAI is working.
+// Generous awards — these are real-world proof that MaglakbAI is working.
 
 export const OUTCOME_XP: Record<OutcomeType, number> = {
   interview:       150,

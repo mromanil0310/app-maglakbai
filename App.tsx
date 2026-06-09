@@ -49,9 +49,18 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, Error
 export default function App() {
   const sessionStart = useRef(Date.now());
   const colorScheme = useAppStore((s) => s.colorScheme);
+  const fontScale = useAppStore((s) => s.fontScale);
   // UX-028: only show the consent banner after onboarding is complete so it
   // never overlaps the "Begin Your Journey" CTA on the welcome screen.
   const hasOnboarded = useAppStore((s) => s.hasOnboarded);
+
+  // Apply the user's text-size preference app-wide (web). The CSS rule
+  // `#root { zoom: var(--app-font-scale) }` in index.html picks this up.
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      document.documentElement.style.setProperty('--app-font-scale', String(fontScale));
+    }
+  }, [fontScale]);
 
   useEffect(() => {
     sessionStarted();

@@ -25,7 +25,7 @@ export default function ConsentBanner() {
     <>
       <View style={styles.wrap} pointerEvents="box-none">
         <View style={styles.card} accessibilityRole="alert">
-          <Text style={styles.title}>📊 Help shape LakbAI</Text>
+          <Text style={styles.title}>📊 Help shape MaglakbAI</Text>
           <Text style={styles.body}>
             We’d love to learn how the pilot is used so we can improve it. May we collect{' '}
             <Text style={styles.bodyStrong}>anonymous</Text> usage stats? No name, email, or anything

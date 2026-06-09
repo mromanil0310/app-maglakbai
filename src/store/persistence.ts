@@ -1,5 +1,5 @@
 // ─── Persistence ────────────────────────────────────────────────────────────────
-// localStorage persistence for the LakbAI store, extracted from appStore.ts
+// localStorage persistence for the MaglakbAI store, extracted from appStore.ts
 // (ARCH-002) and made schema-versioned (ARCH-003).
 //
 // On disk the payload is a versioned envelope: `{ v: SCHEMA_VERSION, data: {...} }`.
@@ -40,6 +40,7 @@ function getPersistable(state: AppState) {
     userFeedPosts: state.userFeedPosts,
     savedPostIds: state.savedPostIds,
     colorScheme: state.colorScheme,
+    fontScale: state.fontScale,
     careerOutcomes: state.careerOutcomes,
     submittedSignalSkillIds: state.submittedSignalSkillIds,
   };
@@ -123,6 +124,7 @@ export function attachPersistence(store: StoreApi<AppState>): void {
       last.userFeedPosts === p.userFeedPosts &&
       last.savedPostIds === p.savedPostIds &&
       last.colorScheme === p.colorScheme &&
+      last.fontScale === p.fontScale &&
       last.careerOutcomes === p.careerOutcomes &&
       last.submittedSignalSkillIds === p.submittedSignalSkillIds
     ) return;

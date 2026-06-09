@@ -1,4 +1,4 @@
-// LakbAI career path catalog — pure static data extracted from appStore.ts (ARCH-002).
+// MaglakbAI career path catalog — pure static data extracted from appStore.ts (ARCH-002).
 import type { CareerPath } from '../types';
 
 export const CAREER_PATHS: CareerPath[] = [

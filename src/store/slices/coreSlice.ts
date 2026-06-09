@@ -184,7 +184,7 @@ export const createCoreSlice = (set: Set, get: Get): Pick<AppState, 'completeOnb
 
     // ── Evidence gate (built-in skills only) ────────────────────────────────
     // A skill may not complete unless at least one of its outputs is 'verified'
-    // (has a link) or 'documented' (description ≥ 80 chars). This prevents
+    // (has a link) or 'documented' (description ≥ 50 chars). This prevents
     // users from spamming minimal entries to fake mastery.
     const currentEvidenceTier = getEvidenceTier(payload.link, payload.description);
     let evidenceRequired = false;
@@ -219,6 +219,7 @@ export const createCoreSlice = (set: Set, get: Get): Pick<AppState, 'completeOnb
       title: payload.title,
       description: payload.description,
       link: payload.link,
+      keyTakeaway: payload.keyTakeaway?.trim() || undefined,
       xpGained: totalXPGained,
       createdAt: new Date().toISOString(),
       evidenceTier: currentEvidenceTier,

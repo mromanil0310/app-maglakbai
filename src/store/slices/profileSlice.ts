@@ -21,7 +21,7 @@ import { initUserSkills, unlockDependentSkills, checkAchievements } from '../../
 type Set = StoreApi<AppState>['setState'];
 type Get = StoreApi<AppState>['getState'];
 
-export const createProfileSlice = (set: Set, get: Get): Pick<AppState, 'updateAvatar' | 'updateAvatarImage' | 'updateBio' | 'updateName' | 'updateTargetRole' | 'setComebackGoal' | 'setPaceMode' | 'updateEmail' | 'setColorScheme'> => ({
+export const createProfileSlice = (set: Set, get: Get): Pick<AppState, 'updateAvatar' | 'updateAvatarImage' | 'updateBio' | 'updateName' | 'updateTargetRole' | 'setComebackGoal' | 'setPaceMode' | 'updateEmail' | 'setColorScheme' | 'setFontScale'> => ({
   updateAvatar: (emoji: string) => {
     const state = get();
     if (!state.user) return;
@@ -75,5 +75,12 @@ export const createProfileSlice = (set: Set, get: Get): Pick<AppState, 'updateAv
 
   setColorScheme: (scheme: 'dark' | 'light') => {
     set({ colorScheme: scheme });
+  },
+
+  // App-wide text size. Clamped to the supported range so a bad value can never
+  // be persisted or zoom the UI off-screen.
+  setFontScale: (scale: number) => {
+    const clamped = Math.min(1.2, Math.max(0.9, Math.round(scale * 100) / 100));
+    set({ fontScale: clamped });
   },
 });

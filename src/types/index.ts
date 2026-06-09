@@ -119,6 +119,7 @@ export interface Output {
   title: string;
   description: string;
   link?: string;
+  keyTakeaway?: string; // the one thing the user will apply (input at log time; +15 XP)
   xpGained: number;
   createdAt: string;
   evidenceTier?: EvidenceTier; // set at log time; undefined on legacy outputs treated as 'logged'

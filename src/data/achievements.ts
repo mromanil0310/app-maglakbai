@@ -1,4 +1,4 @@
-// LakbAI achievement catalog — pure static data extracted from appStore.ts (ARCH-002).
+// MaglakbAI achievement catalog — pure static data extracted from appStore.ts (ARCH-002).
 import type { Achievement } from '../types';
 
 export const ALL_ACHIEVEMENTS: Achievement[] = [

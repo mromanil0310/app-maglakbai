@@ -127,6 +127,7 @@ export interface AppState {
   showWelcomeCard: boolean; // true on first Dashboard load after onboarding — ephemeral, not persisted
   savedPostIds: string[]; // post IDs bookmarked by the user
   colorScheme: 'dark' | 'light'; // persisted theme preference
+  fontScale: number; // persisted app-wide text-size multiplier (0.9–1.2; 1 = default)
   careerOutcomes: CareerOutcome[]; // self-reported real-world career wins
   marketDemand: Record<string, MarketDemand>; // demand signals keyed by skillId — loaded on first EvolveScreen mount
   submittedSignalSkillIds: string[]; // skillIds the user has already contributed a signal for (no re-prompting)
@@ -175,6 +176,7 @@ export interface AppState {
   deleteOutput: (outputId: string) => void;
   addComment: (postId: string, text: string) => void;
   setColorScheme: (scheme: 'dark' | 'light') => void;
+  setFontScale: (scale: number) => void;
   // ARCH-001: auth actions
   setSupabaseSession: (userId: string | null, email: string | null) => void;
   setSupabaseSyncing: (syncing: boolean) => void;
@@ -243,6 +245,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   showWelcomeCard: false,
   savedPostIds: saved?.savedPostIds ?? [],
   colorScheme: saved?.colorScheme ?? 'dark',
+  fontScale: saved?.fontScale ?? 1,
   careerOutcomes: saved?.careerOutcomes ?? [],
   marketDemand: { ...MARKET_DEMAND_MAP }, // seeded from curated data; community signals merged on load
   submittedSignalSkillIds: saved?.submittedSignalSkillIds ?? [],

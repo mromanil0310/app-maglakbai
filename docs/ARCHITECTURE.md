@@ -51,8 +51,9 @@ src/
 │   └── mockFeed.ts            ← MOCK_FEED (seed/PREVIEW posts — not live data)
 ├── domain/                    ← pure, unit-tested calculators (no store/React deps)
 │   ├── progression.ts         ← decay, burnout, evidence tier, skill/career mastery, OUTCOME_XP
+│   ├── hydration.ts           ← reconcileAchievementsAndXP() — heals XP + achievements on load
 │   ├── skillGraph.ts          ← initUserSkills, unlockDependentSkills, checkAchievements
-│   └── __tests__/             ← progression / leveling / skillGraph suites
+│   └── __tests__/             ← progression / leveling / skillGraph / hydration suites
 └── utils/
     ├── theme.ts               ← Colors, PathColors, typography, getLevelFromXP(), getLevelTitle()
     ├── analytics.ts           ← opt-in PostHog capture + PII scrub
@@ -101,14 +102,15 @@ attachPersistence(useAppStore);
 
 Slices add **actions only**; all state fields are initialized in `appStore.ts` (so `tsc` enforces a complete `AppState`). Actions read full state via `get()` and update via `set()` — a `logOutput` call still mutates skills, XP, achievements, streak, and feed in a single transaction.
 
-### Persisted fields (13) — `localStorage` key `skillforge_v1`
+### Persisted fields (14) — `localStorage` key `skillforge_v1`
 
 `getPersistable()` in `src/store/persistence.ts` persists exactly:
 
 ```typescript
 hasOnboarded, user, userSkills, outputs, unlockedAchievementIds,
 customPaths, prioritizedPathId, roadmaps, celebratedMilestones,
-userFeedPosts, savedPostIds, colorScheme, careerOutcomes
+userFeedPosts, savedPostIds, colorScheme, careerOutcomes,
+fontScale          // user-adjustable text size (0.9–1.2, default 1)
 ```
 
 ### Ephemeral fields (in-memory only)
@@ -139,6 +141,7 @@ diagram 75 · reflection 30 · event 65 · other 50          // default 50
 
 qualityBonus  = description.length >= 120 ? 20 : >= 50 ? 10 : 0
 takeawayBonus = keyTakeaway?.trim() ? 15 : 0
+// keyTakeaway is persisted on the Output object and shown in the Profile detail modal
 
 OUTPUT_XP   = baseXP + qualityBonus + takeawayBonus
 skill.xpReward         // bonus on skill completion (gated by the evidence rule below)
@@ -159,7 +162,7 @@ Level thresholds: `getLevelFromXP()` in `src/utils/theme.ts` (cumulative `level*
 
 ## Testing — Vitest (`npm test`)
 
-46 tests; node environment; runs `src/**/*.test.ts`. Two layers:
+94 tests; node environment; runs `src/**/*.test.ts`. Two layers:
 
 - **Pure domain** (`src/domain/__tests__/`): `progression` (decay stages, burnout window, evidence tiers, skill/career mastery ladder, OUTCOME_XP), `leveling` (XP→level/title/bounds), `skillGraph` (achievement unlock thresholds + dedupe).
 - **Store-action integration** (`src/store/__tests__/appStore.test.ts`): exercises the real store — `completeOnboarding` (init + experienced pre-credit), `logOutput` (XP-by-type + bonuses, evidence gate, completion + prerequisite unlock, first-steps achievement, streak), `validateSkill`.

@@ -89,6 +89,7 @@ interface RecapData {
   outputsLeft: number | null;
   skillXpReward?: number;
   pathColor: string;
+  evidenceRequired?: boolean; // true when skill would have completed but evidence gate blocked it
 }
 
 function SessionRecap({ data, onDismiss }: { data: RecapData; onDismiss: () => void }) {
@@ -116,6 +117,8 @@ function SessionRecap({ data, onDismiss }: { data: RecapData; onDismiss: () => v
   const isOneAway = data.outputsLeft === 1;
   const progressMsg = (() => {
     if (data.outputsLeft == null || !data.skillName) return null;
+    if (data.outputsLeft === 0 && data.evidenceRequired)
+      return { text: `📝 Add a link or 50+ char description to unlock ${data.skillName}`, color: Colors.gold };
     if (data.outputsLeft === 0) return { text: '🎯 Skill complete!', color: Colors.success };
     if (isOneAway) return { text: `⚡ 1 more output to master ${data.skillName}!`, color: Colors.primaryLight };
     return { text: `${data.outputsLeft} more outputs to complete ${data.skillName}`, color: Colors.textSub };
@@ -433,7 +436,7 @@ export default function LogOutputScreen() {
       } else if (result.evidenceRequired) {
         // Output logged + XP earned, but skill won't complete without quality evidence
         showToast({
-          message: 'Add a link or write 80+ chars to complete this skill',
+          message: 'Add a link or write 50+ chars to complete this skill',
           xp: result.xpGained,
           emoji: '📝',
           variant: 'warning',
@@ -452,6 +455,7 @@ export default function LogOutputScreen() {
           outputsLeft,
           skillXpReward: currentSkill?.xpReward,
           pathColor: recapPathColor,
+          evidenceRequired: true,
         });
         setShowRecap(true);
         setTimeout(() => {
@@ -596,15 +600,41 @@ export default function LogOutputScreen() {
             const done = us.outputCount;
             const needed = skill.requiredOutputs;
             const remaining = Math.max(0, needed - done - 1);
+            const willComplete = remaining <= 0;
+
+            // Evidence gate check — mirrors the logic in the evidence meter below.
+            // If this output would complete the skill but neither the current entry
+            // nor any prior output provides quality proof, warn the user up front.
+            const currentTier = getEvidenceTier(link, description);
+            const hasExistingQuality = outputs.some((o) => {
+              if (o.skillId !== skillId) return false;
+              const t = o.evidenceTier ?? getEvidenceTier(o.link, o.description);
+              return t !== 'logged';
+            });
+            const gateWillBlock = willComplete && !hasExistingQuality && currentTier === 'logged';
+
             return (
-              <View style={styles.skillContextBanner}>
+              <View style={[
+                styles.skillContextBanner,
+                gateWillBlock && styles.skillContextBannerGate,
+              ]}>
                 <Text style={styles.skillContextIcon}>{skill.icon}</Text>
                 <View style={{ flex: 1 }}>
                   <Text style={styles.skillContextLabel}>COUNTS TOWARD</Text>
-                  <Text style={styles.skillContextName}>{skill.name}</Text>
+                  <Text style={[
+                    styles.skillContextName,
+                    gateWillBlock && styles.skillContextNameGate,
+                  ]}>{skill.name}</Text>
+                  {gateWillBlock && (
+                    <Text style={styles.skillContextGateHint}>
+                      Add a link or write 50+ chars to unlock this skill
+                    </Text>
+                  )}
                 </View>
                 <View style={styles.skillContextProgress}>
-                  {remaining <= 0 ? (
+                  {gateWillBlock ? (
+                    <Text style={styles.skillContextGateBadge}>⚠️ Needs proof</Text>
+                  ) : remaining <= 0 ? (
                     <Text style={styles.skillContextComplete}>🎉 Completes skill!</Text>
                   ) : (
                     <Text style={styles.skillContextCount}>
@@ -722,14 +752,14 @@ export default function LogOutputScreen() {
                 </View>
                 {tier === 'logged' && !showGateWarning && (
                   <Text style={styles.evidenceHint}>
-                    Add a link → <Text style={{ color: Colors.success }}>Verified</Text>  ·  Write 80+ chars → <Text style={{ color: Colors.primaryLight }}>Documented</Text>
+                    Add a link → <Text style={{ color: Colors.success }}>Verified</Text>  ·  Write 50+ chars → <Text style={{ color: Colors.primaryLight }}>Documented</Text>
                   </Text>
                 )}
                 {showGateWarning && (
                   <View style={styles.evidenceGateWarning}>
                     <Text style={styles.evidenceGateIcon}>⚠️</Text>
                     <Text style={styles.evidenceGateText}>
-                      This will complete the skill — add a link or expand your description to 80+ chars to unlock it.
+                      This will complete the skill — add a link or expand your description to 50+ chars to unlock it.
                     </Text>
                   </View>
                 )}
@@ -1350,6 +1380,26 @@ const makeStyles = (Colors: ColorsType) => StyleSheet.create({
   skillContextComplete: {
     fontSize: FontSize.xs,
     color: Colors.success,
+    fontWeight: '700',
+  },
+  // Evidence gate variant of the skill context banner
+  skillContextBannerGate: {
+    backgroundColor: Colors.gold + '10',
+    borderColor: Colors.gold + '40',
+  },
+  skillContextNameGate: {
+    color: Colors.gold,
+  },
+  skillContextGateHint: {
+    fontSize: 10,
+    color: Colors.gold + 'CC',
+    fontWeight: '500',
+    marginTop: 3,
+    lineHeight: 14,
+  },
+  skillContextGateBadge: {
+    fontSize: FontSize.xs,
+    color: Colors.gold,
     fontWeight: '700',
   },
 

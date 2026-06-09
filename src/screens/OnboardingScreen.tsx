@@ -273,116 +273,226 @@ export default function OnboardingScreen() {
   );
 }
 
-// ── LakbAI Signature Icon v2 ─────────────────────────────────────────────────
-// Design system:
-//   • Bold FILLED letterforms — not thin strokes; maximum weight at 60px
-//   • Navy background (#0B1830) — professional, premium, stands out in App Store
-//   • L: White, thick, bold — the anchor/foundation
-//   • A: Cyan→Blue gradient (#00C8FF→#1E3A8A) — vibrant, forward, tech-forward
-//     The A's open triangular form = mountain peak, upward arrow, aspiration
-//   • Swoosh arc: teal→blue ribbon sweeping right = the journey/path metaphor
-//     This is the signature differentiator — no other app has this element
-//   • Filipino DNA retained: the 8-ray sun is embedded as a subtle halo behind
-//     the A peak, opacity 0.12 — discoverable on close inspection
-//   • Reads clearly at 60×60 px; all elements merge into bold silhouette
-function LakbAIIcon({ size = 120 }: { size?: number }) {
+// ── Welcome-screen artwork (logo + journey staircase + trend glyph) ──────────
+// The brand mark is the journey made literal: stacked isometric steps climbing
+// toward a glowing summit gem, with a winding path grooved up the treads.
+function MaglakbAILogo({ size = 100 }: { size?: number }) {
   return (
     // @ts-ignore — SVG is web-only; valid in react-native-web / Vite target
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 120 120"
-      style={{ borderRadius: 26, overflow: 'hidden', display: 'block' } as any}
-    >
+    <svg width={size} height={size} viewBox="0 0 120 120" style={{ display: 'block', overflow: 'visible' } as any}>
       {/* @ts-ignore */}
       <defs>
-        {/* Navy background — matches reference exactly */}
         {/* @ts-ignore */}
-        <linearGradient id="lb2bg" x1="0%" y1="0%" x2="100%" y2="100%">
-          {/* @ts-ignore */}<stop offset="0%" stopColor="#0F1F3D" />
-          {/* @ts-ignore */}<stop offset="100%" stopColor="#060E1E" />
+        <linearGradient id="lgTop" x1="0%" y1="0%" x2="100%" y2="100%">
+          {/* @ts-ignore */}<stop offset="0%" stopColor="#5CB4FF" />
+          {/* @ts-ignore */}<stop offset="100%" stopColor="#2563EB" />
         </linearGradient>
-
-        {/* A letter: cyan at peak → deep blue at base */}
         {/* @ts-ignore */}
-        <linearGradient id="lb2a" x1="50%" y1="0%" x2="50%" y2="100%">
-          {/* @ts-ignore */}<stop offset="0%" stopColor="#00C8FF" />
-          {/* @ts-ignore */}<stop offset="55%" stopColor="#2563EB" />
-          {/* @ts-ignore */}<stop offset="100%" stopColor="#1E3A8A" />
+        <linearGradient id="lgLeft" x1="0%" y1="0%" x2="0%" y2="100%">
+          {/* @ts-ignore */}<stop offset="0%" stopColor="#1E3A8A" />
+          {/* @ts-ignore */}<stop offset="100%" stopColor="#11214F" />
         </linearGradient>
-
-        {/* Arrow stroke gradient (teal → deep blue, left to right) */}
         {/* @ts-ignore */}
-        <linearGradient id="lb2sw" x1="0%" y1="0%" x2="100%" y2="0%">
-          {/* @ts-ignore */}<stop offset="0%" stopColor="#06B6D4" />
+        <linearGradient id="lgRight" x1="0%" y1="0%" x2="0%" y2="100%">
+          {/* @ts-ignore */}<stop offset="0%" stopColor="#2F6BDD" />
           {/* @ts-ignore */}<stop offset="100%" stopColor="#1D4ED8" />
         </linearGradient>
-
-        {/* Arrowhead marker — auto-rotates to match the curve tangent at endpoint */}
         {/* @ts-ignore */}
-        <marker id="lb2arr" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto" markerUnits="userSpaceOnUse">
-          {/* @ts-ignore */}
-          <polygon points="0,0 10,4 0,8" fill="#1D4ED8" />
-        </marker>
-
-        {/* L letter: pure white at top to off-white at base for depth */}
-        {/* @ts-ignore */}
-        <linearGradient id="lb2l" x1="0%" y1="0%" x2="0%" y2="100%">
-          {/* @ts-ignore */}<stop offset="0%" stopColor="#FFFFFF" />
-          {/* @ts-ignore */}<stop offset="100%" stopColor="#E0E8FF" />
+        <linearGradient id="lgGem" x1="0%" y1="0%" x2="100%" y2="100%">
+          {/* @ts-ignore */}<stop offset="0%" stopColor="#A5F3FC" />
+          {/* @ts-ignore */}<stop offset="100%" stopColor="#22D3EE" />
         </linearGradient>
+        {/* @ts-ignore */}
+        <filter id="lgGlow" x="-80%" y="-80%" width="260%" height="260%">
+          {/* @ts-ignore */}<feGaussianBlur stdDeviation="3" result="b" />
+          {/* @ts-ignore */}
+          <feMerge>
+            {/* @ts-ignore */}<feMergeNode in="b" />
+            {/* @ts-ignore */}<feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+        {/* one reusable isometric step (top-back corner at origin) */}
+        {/* @ts-ignore */}
+        <g id="lgStep">
+          {/* @ts-ignore */}<polygon points="0,0 24,12 0,24 -24,12" fill="url(#lgTop)" />
+          {/* @ts-ignore */}<polygon points="-24,12 0,24 0,42 -24,30" fill="url(#lgLeft)" />
+          {/* @ts-ignore */}<polygon points="0,24 24,12 24,30 0,42" fill="url(#lgRight)" />
+          {/* @ts-ignore */}<polygon points="0,0 24,12 0,24 -24,12" fill="none" stroke="rgba(255,255,255,0.28)" strokeWidth="0.75" />
+        </g>
       </defs>
 
-      {/* ── Background ─────────────────────────────────────────── */}
-      {/* @ts-ignore */}
-      <rect x="0" y="0" width="120" height="120" rx="26" ry="26" fill="url(#lb2bg)" />
+      {/* steps drawn back (top-right) → front (bottom-left) */}
+      {/* @ts-ignore */}<use href="#lgStep" transform="translate(76,30)" />
+      {/* @ts-ignore */}<use href="#lgStep" transform="translate(56,48)" />
+      {/* @ts-ignore */}<use href="#lgStep" transform="translate(36,66)" />
 
-      {/* ── Filipino sun DNA: 8-ray halo behind A peak ───────────── */}
-      {/* Centre moved to (74,8) — the new A peak. Rays overflow top  */}
-      {/* edge are clipped by overflow:hidden; that's intentional.    */}
+      {/* winding path groove up the treads */}
       {/* @ts-ignore */}
-      <g opacity="0.14" stroke="#00C8FF" strokeWidth="2" strokeLinecap="round">
-        {/* @ts-ignore */}<line x1="74" y1="8" x2="74" y2="-4" />  {/* N  — clipped at canvas top */}
-        {/* @ts-ignore */}<line x1="74" y1="8" x2="83" y2="-1" />  {/* NE */}
-        {/* @ts-ignore */}<line x1="74" y1="8" x2="86" y2="8"  />  {/* E  */}
-        {/* @ts-ignore */}<line x1="74" y1="8" x2="83" y2="17" />  {/* SE */}
-        {/* @ts-ignore */}<line x1="74" y1="8" x2="74" y2="20" />  {/* S  */}
-        {/* @ts-ignore */}<line x1="74" y1="8" x2="65" y2="17" />  {/* SW */}
-        {/* @ts-ignore */}<line x1="74" y1="8" x2="62" y2="8"  />  {/* W  */}
-        {/* @ts-ignore */}<line x1="74" y1="8" x2="65" y2="-1" />  {/* NW */}
+      <path d="M32,84 C50,75 48,60 62,53 S80,38 84,30" fill="none" stroke="#070C1A" strokeWidth="5.5" strokeLinecap="round" opacity="0.9" />
+      {/* @ts-ignore */}
+      <path d="M32,84 C50,75 48,60 62,53 S80,38 84,30" fill="none" stroke="#60A5FA" strokeWidth="1.4" strokeLinecap="round" opacity="0.5" />
+
+      {/* summit gem */}
+      {/* @ts-ignore */}
+      <g filter="url(#lgGlow)">
+        {/* @ts-ignore */}<polygon points="86,8 97,19 86,30 75,19" fill="url(#lgGem)" />
+        {/* @ts-ignore */}<polygon points="86,8 97,19 86,30 75,19" fill="none" stroke="#CFFAFE" strokeWidth="0.8" />
       </g>
+    </svg>
+  );
+}
 
-      {/* ── A letter (drawn FIRST so L sits in front) ────────────── */}
-      {/* Peak pushed to y=8 (was 12), base to y=108 (was 94).       */}
-      {/* Letters now fill 100px of 120px canvas = 83% — vs 68% before */}
+// ── The LEARN → APPLY → ACHIEVE → ELEVATE journey staircase ──────────────────
+// Four ascending isometric steps, a glowing path climbing to an up-arrow, each
+// stage labelled in its own colour with a one-line "what you get" to the right.
+function JourneyStaircase() {
+  return (
+    // @ts-ignore — SVG is web-only; scales to container width via viewBox
+    <svg viewBox="0 0 360 300" width="100%" height="100%" style={{ display: 'block', overflow: 'visible' } as any}>
       {/* @ts-ignore */}
-      <g fill="none" stroke="url(#lb2a)" strokeWidth="16" strokeLinecap="round" strokeLinejoin="round">
+      <defs>
         {/* @ts-ignore */}
-        <polyline points="58,108 74,8 90,108" />
-      </g>
-
-      {/* ── L letter ─────────────────────────────────────────────── */}
-      {/* Top pushed to y=10 (was 16), base to y=108 (was 94).       */}
-      {/* @ts-ignore */}
-      <g fill="none" stroke="url(#lb2l)" strokeWidth="16" strokeLinecap="round" strokeLinejoin="miter">
+        <linearGradient id="jTop" x1="0%" y1="0%" x2="0%" y2="100%">
+          {/* @ts-ignore */}<stop offset="0%" stopColor="#2C3768" />
+          {/* @ts-ignore */}<stop offset="100%" stopColor="#212a54" />
+        </linearGradient>
         {/* @ts-ignore */}
-        <polyline points="14,10 14,108 50,108" />
+        <linearGradient id="jLeft" x1="0%" y1="0%" x2="0%" y2="100%">
+          {/* @ts-ignore */}<stop offset="0%" stopColor="#161d40" />
+          {/* @ts-ignore */}<stop offset="100%" stopColor="#0e1330" />
+        </linearGradient>
+        {/* @ts-ignore */}
+        <linearGradient id="jRight" x1="0%" y1="0%" x2="0%" y2="100%">
+          {/* @ts-ignore */}<stop offset="0%" stopColor="#1d2650" />
+          {/* @ts-ignore */}<stop offset="100%" stopColor="#141a3c" />
+        </linearGradient>
+        {/* @ts-ignore */}
+        <linearGradient id="jPath" x1="0%" y1="100%" x2="100%" y2="0%">
+          {/* @ts-ignore */}<stop offset="0%" stopColor="#22D3EE" />
+          {/* @ts-ignore */}<stop offset="50%" stopColor="#6366F1" />
+          {/* @ts-ignore */}<stop offset="100%" stopColor="#E879F9" />
+        </linearGradient>
+        {/* @ts-ignore */}
+        <filter id="jGlow" x="-60%" y="-60%" width="220%" height="220%">
+          {/* @ts-ignore */}<feGaussianBlur stdDeviation="2.6" result="b" />
+          {/* @ts-ignore */}
+          <feMerge>
+            {/* @ts-ignore */}<feMergeNode in="b" />
+            {/* @ts-ignore */}<feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+        {/* one reusable isometric step (top-back corner at origin) */}
+        {/* @ts-ignore */}
+        <g id="jStep">
+          {/* @ts-ignore */}<polygon points="0,0 50,16 0,32 -50,16" fill="url(#jTop)" />
+          {/* @ts-ignore */}<polygon points="-50,16 0,32 0,54 -50,38" fill="url(#jLeft)" />
+          {/* @ts-ignore */}<polygon points="0,32 50,16 50,38 0,54" fill="url(#jRight)" />
+          {/* @ts-ignore */}<polygon points="0,0 50,16 0,32 -50,16" fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth="1" />
+        </g>
+      </defs>
+
+      {/* steps: ELEVATE (back/top) → LEARN (front/bottom) */}
+      {/* @ts-ignore */}<use href="#jStep" transform="translate(175,56)" />
+      {/* @ts-ignore */}<use href="#jStep" transform="translate(140,104)" />
+      {/* @ts-ignore */}<use href="#jStep" transform="translate(105,152)" />
+      {/* @ts-ignore */}<use href="#jStep" transform="translate(70,200)" />
+
+      {/* glowing path climbing the steps + up-arrow at the summit */}
+      {/* @ts-ignore */}
+      <g filter="url(#jGlow)">
+        {/* @ts-ignore */}
+        <path d="M70,224 C96,210 92,188 110,176 C128,164 132,142 148,130 C166,118 170,98 178,86 L178,52" fill="none" stroke="url(#jPath)" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+        {/* @ts-ignore */}
+        <polyline points="168,64 178,52 188,64" fill="none" stroke="#E879F9" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" />
       </g>
 
-      {/* ── Curved arrow ──────────────────────────────────────── */}
-      {/* Replaces filled ribbon — now a directed arrow sweeping    */}
-      {/* from lower-left (L's side) diagonally up to upper-right  */}
-      {/* (A's peak area). Reads as: "navigate forward and upward." */}
-      {/* markerEnd auto-rotates the arrowhead to the curve tangent */}
+      {/* ── icons (each centred on its step's top face) ───────────── */}
+      {/* LEARN — book (cyan) */}
       {/* @ts-ignore */}
-      <path
-        d="M10,85 C38,72 70,57 106,44"
-        fill="none"
-        stroke="url(#lb2sw)"
-        strokeWidth="5"
-        strokeLinecap="round"
-        markerEnd="url(#lb2arr)"
-      />
+      <g transform="translate(70,216)" filter="url(#jGlow)" stroke="#22D3EE" fill="none" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+        {/* @ts-ignore */}<path d="M-9,-6 C-5,-8 -1,-7 0,-5 L0,7 C-1,5 -5,4 -9,6 Z" />
+        {/* @ts-ignore */}<path d="M9,-6 C5,-8 1,-7 0,-5 L0,7 C1,5 5,4 9,6 Z" />
+      </g>
+      {/* APPLY — check in rounded square (blue) */}
+      {/* @ts-ignore */}
+      <g transform="translate(105,168)" filter="url(#jGlow)" stroke="#60A5FA" fill="none" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+        {/* @ts-ignore */}<rect x="-9" y="-9" width="18" height="18" rx="5" />
+        {/* @ts-ignore */}<polyline points="-5,0 -1,4 6,-5" />
+      </g>
+      {/* ACHIEVE — trophy (purple) */}
+      {/* @ts-ignore */}
+      <g transform="translate(140,120)" filter="url(#jGlow)" stroke="#C084FC" fill="none" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+        {/* @ts-ignore */}<path d="M-7,-8 H7 V-3 C7,2 4,5 0,5 C-4,5 -7,2 -7,-3 Z" />
+        {/* @ts-ignore */}<path d="M-7,-6 C-11,-6 -11,0 -7,0.5" />
+        {/* @ts-ignore */}<path d="M7,-6 C11,-6 11,0 7,0.5" />
+        {/* @ts-ignore */}<line x1="0" y1="5" x2="0" y2="8" />
+        {/* @ts-ignore */}<line x1="-5" y1="9" x2="5" y2="9" />
+      </g>
+      {/* ELEVATE — star (magenta) */}
+      {/* @ts-ignore */}
+      <g transform="translate(175,72)" filter="url(#jGlow)">
+        {/* @ts-ignore */}
+        <polygon points="0,-9 2.6,-3 9,-2.8 4,1.4 5.6,7.6 0,4.2 -5.6,7.6 -4,1.4 -9,-2.8 -2.6,-3" fill="none" stroke="#F0ABFC" strokeWidth="2.2" strokeLinejoin="round" />
+      </g>
+
+      {/* ── stage labels (on each step's front face) ──────────────── */}
+      {/* @ts-ignore */}<text x="70" y="240" textAnchor="middle" fill="#22D3EE" fontSize="12.5" fontWeight="800" letterSpacing="1.5">LEARN</text>
+      {/* @ts-ignore */}<text x="105" y="192" textAnchor="middle" fill="#60A5FA" fontSize="12.5" fontWeight="800" letterSpacing="1.5">APPLY</text>
+      {/* @ts-ignore */}<text x="140" y="144" textAnchor="middle" fill="#C084FC" fontSize="12.5" fontWeight="800" letterSpacing="1.5">ACHIEVE</text>
+      {/* @ts-ignore */}<text x="175" y="96" textAnchor="middle" fill="#F0ABFC" fontSize="12.5" fontWeight="800" letterSpacing="1.5">ELEVATE</text>
+
+      {/* ── right-column descriptions — each aligned to its step's label ─── */}
+      {/* LEARN ↔ "Gain skills" (label baseline y=240) */}
+      {/* @ts-ignore */}<line x1="238" y1="229" x2="238" y2="251" stroke="#22D3EE" strokeWidth="2.5" strokeLinecap="round" opacity="0.85" />
+      {/* @ts-ignore */}
+      <text x="250" fontSize="12">
+        {/* @ts-ignore */}<tspan x="250" y="236" fill="#D7DAEC" fontWeight="600">Gain skills</tspan>
+        {/* @ts-ignore */}<tspan x="250" y="251" fill="#8A8FB0" fontWeight="500">that matter.</tspan>
+      </text>
+
+      {/* APPLY ↔ "Use skills in" (label baseline y=192) */}
+      {/* @ts-ignore */}<line x1="238" y1="181" x2="238" y2="203" stroke="#60A5FA" strokeWidth="2.5" strokeLinecap="round" opacity="0.85" />
+      {/* @ts-ignore */}
+      <text x="250" fontSize="12">
+        {/* @ts-ignore */}<tspan x="250" y="188" fill="#D7DAEC" fontWeight="600">Use skills in</tspan>
+        {/* @ts-ignore */}<tspan x="250" y="203" fill="#8A8FB0" fontWeight="500">real situations.</tspan>
+      </text>
+
+      {/* ACHIEVE ↔ "Build proof." (label baseline y=144) */}
+      {/* @ts-ignore */}<line x1="238" y1="133" x2="238" y2="155" stroke="#C084FC" strokeWidth="2.5" strokeLinecap="round" opacity="0.85" />
+      {/* @ts-ignore */}
+      <text x="250" fontSize="12">
+        {/* @ts-ignore */}<tspan x="250" y="140" fill="#D7DAEC" fontWeight="600">Build proof.</tspan>
+        {/* @ts-ignore */}<tspan x="250" y="155" fill="#8A8FB0" fontWeight="500">Create impact.</tspan>
+      </text>
+
+      {/* ELEVATE ↔ "Unlock new" (label baseline y=96) */}
+      {/* @ts-ignore */}<line x1="238" y1="85" x2="238" y2="107" stroke="#F0ABFC" strokeWidth="2.5" strokeLinecap="round" opacity="0.85" />
+      {/* @ts-ignore */}
+      <text x="250" fontSize="12">
+        {/* @ts-ignore */}<tspan x="250" y="92" fill="#D7DAEC" fontWeight="600">Unlock new</tspan>
+        {/* @ts-ignore */}<tspan x="250" y="107" fill="#8A8FB0" fontWeight="500">opportunities.</tspan>
+      </text>
+    </svg>
+  );
+}
+
+// Up-trend chart glyph for the "Show results." card.
+function TrendIcon({ size = 34 }: { size?: number }) {
+  return (
+    // @ts-ignore — SVG is web-only
+    <svg width={size} height={size} viewBox="0 0 36 36" style={{ display: 'block' } as any}>
+      {/* @ts-ignore */}
+      <defs>
+        {/* @ts-ignore */}
+        <linearGradient id="trGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+          {/* @ts-ignore */}<stop offset="0%" stopColor="#60A5FA" />
+          {/* @ts-ignore */}<stop offset="100%" stopColor="#C084FC" />
+        </linearGradient>
+      </defs>
+      {/* @ts-ignore */}
+      <polyline points="4,26 13,18 19,22 30,9" fill="none" stroke="url(#trGrad)" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+      {/* @ts-ignore */}<polyline points="23,9 30,9 30,16" fill="none" stroke="url(#trGrad)" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
@@ -395,7 +505,7 @@ function LakbAIIcon({ size = 120 }: { size?: number }) {
 //   Icon → Brand → Tagline (2-line bilingual) → Value prop → CTA
 //
 // Brand positioning (v3):
-//   LakbAI is NOT a learning app. NOT an AI app.
+//   MaglakbAI is NOT a learning app. NOT an AI app.
 //   It is the platform where people build VISIBLE PROOF of their growth
 //   through real outputs, earned achievements, and community recognition.
 //   Roadmaps, AI, and market signals are supporting features — not the story.
@@ -403,11 +513,11 @@ function LakbAIIcon({ size = 120 }: { size?: number }) {
 // Core identity delivered in 4 lines:
 //   Navigate Your Future.           ← where you're headed (aspiration)
 //   Isulong Ang Pangarap.           ← the heart (Filipino soul)
-//   Stop collecting certificates.   ← the problem (what NOT to do)
-//   Start building proof.           ← the solution (what LakbAI is)
+//   Stop talking.                   ← the problem (what NOT to do)
+//   Show results.                   ← the solution (what MaglakbAI is)
 //
-// "Start building proof." is the line that makes people immediately
-// understand what LakbAI could become. It earns its own visual weight.
+// "Show results." is the line that makes people immediately
+// understand what MaglakbAI could become. It earns its own visual weight.
 function WelcomeStep({
   logoScale,
   logoOpacity,
@@ -419,55 +529,57 @@ function WelcomeStep({
 }) {
   const Colors = useThemeColors();
   const styles = makeStyles(Colors);
+  // Single-screen, no scroll: a flex column that distributes to fill the space.
   return (
-    <ScrollView
-      contentContainerStyle={styles.stepContainer}
-      showsVerticalScrollIndicator={false}
-    >
-      {/* 1 — Signature icon */}
-      <Animated.View
-        style={[
-          styles.logoWrapper,
-          { opacity: logoOpacity, transform: [{ scale: logoScale }] },
-        ]}
-      >
-        <LakbAIIcon size={120} />
-      </Animated.View>
-
-      {/* 2 — Brand name */}
-      <Text style={styles.brandName}>LakbAI</Text>
-
-      {/* 3 — Bilingual tagline: aspiration layer */}
-      <Text style={styles.brandTaglinePrimary}>Navigate Your Future.</Text>
-      <Text style={styles.brandTaglineSub}>Isulong Ang Pangarap.</Text>
-
-      {/* 4 — Core identity: the contrast statement that defines LakbAI */}
-      {/* Line 1: the old behaviour being left behind (quieter, smaller) */}
-      {/* Line 2: the new identity (bold, primary colour — owns the screen) */}
-      {/* Together they read as a manifesto, not a feature description.   */}
-      {/* AI, roadmaps, signals are NOT mentioned here — they're inside.  */}
-      <View style={styles.manifesto}>
-        <Text style={styles.manifestoOld}>Stop collecting certificates.</Text>
-        <Text style={styles.manifestoNew}>Start building proof.</Text>
+    <View style={styles.welcomeFit}>
+      {/* Brand cluster — mark, wordmark, tagline */}
+      <View style={styles.brandCluster}>
+        <Animated.View
+          style={[
+            styles.logoWrap,
+            { opacity: logoOpacity, transform: [{ scale: logoScale }] },
+          ]}
+        >
+          <MaglakbAILogo size={92} />
+        </Animated.View>
+        <Text style={styles.wordmarkRow} nativeID="brand-wordmark">
+          <Text style={styles.wordmarkWhite}>Maglakb</Text>
+          <Text style={styles.wordmarkAI}>AI</Text>
+        </Text>
+        <View style={styles.brandDivider} />
+        <Text style={styles.taglineFil}>Isulong ang pangarap.</Text>
       </View>
 
-      {/* 5 — Scope qualifier (retained per brand requirement) */}
-      <Text style={styles.forEveryoneLabel}>
-        Any skill. Any field. Any level.
-      </Text>
+      {/* Glass card: the contrast statement + scope + trend glyph */}
+      <View style={styles.glassCard}>
+        <View style={styles.glassCardLeft}>
+          <Text style={styles.cardStopTalking}>Stop talking.</Text>
+          <Text style={styles.cardShowResults}>
+            Show <Text style={styles.cardResultsAccent}>results.</Text>
+          </Text>
+          <Text style={styles.cardScope}>ANY SKILL. ANY FIELD. ANY LEVEL.</Text>
+        </View>
+        <View style={styles.trendChip}>
+          <TrendIcon size={34} />
+        </View>
+      </View>
 
-      {/* 6 — CTA: "Start Building" mirrors the identity directly */}
-      <View style={{ height: 36 }} />
+      {/* The LEARN → APPLY → ACHIEVE → ELEVATE journey */}
+      <View style={styles.journeyWrap}>
+        <JourneyStaircase />
+      </View>
+
+      {/* CTA */}
       <TouchableOpacity
         style={styles.primaryBtn}
         onPress={onNext}
         activeOpacity={0.85}
         accessibilityRole="button"
-        accessibilityLabel="Start building proof of your growth with LakbAI"
+        accessibilityLabel="Start building and showing results with MaglakbAI"
       >
-        <Text style={styles.primaryBtnText}>Start Building →</Text>
+        <Text style={styles.primaryBtnText}>Start Building Now  →</Text>
       </TouchableOpacity>
-    </ScrollView>
+    </View>
   );
 }
 
@@ -522,7 +634,7 @@ function NameStep({
         onSubmitEditing={() => name.trim() && onNext()}
       />
       <Text style={styles.inputHint}>
-        e.g. "Alex Chen" — the community will know you by this.
+        e.g. "Juan Masipag" — the community will know you by this.
       </Text>
 
       <TouchableOpacity
@@ -786,7 +898,7 @@ function ExperienceLevelStep({
         Where are you starting from{name ? `, ${name.split(' ')[0]}` : ''}?
       </Text>
       <Text style={styles.stepSub}>
-        LakbAI adapts your roadmap to your level. No wasted steps.
+        MaglakbAI adapts your roadmap to your level. No wasted steps.
       </Text>
 
       <View style={styles.expCards}>
@@ -1241,18 +1353,29 @@ const makeStyles = (Colors: ColorsType) => StyleSheet.create({
     height: 120,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 28,
-    // @ts-ignore
-    filter: 'drop-shadow(0 12px 32px rgba(0,100,200,0.45))',
+    marginBottom: 30,
+    // @ts-ignore — layered glow: tight blue core + soft purple bloom for depth
+    filter: 'drop-shadow(0 8px 20px rgba(0,110,210,0.40)) drop-shadow(0 18px 48px rgba(124,58,237,0.30))',
   },
 
   // ── Brand name ───────────────────────────────────────────────────────────
+  // The signature gradient (purple→indigo) — appears exactly twice on this
+  // screen: here and on the CTA. It bookends the composition, framing the
+  // crisp white messaging between. One gradient family = visual cohesion.
   brandName: {
-    fontSize: 44,
+    fontSize: 40,
     fontWeight: '800' as const,
-    color: Colors.primaryLight,
-    letterSpacing: 1.5,
-    marginBottom: 16,
+    color: Colors.primaryLight, // native fallback (gradient is web-only)
+    letterSpacing: 0.5,
+    marginBottom: 14,
+    // @ts-ignore — web-only gradient text
+    backgroundImage: 'linear-gradient(135deg, #C084FC 0%, #A855F7 48%, #6366F1 100%)',
+    // @ts-ignore
+    WebkitBackgroundClip: 'text',
+    // @ts-ignore
+    backgroundClip: 'text',
+    // @ts-ignore
+    WebkitTextFillColor: 'transparent',
   },
 
   // ── Tagline — two-line bilingual with SIZE CONTRAST ──────────────────────
@@ -1265,20 +1388,22 @@ const makeStyles = (Colors: ColorsType) => StyleSheet.create({
     color: Colors.text,
     textAlign: 'center',
     lineHeight: 32,
-    marginBottom: 6,
+    letterSpacing: 0.2,
+    marginBottom: 5,
   },
   brandTaglineSub: {
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: '500' as const,
     color: Colors.textSub,
     textAlign: 'center',
     fontStyle: 'italic',
-    marginBottom: 20,
+    letterSpacing: 0.2,
+    marginBottom: 28,
   },
 
   // ── Core identity manifesto ───────────────────────────────────────────────
-  // Two-line contrast statement — the heart of LakbAI's positioning.
-  // This replaces any "AI/learning" value prop. LakbAI is not a learning app.
+  // Two-line contrast statement — the heart of MaglakbAI's positioning.
+  // This replaces any "AI/learning" value prop. MaglakbAI is not a learning app.
   // It is the place where growth becomes VISIBLE through proof.
   //
   // Line 1 (manifestoOld): the behaviour being left behind — quieter.
@@ -1289,31 +1414,37 @@ const makeStyles = (Colors: ColorsType) => StyleSheet.create({
   //   • The line users remember after closing the app
   manifesto: {
     alignItems: 'center' as const,
-    marginBottom: 20,
-    gap: 6,
+    marginBottom: 28,
+    gap: 4,
   },
+  // "Stop talking." — the behaviour being left behind. Quiet, recessive.
   manifestoOld: {
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: '400' as const,
     color: Colors.textMuted,
     textAlign: 'center',
-    letterSpacing: 0.1,
+    letterSpacing: 0.2,
   },
+  // "Show results." — the punchline. Crisp white, large, confident.
+  // Stays chromatically neutral so the purple gradient bookends (brand + CTA)
+  // own the colour story without a third accent competing.
   manifestoNew: {
-    fontSize: 26,
+    fontSize: 30,
     fontWeight: '800' as const,
-    color: Colors.primaryLight,
+    color: Colors.text,
     textAlign: 'center',
     letterSpacing: 0.2,
-    lineHeight: 32,
+    lineHeight: 36,
   },
 
   // ── Scope line (retained) ─────────────────────────────────────────────────
+  // Quiet engraved caption — tight tracking, muted, sits as a fine print
+  // qualifier beneath the punchline.
   forEveryoneLabel: {
     fontSize: 11,
-    color: Colors.textSub,
-    fontWeight: '600' as const,
-    letterSpacing: 1.8,
+    color: Colors.textMuted,
+    fontWeight: '700' as const,
+    letterSpacing: 2.4,
     textAlign: 'center',
     textTransform: 'uppercase' as const,
   },
@@ -1326,22 +1457,138 @@ const makeStyles = (Colors: ColorsType) => StyleSheet.create({
   // philosophyLine:
   //   → the CTA "Start Building →" already carries this message; repetition dilutes
 
+  // ══ Welcome screen v4 (mockup rebuild — single screen, no scroll) ════════════
+  welcomeFit: {
+    flex: 1,
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 22,
+    paddingTop: 6,
+    paddingBottom: 12,
+  },
+  brandCluster: {
+    alignItems: 'center',
+  },
+  logoWrap: {
+    width: 92,
+    height: 92,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 4,
+    // @ts-ignore — blue core glow + cyan bloom, matching the mark
+    filter: 'drop-shadow(0 10px 26px rgba(37,99,235,0.42)) drop-shadow(0 4px 16px rgba(34,211,238,0.28))',
+  },
+  // Wordmark — "Maglakb" white, "AI" blue gradient
+  wordmarkRow: {
+    fontSize: 38,
+    fontWeight: '700' as const, // Space Grotesk's heaviest weight — avoids faux-bold
+    letterSpacing: 0.3,
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  wordmarkWhite: { color: Colors.text },
+  wordmarkAI: {
+    color: '#3B82F6', // native fallback
+    // @ts-ignore — web-only gradient text
+    backgroundImage: 'linear-gradient(135deg, #38BDF8 0%, #3B82F6 100%)',
+    // @ts-ignore
+    WebkitBackgroundClip: 'text',
+    // @ts-ignore
+    backgroundClip: 'text',
+    // @ts-ignore
+    WebkitTextFillColor: 'transparent',
+  },
+  brandDivider: {
+    width: 34,
+    height: 3,
+    borderRadius: 2,
+    backgroundColor: Colors.primaryLight,
+    opacity: 0.65,
+    marginBottom: 16,
+  },
+  taglineFil: {
+    fontSize: 13,
+    color: Colors.textSub,
+    letterSpacing: 2.6,
+    fontWeight: '500' as const,
+  },
+  // Glass "Show results." card
+  glassCard: {
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: 'rgba(255,255,255,0.045)',
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.10)',
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    // @ts-ignore — frosted glass + inner top highlight
+    backdropFilter: 'blur(8px)',
+    // @ts-ignore
+    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.07)',
+  },
+  glassCardLeft: { flex: 1, paddingRight: 10 },
+  cardStopTalking: {
+    fontSize: 15,
+    color: Colors.textSub,
+    fontWeight: '500' as const,
+    marginBottom: 2,
+  },
+  cardShowResults: {
+    fontSize: 26,
+    fontWeight: '800' as const,
+    color: Colors.text,
+    marginBottom: 9,
+    letterSpacing: 0.2,
+  },
+  cardResultsAccent: { color: Colors.primaryLight },
+  cardScope: {
+    fontSize: 10,
+    fontWeight: '700' as const,
+    color: Colors.textMuted,
+    letterSpacing: 1.8,
+  },
+  trendChip: {
+    width: 58,
+    height: 58,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(124,58,237,0.12)',
+    borderWidth: 1,
+    borderColor: 'rgba(168,85,247,0.38)',
+    // @ts-ignore — soft purple glow
+    boxShadow: '0 0 18px rgba(124,58,237,0.32)',
+  },
+  // Journey staircase wrapper — aspectRatio reserves height for the 360×300 svg
+  journeyWrap: {
+    width: '100%',
+    maxWidth: 340,
+    alignSelf: 'center',
+    aspectRatio: 1.2,
+  },
+
   // Primary button
   primaryBtn: {
     borderRadius: Radius.full,
-    paddingVertical: 16,
+    paddingVertical: 17,
     paddingHorizontal: Spacing.xl,
     alignItems: 'center',
     width: '100%',
-    // @ts-ignore - web-only gradient
-    backgroundImage: 'linear-gradient(135deg, #7C3AED, #4F46E5)',
+    // @ts-ignore - web-only gradient (signature: matches brand name)
+    backgroundImage: 'linear-gradient(135deg, #A855F7 0%, #7C3AED 50%, #4F46E5 100%)',
     backgroundColor: Colors.primary,
-    // @ts-ignore
-    boxShadow: '0 4px 20px rgba(124,58,237,0.45)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.12)',
+    // @ts-ignore — grounded shadow + soft colour bloom for a lifted, premium feel
+    boxShadow: '0 8px 24px rgba(124,58,237,0.42), inset 0 1px 0 rgba(255,255,255,0.18)',
     shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 0 },
-    shadowRadius: 16,
-    shadowOpacity: 0.5,
+    shadowOffset: { width: 0, height: 6 },
+    shadowRadius: 18,
+    shadowOpacity: 0.45,
     elevation: 6,
   },
   btnDisabled: {
