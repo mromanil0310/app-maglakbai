@@ -117,7 +117,7 @@ MaglakbAI/
     │   └── AppNavigator.tsx         ← Onboarding → Main tabs → modal/stack screens; per-screen ErrorBoundary; auth session listener
     │
     ├── screens/                     ← 9 screens
-    │   ├── OnboardingScreen.tsx     ← 5-step onboarding: welcome → name/email → path → experience level → first output
+    │   ├── OnboardingScreen.tsx     ← 4-step onboarding: welcome → name/email → path → experience level (lands on dashboard; no forced first output)
     │   ├── DashboardScreen.tsx      ← Home tab: path ring, XP bar, coaching, decay/burnout nudges
     │   ├── EvolveScreen.tsx         ← Evolve tab: milestone map, path switcher, editable custom roadmaps
     │   ├── LogOutputScreen.tsx      ← Log tab: proof-of-work output (9 types + XP float)
@@ -294,7 +294,8 @@ npx expo start
 ## Build Status
 
 ### ✅ Already Built (Pilot-Live)
-- Onboarding — 5-step flow: welcome → name/email → path → experience level → first output log
+- Onboarding — 4-step flow: welcome → name/email → path → experience level
+  - Completes on level select (or custom-path build) → lands on dashboard; no forced first-output step (users log via the dashboard's "YOUR FIRST MISSION" CTA when ready)
   - Beginner path adapted for Fresh Start users (forward-looking framing)
   - 25 XP + streak 1 granted on completion (UX-029)
   - Consent banner shown post-onboarding only (UX-028)

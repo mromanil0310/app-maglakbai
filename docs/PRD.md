@@ -245,10 +245,11 @@ Consistency streak: [N] days 🔥
 2. **Choose your path** — Data Architect / AI Engineer / (more later)
 3. **Profile setup** — name, username, optional avatar
 4. **Magic link auth** — email only for MVP (no password)
-5. **First output prompt** — "What are you working on?" → pre-filled log form
-6. **Map reveal** — animated reveal of their evolution map, first node highlighted
+5. **Map reveal** — animated reveal of their evolution map, first node highlighted
 
-Target: User logs their first output before leaving onboarding.
+Note: onboarding does **not** force a first-output log. New users land on the dashboard, where the "YOUR FIRST MISSION" card invites (does not require) them to log their first output when ready.
+
+Target: User logs their first output within their first session (from the dashboard mission CTA), not during onboarding.
 
 ---
 
