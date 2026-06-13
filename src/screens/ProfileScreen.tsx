@@ -379,12 +379,12 @@ export default function ProfileScreen() {
   };
 
   const shareOnLinkedIn = () => {
-    const url = `https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent('https://lakbai.app')}&title=${encodeURIComponent('My MaglakbAI Progress')}&summary=${encodeURIComponent(shareText)}`;
+    const url = `https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent('https://maglakbai.app')}&title=${encodeURIComponent('My MaglakbAI Progress')}&summary=${encodeURIComponent(shareText)}`;
     openShareURL(url);
   };
 
   const shareOnFacebook = () => {
-    const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent('https://lakbai.app')}&quote=${encodeURIComponent(shareText)}`;
+    const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent('https://maglakbai.app')}&quote=${encodeURIComponent(shareText)}`;
     openShareURL(url);
   };
 
