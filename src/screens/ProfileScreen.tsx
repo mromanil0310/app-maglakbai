@@ -30,7 +30,6 @@ import {
   getLevelTitle,
   getLevelBounds,
   getLevelFromXP,
-  derivePathTagline,
   timeAgo,
 } from '../utils/theme';
 import { useContext } from 'react';
@@ -286,8 +285,6 @@ export default function ProfileScreen() {
         text: colorScheme === 'light' ? (customPrioritizedPath?.color ?? Colors.primary) : Colors.primaryLight,
         border: (customPrioritizedPath?.color ?? Colors.primary) + (colorScheme === 'light' ? '35' : '40'),
       };
-  const pillTitle = builtInPrioritized?.title
-    ?? (customPrioritizedPath?.name ? derivePathTagline(customPrioritizedPath.name) : 'Mastery in Progress');
 
   // Career Evolution section always reflects the prioritized path
   const builtInPath = CAREER_PATHS.find((p) => p.id === resolvedPriorityId);
@@ -316,6 +313,18 @@ export default function ProfileScreen() {
     ? Math.round((completedCount / pathSkills.length) * 100)
     : 0;
   const totalSkillsDone = Object.values(userSkills).filter(s => s.status === 'completed').length;
+
+  // Status pill under the name: "Mastered <Path> Path" once every skill in the
+  // prioritized path is completed, otherwise "Mastery in Progress". Derived from
+  // the resolved priority path + userSkills, so it updates automatically when the
+  // user switches paths or changes their priority roadmap.
+  const prioritizedPathName = builtInPath?.name ?? customCareerPath?.name ?? null;
+  const prioritizedPathComplete = pathSkills.length > 0 && completedCount === pathSkills.length;
+  const pillTitle = prioritizedPathComplete && prioritizedPathName
+    ? (/\bpath$/i.test(prioritizedPathName.trim())
+        ? `Mastered ${prioritizedPathName.trim()}`
+        : `Mastered ${prioritizedPathName.trim()} Path`)
+    : 'Mastery in Progress';
 
   // Mastery Framework
   const pathSkillIds = builtInPath
