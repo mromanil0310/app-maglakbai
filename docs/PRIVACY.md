@@ -20,7 +20,7 @@ We do not sell your data. We do not show third-party ads. We do not track you ac
 If you use Cloud Backup, your email address is stored with Supabase solely to send you a sign-in link. It is never used for marketing, never sold, and never shared with any third party. Supabase is a SOC 2 compliant cloud provider. You can sign out of Cloud Backup at any time from Settings. If you never use Cloud Backup, any email you enter stays on this device only.
 
 ## Deleting your data
-You are always in control. Use **Settings → Reset All Progress** to permanently erase everything from this device; if you were signed in, Reset also signs you out of Cloud Backup. Reset does **not** delete the copy already in your cloud backup — signing in again can restore it. To permanently delete your cloud data, email `marlo.romanillos@gmail.com` and we will erase it. Turning analytics off also clears your anonymous analytics ID.
+You are always in control. If you use Cloud Backup, **Settings → Delete Account** permanently erases your account and **all** cloud data — your profile, every output, your skill progress, and the email kept for sign-in — on our servers and on this device. It cannot be undone. **Settings → Reset All Progress** wipes only this device and signs you out, leaving your cloud backup intact so signing in again can restore it. You can also email `marlo.romanillos@gmail.com` to request erasure. Turning analytics off also clears your anonymous analytics ID.
 
 ## Children
 MaglakbAI is intended for users aged 16 and older. It is not directed at children.

@@ -437,3 +437,34 @@ create policy "Users can delete own signals" on public.market_signals
 ```
 
 > Run this migration in the Supabase SQL editor for project `wovceouygyobczkkeyxy`.
+
+---
+
+## Edge Functions
+
+### `delete-account` (COMP-001 — right to erasure)
+
+Self-serve account + cloud-data deletion, wired to **Settings → Delete Account**
+in the app. Source: `supabase/functions/delete-account/index.ts`.
+
+The function authenticates the caller by their own JWT, then uses the
+**service-role** key to call `auth.admin.deleteUser(userId)`. Because
+`profiles.id → auth.users(id) ON DELETE CASCADE` and every data table references
+`profiles(id) ON DELETE CASCADE`, deleting that one `auth.users` row erases the
+profile **and** every owned row (`outputs`, `skill_progress`, `milestones`,
+`market_signals`, feed tables) — including the email held in `auth.users`. No
+extra DELETE RLS policies are needed; the cascade does the work, and the
+service-role key never touches the client.
+
+**Deploy (owner step):**
+
+```bash
+supabase login
+supabase link --project-ref wovceouygyobczkkeyxy
+supabase functions deploy delete-account --project-ref wovceouygyobczkkeyxy
+```
+
+`SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are injected by the Supabase
+runtime — never set or commit them. `verify_jwt` defaults to true. See
+`supabase/functions/delete-account/README.md` for the full deploy + verify
+runbook.

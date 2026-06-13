@@ -18,8 +18,9 @@ import { useThemeColors, ColorsType, Spacing, Radius, FontSize } from '../utils/
 import { useToast } from '../components/Toast';
 import { page, getConsentStatus, setConsent } from '../utils/analytics';
 import PrivacyPolicyModal, { PRIVACY_CONTACT } from '../components/PrivacyPolicyModal';
+import TermsOfServiceModal from '../components/TermsOfServiceModal';
 // ARCH-001: Supabase auth
-import { sendMagicLink, signOut, isSupabaseEnabled } from '../lib/auth';
+import { sendMagicLink, signOut, deleteAccount, isSupabaseEnabled } from '../lib/auth';
 
 const STORAGE_KEY = 'skillforge_v1';
 
@@ -272,6 +273,9 @@ export default function SettingsScreen() {
   const [editingField, setEditingField] = useState<'name' | 'email' | null>(null);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [showPrivacy, setShowPrivacy] = useState(false);
+  const [showTerms, setShowTerms] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [analyticsOn, setAnalyticsOn] = useState(getConsentStatus() === 'granted');
   // ARCH-001: Magic Link state
   const [magicLinkEmail, setMagicLinkEmail] = useState('');
@@ -336,6 +340,27 @@ export default function SettingsScreen() {
     setShowResetConfirm(false);
     resetApp();
     // resetApp sets hasOnboarded=false → AppNavigator redirects to Onboarding automatically
+  };
+
+  // COMP-001: permanently delete the cloud account + all data via the
+  // delete-account Edge Function, then wipe the device and return to onboarding.
+  const handleDeleteAccount = async () => {
+    if (deleting) return;
+    setDeleting(true);
+    const result = await deleteAccount();
+    setDeleting(false);
+    if (!result.ok) {
+      showToast({
+        message: result.error ?? 'Could not delete account. Please try again.',
+        emoji: '⚠️',
+        variant: 'warning',
+      });
+      return;
+    }
+    setShowDeleteConfirm(false);
+    // resetApp also signs out locally; hasOnboarded=false → redirect to Onboarding.
+    resetApp();
+    showToast({ message: 'Account and cloud data permanently deleted.', emoji: '🗑️', variant: 'success' });
   };
 
   return (
@@ -542,6 +567,12 @@ export default function SettingsScreen() {
             label="Privacy Policy"
             onPress={() => setShowPrivacy(true)}
           />
+          <View style={styles.rowDivider} />
+          <SettingsRow
+            icon="📄"
+            label="Terms of Service"
+            onPress={() => setShowTerms(true)}
+          />
         </View>
 
         {/* ── Data & Privacy ────────────────────────────────────────── */}
@@ -589,11 +620,36 @@ export default function SettingsScreen() {
             <View style={styles.dangerTextCol}>
               <Text style={styles.dangerLabel}>Reset All Progress</Text>
               <Text style={styles.dangerSub}>
-                Deletes all your XP, outputs, and skills. Cannot be undone.
+                {supabaseUserId
+                  ? 'Wipes this device and signs you out. Your cloud backup is kept.'
+                  : 'Deletes all your XP, outputs, and skills. Cannot be undone.'}
               </Text>
             </View>
             <Text style={styles.dangerChevron}>›</Text>
           </TouchableOpacity>
+
+          {/* COMP-001: full account + cloud erasure — only meaningful when signed in */}
+          {isSupabaseEnabled && supabaseUserId && (
+            <>
+              <View style={styles.rowDivider} />
+              <TouchableOpacity
+                style={styles.dangerRow}
+                onPress={() => setShowDeleteConfirm(true)}
+                activeOpacity={0.75}
+                accessibilityRole="button"
+                accessibilityLabel="Delete account and all cloud data"
+              >
+                <Text style={styles.dangerIcon}>☠️</Text>
+                <View style={styles.dangerTextCol}>
+                  <Text style={styles.dangerLabel}>Delete Account</Text>
+                  <Text style={styles.dangerSub}>
+                    Permanently erases your account, cloud data, and email. Cannot be undone.
+                  </Text>
+                </View>
+                <Text style={styles.dangerChevron}>›</Text>
+              </TouchableOpacity>
+            </>
+          )}
         </View>
 
         <View style={{ height: 60 }} />
@@ -638,7 +694,21 @@ export default function SettingsScreen() {
         onCancel={() => setShowResetConfirm(false)}
       />
 
+      {/* COMP-001: permanent account deletion confirmation */}
+      <ConfirmModal
+        visible={showDeleteConfirm}
+        title="Delete Account?"
+        message={
+          `This permanently erases your account and ALL cloud data for @${user.handle} — your profile, every output, your skill progress, and the email kept for Cloud Backup. This is a full erasure on our servers and on this device. It cannot be undone.`
+        }
+        confirmLabel={deleting ? 'Deleting…' : 'Delete Forever'}
+        confirmColor="#EF4444"
+        onConfirm={handleDeleteAccount}
+        onCancel={() => { if (!deleting) setShowDeleteConfirm(false); }}
+      />
+
       <PrivacyPolicyModal visible={showPrivacy} onClose={() => setShowPrivacy(false)} />
+      <TermsOfServiceModal visible={showTerms} onClose={() => setShowTerms(false)} />
     </SafeAreaView>
   );
 }

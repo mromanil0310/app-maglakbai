@@ -15,6 +15,8 @@ import { useAppStore, CAREER_PATHS, ALL_SKILLS } from '../store/appStore';
 import { useThemeColors, ColorsType, Colors, Spacing, Radius, FontSize, PathColors } from '../utils/theme';
 import { CareerPathId, CareerPath, CustomSkill, OutputType, ExperienceLevel } from '../types';
 import { getPathDemandLabel, DEMAND_SOURCE_LABEL } from '../data/marketDemand';
+import PrivacyPolicyModal from '../components/PrivacyPolicyModal';
+import TermsOfServiceModal from '../components/TermsOfServiceModal';
 
 const ONBOARDING_PATH_CATEGORIES = [
   { label: 'Data & AI', pathIds: ['data-architect', 'data-engineer', 'ai-engineer', 'ml-engineer', 'data-analyst'] },
@@ -601,6 +603,8 @@ function NameStep({
   const Colors = useThemeColors();
   const styles = makeStyles(Colors);
   const emailRef = useRef<any>(null);
+  const [showTerms, setShowTerms] = useState(false);
+  const [showPrivacy, setShowPrivacy] = useState(false);
   return (
     <ScrollView contentContainerStyle={styles.stepContainer} showsVerticalScrollIndicator={false}>
       <Text style={styles.stepEmoji}>👤</Text>
@@ -648,6 +652,17 @@ function NameStep({
       <TouchableOpacity style={styles.skipLink} onPress={onSkip} activeOpacity={0.7}>
         <Text style={styles.skipLinkText}>Skip for now — I'll set this up later</Text>
       </TouchableOpacity>
+
+      {/* COMP-001: Terms + Privacy reachable before any sign-up / email use */}
+      <Text style={styles.legalNote}>
+        By continuing, you agree to our{' '}
+        <Text style={styles.legalLink} onPress={() => setShowTerms(true)}>Terms of Service</Text>
+        {' '}and{' '}
+        <Text style={styles.legalLink} onPress={() => setShowPrivacy(true)}>Privacy Policy</Text>.
+      </Text>
+
+      <TermsOfServiceModal visible={showTerms} onClose={() => setShowTerms(false)} />
+      <PrivacyPolicyModal visible={showPrivacy} onClose={() => setShowPrivacy(false)} />
     </ScrollView>
   );
 }
@@ -1787,6 +1802,18 @@ const makeStyles = (Colors: ColorsType) => StyleSheet.create({
     color: Colors.textMuted,
     textDecorationLine: 'underline',
     textAlign: 'center',
+  },
+  legalNote: {
+    fontSize: FontSize.xs,
+    color: Colors.textMuted,
+    textAlign: 'center',
+    lineHeight: 18,
+    marginTop: Spacing.lg,
+    paddingHorizontal: Spacing.md,
+  },
+  legalLink: {
+    color: Colors.primaryLight,
+    textDecorationLine: 'underline',
   },
 
   // ExperienceLevelStep

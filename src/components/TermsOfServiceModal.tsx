@@ -1,10 +1,9 @@
 import React from 'react';
 import { View, Text, StyleSheet, Modal, ScrollView, TouchableOpacity } from 'react-native';
 import { useThemeColors, ColorsType, Spacing, Radius, FontSize } from '../utils/theme';
+import { PRIVACY_CONTACT } from './PrivacyPolicyModal';
 
-export const PRIVACY_POLICY_EFFECTIVE = 'June 12, 2026';
-
-export const PRIVACY_CONTACT = 'marlo.romanillos@gmail.com';
+export const TERMS_EFFECTIVE = 'June 13, 2026';
 
 interface Section { heading: string; body: string }
 
@@ -12,46 +11,51 @@ const SECTIONS: Section[] = [
   {
     heading: 'The short version',
     body:
-      'MaglakbAI is a pilot. Your progress — your outputs, XP, skills, and posts — is saved on this device. If you choose to use Cloud Backup (Settings → Cloud Backup), your email address and progress are also stored securely with Supabase, our cloud provider. We never share your data with third parties, and nothing you log is visible to other users.',
+      'MaglakbAI is a free pilot that lets you log real proof-of-work and earn XP. By using it you agree to these terms. It is provided as-is, you stay in control of your data, and you can delete your account at any time.',
   },
   {
-    heading: 'Where your data lives',
+    heading: 'Who can use it',
     body:
-      'By default, everything is saved in your browser\'s local storage on this device only. If you sign in via Cloud Backup, your progress is also synced to Supabase (supabase.com), a secure cloud database. This allows you to access your progress from any device. Without Cloud Backup, clearing your browser data or switching devices may result in lost progress — use Settings → Export Data as a local backup.',
+      'MaglakbAI is intended for people aged 16 and older. By using it you confirm you meet that age and that any information you provide is accurate.',
   },
   {
-    heading: 'Analytics (optional, off by default)',
+    heading: 'Your account & Cloud Backup',
     body:
-      'To improve the pilot we can collect anonymous usage events (for example: a screen was viewed, an output was logged) using PostHog. This is strictly opt-in — nothing is sent until you tap “Allow.” We never send your name, email, handle, or anything you type. You are identified only by a random anonymous ID. You can turn analytics off anytime in Settings.',
+      'You can use MaglakbAI entirely on your device with no account. If you choose Cloud Backup, you sign in with a one-time email link (no password) and your progress is stored with Supabase, our cloud provider. Keep access to your email secure — anyone who can open your sign-in link can reach your backup. See the Privacy Policy for exactly what is stored.',
   },
   {
-    heading: 'What we do NOT do',
+    heading: 'Your content',
     body:
-      'We do not sell your data. We do not show third-party ads. We do not send your personal information to anyone. We do not track you across other websites.',
+      'You own everything you log — your outputs, titles, descriptions, links and reflections. You grant us only the limited permission needed to store and display that content back to you within the app (and, if you explicitly share to the community feed, to show it there). You are responsible for what you log: do not upload confidential information you are not allowed to share, content that infringes someone else’s rights, or anything unlawful.',
   },
   {
-    heading: 'Your email (Cloud Backup)',
+    heading: 'Acceptable use',
     body:
-      'If you use Cloud Backup, your email address is stored with Supabase solely to send you a sign-in link. It is never used for marketing, never sold, and never shared with any third party. Supabase is a SOC 2 compliant cloud provider. You can sign out of Cloud Backup at any time from Settings.',
+      'Use MaglakbAI for its purpose — tracking and celebrating real skill-building. Do not misuse it: no illegal activity, no harassment or abusive content, no attempting to access other users’ data, break security or row-level access controls, scrape the service, or disrupt its operation. We may suspend or remove access that abuses these rules.',
   },
   {
-    heading: 'Deleting your data',
+    heading: 'Pilot status — provided “as is”',
     body:
-      'You are always in control. If you use Cloud Backup, Settings → Delete Account permanently erases your account and ALL cloud data — your profile, every output, your skill progress, and the email kept for sign-in — on our servers and on this device. It cannot be undone. Settings → Reset All Progress wipes only this device and signs you out, leaving your cloud backup intact so signing in again can restore it. You can also email ' + PRIVACY_CONTACT + ' to request erasure. Turning analytics off also clears your anonymous analytics ID.',
+      'MaglakbAI is an early pilot offered free of charge. Features may change, break, or be removed, and the service may be unavailable at times. It is provided “as is” and “as available,” without warranties of any kind. Local (on-device) data can be lost if you clear your browser or switch devices — export a backup regularly, and use Cloud Backup, to protect your progress. We are not liable for lost progress, and to the maximum extent permitted by law our total liability arising from your use of the pilot is limited to the amount you paid for it (which is nothing).',
   },
   {
-    heading: 'Children',
+    heading: 'Deleting your account',
     body:
-      'MaglakbAI is intended for users aged 16 and older. It is not directed at children.',
+      'You can delete your account and all cloud data yourself at any time from Settings → Delete Account — this permanently erases your profile, outputs, skill progress and the email held for Cloud Backup, and cannot be undone. Settings → Reset All Progress wipes only this device and signs you out. We may also terminate accounts that violate these terms.',
   },
   {
-    heading: 'Changes & contact',
+    heading: 'Changes to these terms',
     body:
-      `This is a pilot policy and may change as the product evolves. Questions? Contact ${PRIVACY_CONTACT}.`,
+      'As the pilot evolves these terms may change. Material changes will be reflected here with a new effective date; continuing to use MaglakbAI after a change means you accept the updated terms.',
+  },
+  {
+    heading: 'Governing law & contact',
+    body:
+      `These terms are governed by the laws of the Republic of the Philippines, without regard to conflict-of-law rules. Questions about these terms? Contact ${PRIVACY_CONTACT}.`,
   },
 ];
 
-export default function PrivacyPolicyModal({
+export default function TermsOfServiceModal({
   visible,
   onClose,
 }: {
@@ -67,17 +71,17 @@ export default function PrivacyPolicyModal({
         <View style={styles.card}>
           <View style={styles.handle} />
           <View style={styles.headerRow}>
-            <Text style={styles.title}>Privacy Policy</Text>
+            <Text style={styles.title}>Terms of Service</Text>
             <TouchableOpacity
               onPress={onClose}
               style={styles.closeBtn}
               accessibilityRole="button"
-              accessibilityLabel="Close privacy policy"
+              accessibilityLabel="Close terms of service"
             >
               <Text style={styles.closeIcon}>✕</Text>
             </TouchableOpacity>
           </View>
-          <Text style={styles.effective}>Effective {PRIVACY_POLICY_EFFECTIVE}</Text>
+          <Text style={styles.effective}>Effective {TERMS_EFFECTIVE}</Text>
 
           <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
             {SECTIONS.map((s) => (

@@ -32,6 +32,23 @@ export async function signOut(): Promise<void> {
   await supabase.auth.signOut();
 }
 
+/**
+ * Permanently delete the current user's account and ALL cloud data (COMP-001).
+ * Invokes the `delete-account` Edge Function, which uses the service role to
+ * delete the `auth.users` row — cascading to the profile, outputs,
+ * skill_progress, milestones and signals (including the stored email). The
+ * caller is responsible for clearing local state afterwards (resetApp).
+ */
+export async function deleteAccount(): Promise<AuthResult> {
+  if (!isSupabaseEnabled) return { ok: false, error: 'Backend not configured' };
+  const { data, error } = await supabase.functions.invoke('delete-account', { method: 'POST' });
+  if (error) return { ok: false, error: error.message };
+  if (data && typeof data === 'object' && 'error' in data) {
+    return { ok: false, error: String((data as { error: unknown }).error) };
+  }
+  return { ok: true };
+}
+
 /** Get the current session (null if not signed in). */
 export async function getSession(): Promise<Session | null> {
   if (!isSupabaseEnabled) return null;

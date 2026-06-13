@@ -2,5 +2,16 @@
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "strict": true
-  }
+  },
+  "//": "exclude replaces the base list, so the base entries are repeated here. supabase/ is a Deno Edge Function, type-checked by `supabase functions deploy` — not the app's tsc.",
+  "exclude": [
+    "node_modules",
+    "babel.config.js",
+    "metro.config.js",
+    "jest.config.js",
+    "android",
+    "ios",
+    "dist",
+    "supabase"
+  ]
 }
