@@ -699,7 +699,7 @@ export const createCoreSlice = (set: Set, get: Get): Pick<AppState, 'completeOnb
   },
 
   resetApp: () => {
-    try { localStorage.removeItem('skillforge_v1'); } catch {}
+    try { localStorage.removeItem('maglakbai_v1'); } catch {}
     // PRIV-003: Reset wipes THIS DEVICE and signs out of Cloud Backup. It does
     // NOT delete cloud rows (no server-side delete path yet — COMP-001); the
     // Settings copy and privacy policy state this honestly. Signing out here

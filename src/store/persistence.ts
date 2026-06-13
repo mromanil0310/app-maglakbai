@@ -12,7 +12,10 @@
 import type { StoreApi } from 'zustand';
 import type { AppState } from './appStore'; // type-only import → no runtime cycle
 
-const STORAGE_KEY = 'skillforge_v1'; // localStorage key (kept stable so existing data isn't orphaned)
+const STORAGE_KEY = 'maglakbai_v1'; // current localStorage key
+// Pre-rebrand keys, newest first. Read as a fallback and promoted to STORAGE_KEY
+// on load so the SkillForge → MaglakbAI rename never orphans existing user data.
+const LEGACY_STORAGE_KEYS = ['skillforge_v1'];
 export const SCHEMA_VERSION = 1; // bump when the persisted shape changes; add a migration step below
 
 interface VersionedEnvelope {
@@ -77,7 +80,20 @@ function saveToStorage(data: PersistedState): void {
 
 export function loadFromStorage(): Partial<PersistedState> | null {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    let raw = localStorage.getItem(STORAGE_KEY);
+    let fromLegacyKey = false;
+    if (!raw) {
+      // No data under the current key — fall back to pre-rebrand keys so the
+      // SkillForge → MaglakbAI rename doesn't orphan existing users' progress.
+      for (const legacyKey of LEGACY_STORAGE_KEYS) {
+        const legacyRaw = localStorage.getItem(legacyKey);
+        if (legacyRaw) {
+          raw = legacyRaw;
+          fromLegacyKey = true;
+          break;
+        }
+      }
+    }
     if (!raw) return null;
     const parsed: unknown = JSON.parse(raw);
     if (!isPlainObject(parsed)) return null;
@@ -98,7 +114,20 @@ export function loadFromStorage(): Partial<PersistedState> | null {
 
     const migrated = migrate(data, version);
     if (!migrated) return null;
-    return migrated as Partial<PersistedState>;
+    const result = migrated as Partial<PersistedState>;
+
+    if (fromLegacyKey) {
+      // Promote legacy data to the current key once, then drop the old key so
+      // this fallback is a one-time migration rather than read on every load.
+      try {
+        saveToStorage(result as PersistedState);
+        for (const legacyKey of LEGACY_STORAGE_KEYS) localStorage.removeItem(legacyKey);
+      } catch {
+        // best-effort — reading the data is what matters; promotion can retry next load
+      }
+    }
+
+    return result;
   } catch {
     return null;
   }

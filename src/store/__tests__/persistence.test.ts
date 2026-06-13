@@ -5,13 +5,26 @@ import { loadFromStorage, SCHEMA_VERSION } from '../persistence';
 // loadFromStorage reads localStorage at call time, so we stub a minimal
 // localStorage before each assertion.
 
-const KEY = 'skillforge_v1';
+const KEY = 'maglakbai_v1';
+const LEGACY_KEY = 'skillforge_v1';
 function setStored(raw: string | null): void {
   (globalThis as { localStorage?: unknown }).localStorage = {
     getItem: (k: string) => (k === KEY ? raw : null),
     setItem: () => {},
     removeItem: () => {},
   };
+}
+
+// Backs a mutable in-memory store so we can assert the legacy → current key
+// promotion (read old key once, write new key, drop old key).
+function setStoredMap(initial: Record<string, string>): Record<string, string> {
+  const store: Record<string, string> = { ...initial };
+  (globalThis as { localStorage?: unknown }).localStorage = {
+    getItem: (k: string) => (k in store ? store[k] : null),
+    setItem: (k: string, v: string) => { store[k] = v; },
+    removeItem: (k: string) => { delete store[k]; },
+  };
+  return store;
 }
 
 describe('loadFromStorage (ARCH-003 versioning)', () => {
@@ -33,6 +46,30 @@ describe('loadFromStorage (ARCH-003 versioning)', () => {
     const r = loadFromStorage();
     expect(r!.hasOnboarded).toBe(true);
     expect(r!.colorScheme).toBe('light');
+  });
+
+  it('falls back to the legacy skillforge_v1 key so the rebrand never orphans data', () => {
+    const store = setStoredMap({
+      [LEGACY_KEY]: JSON.stringify({ v: SCHEMA_VERSION, data: { hasOnboarded: true, savedPostIds: ['p1'] } }),
+    });
+    const r = loadFromStorage();
+    expect(r!.hasOnboarded).toBe(true);
+    expect(r!.savedPostIds).toEqual(['p1']);
+    // Promotion: data is re-saved under the current key and the legacy key is dropped.
+    expect(store[KEY]).toBeDefined();
+    expect(JSON.parse(store[KEY]).data.hasOnboarded).toBe(true);
+    expect(LEGACY_KEY in store).toBe(false);
+  });
+
+  it('prefers the current key over a legacy key when both exist', () => {
+    const store = setStoredMap({
+      [KEY]: JSON.stringify({ v: SCHEMA_VERSION, data: { hasOnboarded: true, colorScheme: 'dark' } }),
+      [LEGACY_KEY]: JSON.stringify({ v: SCHEMA_VERSION, data: { hasOnboarded: true, colorScheme: 'light' } }),
+    });
+    const r = loadFromStorage();
+    expect(r!.colorScheme).toBe('dark');
+    // Legacy key is left untouched when the current key already holds data.
+    expect(LEGACY_KEY in store).toBe(true);
   });
 
   it('returns null on corrupt JSON', () => {

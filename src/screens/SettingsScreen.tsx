@@ -22,7 +22,7 @@ import TermsOfServiceModal from '../components/TermsOfServiceModal';
 // ARCH-001: Supabase auth
 import { sendMagicLink, signOut, deleteAccount, isSupabaseEnabled } from '../lib/auth';
 
-const STORAGE_KEY = 'skillforge_v1';
+const STORAGE_KEY = 'maglakbai_v1';
 
 // Text-size steps (must stay within the store's 0.9–1.2 clamp).
 const FONT_SCALE_STEPS = [0.9, 1.0, 1.1, 1.2];
