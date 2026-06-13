@@ -11,9 +11,9 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { useAppStore, CAREER_PATHS, ALL_SKILLS } from '../store/appStore';
+import { useAppStore, CAREER_PATHS } from '../store/appStore';
 import { useThemeColors, ColorsType, Colors, Spacing, Radius, FontSize, PathColors } from '../utils/theme';
-import { CareerPathId, CareerPath, CustomSkill, OutputType, ExperienceLevel } from '../types';
+import { CareerPathId, CareerPath, CustomSkill, ExperienceLevel } from '../types';
 import { getPathDemandLabel, DEMAND_SOURCE_LABEL } from '../data/marketDemand';
 import PrivacyPolicyModal from '../components/PrivacyPolicyModal';
 import TermsOfServiceModal from '../components/TermsOfServiceModal';
@@ -26,16 +26,6 @@ const ONBOARDING_PATH_CATEGORIES = [
 ];
 import { track } from '../utils/analytics';
 
-const FIRST_OUTPUT_TYPES = [
-  { id: 'project' as OutputType, icon: '🔨', label: 'Project' },
-  { id: 'cert' as OutputType, icon: '🏅', label: 'Cert' },
-  { id: 'github' as OutputType, icon: '💻', label: 'GitHub' },
-  { id: 'book' as OutputType, icon: '📖', label: 'Book' },
-  { id: 'script' as OutputType, icon: '⚙️', label: 'Script' },
-  { id: 'diagram' as OutputType, icon: '📐', label: 'Design' },
-  { id: 'event'   as OutputType, icon: '🎤', label: 'Event' },
-  { id: 'other'   as OutputType, icon: '📋', label: 'Other' },
-];
 
 export default function OnboardingScreen() {
   const Colors = useThemeColors();
@@ -48,7 +38,6 @@ export default function OnboardingScreen() {
 
   // Custom path state — set when user chooses "Build My Own Path" in step 2
   const [isCustomPath, setIsCustomPath] = useState(false);
-  const [createdCustomPathId, setCreatedCustomPathId] = useState<string | null>(null);
 
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const slideAnim = useRef(new Animated.Value(0)).current;
@@ -56,9 +45,7 @@ export default function OnboardingScreen() {
   const logoOpacity = useRef(new Animated.Value(0)).current;
 
   const completeOnboarding = useAppStore((s) => s.completeOnboarding);
-  const logOutput = useAppStore((s) => s.logOutput);
   const addCustomPath = useAppStore((s) => s.addCustomPath);
-  const customPaths = useAppStore((s) => s.customPaths);
 
   useEffect(() => {
     Animated.parallel([
@@ -111,62 +98,19 @@ export default function OnboardingScreen() {
     transitionTo(3);
   };
 
-  // Called when user finishes configuring their custom path in step 3.
-  // Creates the custom path NOW so step 4 (first output) can reference it.
-  const handleCustomPathCreated = (pathId: string) => {
-    setCreatedCustomPathId(pathId);
-    transitionTo(4);
+  // Finalize onboarding. Called from the final step (experience level for
+  // built-in paths, or the custom-path builder). New users are NOT asked to log
+  // an output here — they land on the dashboard, which has its own "Log my first
+  // output" mission CTA. completeOnboarding grants 25 XP + streak 1 (UX-029) and
+  // flips hasOnboarded → the navigator switches to Main automatically.
+  const finishOnboarding = (pathId: CareerPathId | string, level?: ExperienceLevel) => {
+    const finalName = name.trim() || 'Explorer';
+    completeOnboarding(finalName, pathId, email.trim() || undefined, level);
   };
 
-  // ISSUE-006: completeOnboarding is now called here (step 4) instead of step 2,
-  // so the user can still go back from step 4 to fix their path selection.
-  const handleFirstOutput = (type: OutputType, title: string, desc: string) => {
-    const finalName = name.trim() || 'Explorer';
-    const finalLevel: ExperienceLevel = experienceLevel ?? 'beginner';
-
-    if (isCustomPath && createdCustomPathId) {
-      // Custom path: completeOnboarding uses the custom path ID.
-      // userSkills were already set by addCustomPath in step 3.
-      completeOnboarding(finalName, createdCustomPathId, email.trim() || undefined);
-      // Log first output to the first skill of the custom path (if provided)
-      if (title.trim() && desc.trim()) {
-        // Find the actual first skill ID from the stored custom path.
-        // addCustomPath already ran in step 3, so customPaths is populated.
-        const customPath = customPaths.find((p) => p.id === createdCustomPathId);
-        const firstSkillId = customPath?.skills[0]?.id;
-        if (firstSkillId) {
-          logOutput({
-            skillId: firstSkillId,
-            type,
-            title: title.trim(),
-            description: desc.trim(),
-          });
-        }
-      } else {
-        track('onboarding_first_output_skipped', { career_path: createdCustomPathId, is_custom: true });
-      }
-    } else {
-      const finalPath = selectedPath ?? (CAREER_PATHS[0].id as CareerPathId);
-      // Finalize account — this is what triggers the navigator switch to Main
-      completeOnboarding(finalName, finalPath, email.trim() || undefined, finalLevel);
-
-      if (title.trim() && desc.trim()) {
-        const firstSkill = ALL_SKILLS.find(
-          (s) => s.pathId === finalPath && s.prerequisites.length === 0
-        );
-        if (firstSkill) {
-          logOutput({
-            skillId: firstSkill.id,
-            type,
-            title: title.trim(),
-            description: desc.trim(),
-          });
-        }
-      } else {
-        track('onboarding_first_output_skipped', { career_path: finalPath });
-      }
-    }
-    // hasOnboarded now true → navigator switches to Main automatically
+  // Custom path: addCustomPath already ran in the builder; finalize with its id.
+  const handleCustomPathCreated = (pathId: string) => {
+    finishOnboarding(pathId);
   };
 
   return (
@@ -192,7 +136,7 @@ export default function OnboardingScreen() {
           )}
 
           <View style={styles.stepDots}>
-            {[0, 1, 2, 3, 4].map((i) => (
+            {[0, 1, 2, 3].map((i) => (
               <View
                 key={i}
                 style={[
@@ -256,17 +200,13 @@ export default function OnboardingScreen() {
               selectedLevel={experienceLevel}
               onSelect={(level) => {
                 setExperienceLevel(level);
-                // Brief delay so the selection registers visually before advancing
-                setTimeout(() => transitionTo(4), 320);
+                track('onboarding_step_completed', { step: 3, next_step: 'complete' });
+                // Brief delay so the selection registers visually before we
+                // finalize and the navigator switches to the dashboard.
+                setTimeout(() => {
+                  finishOnboarding(selectedPath ?? (CAREER_PATHS[0].id as CareerPathId), level);
+                }, 320);
               }}
-            />
-          )}
-          {step === 4 && (
-            <FirstOutputStep
-              pathId={isCustomPath ? (createdCustomPathId ?? '') : (selectedPath ?? (CAREER_PATHS[0].id as CareerPathId))}
-              experienceLevel={isCustomPath ? 'beginner' : (experienceLevel ?? 'beginner')}
-              isCustomPath={isCustomPath}
-              onSubmit={handleFirstOutput}
             />
           )}
         </Animated.View>
@@ -955,137 +895,6 @@ function ExperienceLevelStep({
       </View>
 
       <Text style={styles.expHint}>Tap to select — you'll move on automatically.</Text>
-    </ScrollView>
-  );
-}
-
-function FirstOutputStep({
-  pathId,
-  experienceLevel,
-  isCustomPath = false,
-  onSubmit,
-}: {
-  pathId: CareerPathId | string;
-  experienceLevel: ExperienceLevel;
-  isCustomPath?: boolean;
-  onSubmit: (type: OutputType, title: string, desc: string) => void;
-}) {
-  const Colors = useThemeColors();
-  const styles = makeStyles(Colors);
-  const [selectedType, setSelectedType] = useState<OutputType>('project');
-  const [title, setTitle] = useState('');
-  const [desc, setDesc] = useState('');
-
-  const placeholderByType: Record<OutputType, string> = {
-    book:       'e.g. Clean Code — 5 key takeaways',
-    cert:       'e.g. AWS Cloud Practitioner',
-    project:    'e.g. Built a data pipeline in Python',
-    github:     'e.g. Open-sourced a REST API client',
-    script:     'e.g. Automated daily report with Python',
-    diagram:    'e.g. System architecture for microservices',
-    reflection: 'e.g. Reflecting on my first week learning SQL',
-    event:      'e.g. Led a community workshop on public speaking',
-    other:      'Describe what you did or accomplished',
-  };
-
-  const canSubmit = title.trim().length > 0 && desc.trim().length > 0;
-
-  return (
-    <ScrollView contentContainerStyle={styles.stepContainer} showsVerticalScrollIndicator={false}>
-      <Text style={styles.stepEmoji}>🎯</Text>
-      <Text style={styles.stepTitle}>
-        {isCustomPath
-          ? 'What are you working on right now?'
-          : experienceLevel === 'experienced'
-          ? 'What are you working on now?'
-          : experienceLevel === 'building'
-          ? 'Log your most recent output.'
-          // beginner / Fresh Start (UX-027): forward-looking, not "what have you already built"
-          : 'Start with one small step.'}
-      </Text>
-      <Text style={styles.stepSub}>
-        {isCustomPath
-          ? 'Log something you\'ve already built, read, or earned toward your goal. Proof-of-work earns XP.'
-          : experienceLevel === 'experienced'
-          ? 'Your foundation is credited. Show us what you\'re building at the advanced level.'
-          : experienceLevel === 'building'
-          ? 'Your first skill has been credited. What have you built recently on this path?'
-          // beginner / Fresh Start: logging is optional — make skipping a first-class choice
-          : 'New to this? Log anything you\'ve already tried — a tutorial, notes, a small build. Nothing yet? Tap Skip and we\'ll line up your first mission.'}
-      </Text>
-
-      {/* Output type selector */}
-      <View style={styles.outputTypeRow}>
-        {FIRST_OUTPUT_TYPES.map((t) => (
-          <TouchableOpacity
-            key={t.id}
-            style={[
-              styles.outputTypeChip,
-              selectedType === t.id && styles.outputTypeChipActive,
-            ]}
-            onPress={() => setSelectedType(t.id)}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.outputTypeIcon}>{t.icon}</Text>
-            <Text style={[
-              styles.outputTypeLabel,
-              selectedType === t.id && styles.outputTypeLabelActive,
-            ]}>
-              {t.label}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      {/* Title input */}
-      <TextInput
-        style={styles.textInput}
-        placeholder={placeholderByType[selectedType]}
-        placeholderTextColor={Colors.textMuted}
-        value={title}
-        onChangeText={setTitle}
-        returnKeyType="next"
-      />
-
-      {/* Description input */}
-      <TextInput
-        style={[styles.textInput, styles.textInputMulti]}
-        placeholder="What did you learn or build? Be specific — 1–2 sentences."
-        placeholderTextColor={Colors.textMuted}
-        value={desc}
-        onChangeText={setDesc}
-        multiline
-        numberOfLines={3}
-        textAlignVertical="top"
-      />
-
-      {/* CTA */}
-      <TouchableOpacity
-        style={[styles.primaryBtn, !canSubmit && styles.btnDisabled]}
-        onPress={() => onSubmit(selectedType, title, desc)}
-        disabled={!canSubmit}
-        activeOpacity={0.85}
-        accessibilityRole="button"
-        accessibilityState={{ disabled: !canSubmit }}
-      >
-        <Text style={styles.primaryBtnText}>Log It &amp; Start My Journey ⚡</Text>
-      </TouchableOpacity>
-      {!canSubmit && (
-        <Text style={styles.submitHint}>Add a title and a short description to continue.</Text>
-      )}
-
-      {/* Skip */}
-      <TouchableOpacity
-        style={styles.skipLink}
-        onPress={() => onSubmit('project', '', '')}
-        activeOpacity={0.7}
-      >
-        <Text style={styles.skipLinkText}>
-          {!isCustomPath && experienceLevel === 'beginner'
-            ? "I'm just getting started — skip →"
-            : 'Skip for now'}
-        </Text>
-      </TouchableOpacity>
     </ScrollView>
   );
 }
