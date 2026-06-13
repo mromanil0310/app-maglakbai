@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "LakbAI",
-    "slug": "lakbai",
+    "name": "MaglakbAI",
+    "slug": "maglakbai",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
@@ -11,13 +11,13 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.skillforge.app"
+      "bundleIdentifier": "com.maglakbai.app"
     },
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#080810"
       },
-      "package": "com.skillforge.app"
+      "package": "com.maglakbai.app"
     },
     "web": {
       "bundler": "metro",

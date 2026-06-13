@@ -129,7 +129,10 @@ export default function MilestoneScreen() {
   const styles = React.useMemo(() => makeStyles(Colors), [Colors]);
   const navigation = useNavigation<any>();
   const route = useRoute<MilestoneRouteProps>();
-  const { skillId, xpGained, leveledUp, newLevel } = route.params;
+  const { skillId, xpGained, sessionXpGained, achievements, leveledUp, newLevel } = route.params;
+  // UX-030: show the TOTAL XP gained this action (incl. achievement + streak
+  // bonuses) so the headline reconciles with the user's actual XP change.
+  const displayXp = sessionXpGained ?? xpGained;
 
   const user = useAppStore((s) => s.user);
   const customPaths = useAppStore((s) => s.customPaths);
@@ -365,9 +368,25 @@ export default function MilestoneScreen() {
         {/* XP + Level */}
         <Animated.View style={[styles.xpSection, { opacity: contentOpacity }]}>
           <View style={styles.xpCard}>
-            <Text style={styles.xpAmount}>+{xpGained} XP</Text>
+            <Text style={styles.xpAmount}>+{displayXp} XP</Text>
             <Text style={styles.xpLabel}>earned this session</Text>
           </View>
+
+          {/* UX-030: surface achievements unlocked by this milestone so the
+              XP total reconciles on screen ("where did the extra XP come from"). */}
+          {achievements && achievements.length > 0 && (
+            <View style={styles.achievementsCard}>
+              {achievements.map((a) => (
+                <View key={a.id} style={styles.achievementRow}>
+                  <Text style={styles.achievementEmoji}>🏆</Text>
+                  <Text style={styles.achievementText} numberOfLines={1}>
+                    Achievement unlocked: {a.title}
+                  </Text>
+                  <Text style={styles.achievementXp}>+{a.xpGranted}</Text>
+                </View>
+              ))}
+            </View>
+          )}
 
           {leveledUp && (
             <Animated.View
@@ -577,6 +596,35 @@ const makeStyles = (Colors: ColorsType) => StyleSheet.create({
   xpLabel: {
     fontSize: FontSize.sm,
     color: Colors.textSub,
+  },
+  achievementsCard: {
+    marginTop: Spacing.sm,
+    backgroundColor: Colors.cardAlt,
+    borderRadius: Radius.lg,
+    borderWidth: 1,
+    borderColor: Colors.gold + '40',
+    paddingHorizontal: Spacing.md,
+    paddingVertical: 10,
+    gap: 8,
+  },
+  achievementRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  achievementEmoji: {
+    fontSize: 16,
+  },
+  achievementText: {
+    flex: 1,
+    fontSize: FontSize.sm,
+    fontWeight: '700',
+    color: Colors.text,
+  },
+  achievementXp: {
+    fontSize: FontSize.sm,
+    fontWeight: '800',
+    color: Colors.gold,
   },
   levelUpCard: {
     backgroundColor: Colors.primaryDim,

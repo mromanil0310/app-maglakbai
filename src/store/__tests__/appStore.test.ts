@@ -105,6 +105,42 @@ describe('logOutput', () => {
     expect(get().unlockedAchievementIds).toContain('first-steps');
   });
 
+  it('resetApp wipes the device AND clears the cloud session (PRIV-003)', () => {
+    reset();
+    onboard();
+    log();
+    // Simulate a signed-in Cloud Backup session
+    store.setState({ supabaseUserId: 'uid_123', supabaseEmail: 'maria@example.com' });
+    reset();
+    // Device wiped…
+    expect(get().hasOnboarded).toBe(false);
+    expect(get().user).toBeNull();
+    expect(get().outputs).toEqual([]);
+    // …and signed out, so the auth listener can't silently re-sync cloud data
+    // back into the freshly reset app.
+    expect(get().supabaseUserId).toBeNull();
+    expect(get().supabaseEmail).toBeNull();
+    expect(get().supabaseSyncing).toBe(false);
+  });
+
+  it('reports sessionXpGained as the TRUE total delta incl. achievement XP (UX-030)', () => {
+    reset();
+    onboard();
+    const xpBefore = get().user!.xp;
+    const r = log(); // first output also unlocks first-steps (+25)
+    const xpAfter = get().user!.xp;
+
+    // The headline "earned this session" number must equal the real XP change…
+    expect(r.sessionXpGained).toBe(xpAfter - xpBefore);
+    // …which is strictly more than the per-output XP because an achievement fired.
+    expect(r.sessionXpGained!).toBeGreaterThan(r.xpGained);
+    // The unlocked achievement is surfaced…
+    expect(r.newAchievements?.some((a) => a.id === 'first-steps')).toBe(true);
+    // …and the totals reconcile exactly: output XP + achievement grants.
+    const achTotal = (r.newAchievements ?? []).reduce((s, a) => s + a.xpGranted, 0);
+    expect(r.sessionXpGained).toBe(r.xpGained + achTotal);
+  });
+
   it('increments the streak on a consecutive day', () => {
     reset();
     onboard();

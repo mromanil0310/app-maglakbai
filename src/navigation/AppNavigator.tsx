@@ -8,6 +8,8 @@ import { useThemeColors, Colors, FontSize, Spacing } from '../utils/theme';
 import { useAppStore } from '../store/appStore';
 // ARCH-001: auth session listener
 import { onAuthStateChange, isSupabaseEnabled } from '../lib/auth';
+import { captureError } from '../utils/errorMonitor';
+import type { UnlockedAchievementInfo } from '../types';
 
 import OnboardingScreen from '../screens/OnboardingScreen';
 import DashboardScreen from '../screens/DashboardScreen';
@@ -27,6 +29,14 @@ class ScreenErrorBoundary extends React.Component<
 > {
   state: ScreenErrorState = { error: null };
   static getDerivedStateFromError(error: Error) { return { error }; }
+  componentDidCatch(error: Error, info: { componentStack?: string }) {
+    // OPS-001: report which screen crashed (consent-gated + PII-scrubbed).
+    captureError(error, {
+      source: 'screen_boundary',
+      screen: this.props.screenName,
+      component_stack: (info?.componentStack ?? '').split('\n').slice(0, 6).join('\n'),
+    });
+  }
   render() {
     if (this.state.error) {
       return (
@@ -64,6 +74,8 @@ export type RootStackParamList = {
   MilestoneDetail: {
     skillId: string;
     xpGained: number;
+    sessionXpGained?: number; // UX-030: true total XP delta incl. achievement/streak bonuses
+    achievements?: UnlockedAchievementInfo[]; // achievements unlocked alongside the milestone
     leveledUp: boolean;
     newLevel: number;
   };

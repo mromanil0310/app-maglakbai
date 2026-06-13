@@ -4,7 +4,8 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import AppNavigator from './src/navigation/AppNavigator';
 import { ToastProvider } from './src/components/Toast';
 import ConsentBanner from './src/components/ConsentBanner';
-import { sessionStarted, track } from './src/utils/analytics';
+import { sessionStarted, track, trackRetention } from './src/utils/analytics';
+import { captureError, installGlobalErrorHandlers } from './src/utils/errorMonitor';
 import { ThemeContext } from './src/utils/theme';
 import { useAppStore } from './src/store/appStore';
 
@@ -15,6 +16,13 @@ interface ErrorState { error: Error | null; showDetails: boolean }
 class ErrorBoundary extends React.Component<{ children: React.ReactNode }, ErrorState> {
   state: ErrorState = { error: null, showDetails: false };
   static getDerivedStateFromError(error: Error) { return { error, showDetails: false }; }
+  componentDidCatch(error: Error, info: { componentStack?: string }) {
+    // OPS-001: report root-level crashes (consent-gated + PII-scrubbed).
+    captureError(error, {
+      source: 'root_boundary',
+      component_stack: (info?.componentStack ?? '').split('\n').slice(0, 6).join('\n'),
+    });
+  }
   render() {
     if (this.state.error) {
       return (
@@ -63,7 +71,9 @@ export default function App() {
   }, [fontScale]);
 
   useEffect(() => {
+    installGlobalErrorHandlers(); // OPS-001: catch window errors + unhandled rejections
     sessionStarted();
+    trackRetention(useAppStore.getState().user?.joinedAt);
 
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'hidden') {
@@ -72,6 +82,8 @@ export default function App() {
       } else if (document.visibilityState === 'visible') {
         sessionStart.current = Date.now();
         sessionStarted({ resumed: true });
+        // A resume can cross a calendar-day boundary → re-check retention.
+        trackRetention(useAppStore.getState().user?.joinedAt);
       }
     };
 

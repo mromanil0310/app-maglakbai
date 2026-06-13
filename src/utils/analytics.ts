@@ -20,15 +20,25 @@
  *   first_output_logged, output_logged, skill_completed, level_up,
  *   achievement_unlocked, streak_milestone, post_reacted,
  *   milestone_screen_viewed, path_switched, custom_path_created,
- *   screen_viewed, log_screen_abandoned, retention_d1_activated,
- *   retention_d7, retention_d30
+ *   screen_viewed, log_screen_abandoned, retention_d1, retention_d7,
+ *   retention_d30, client_error (OPS-001 — see errorMonitor.ts)
+ *
+ * Retention semantics: retention_dN fires ONCE, on the first session that
+ * occurs on or after N calendar days since the user joined (see
+ * trackRetention). This measures "still active at the N-day mark" and is
+ * driven by app opens — NOT by logging an output — so a returning user is
+ * counted whether or not they happen to log on the exact Nth day.
  */
 
-const API_KEY: string = (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_POSTHOG_API_KEY) ?? '';
-const HOST: string    = (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_POSTHOG_HOST) ?? 'https://us.i.posthog.com';
+// `||` (not `??`) so an EMPTY-string env var still falls back to the default —
+// with `??`, VITE_POSTHOG_HOST="" would make HOST '' and post() would hit the
+// app's own origin (OPS-002). The ingest host must also be allowed by the CSP
+// connect-src in netlify.toml — keep the two in sync.
+const API_KEY: string = ((typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_POSTHOG_API_KEY) || '') as string;
+const HOST: string    = ((typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_POSTHOG_HOST) || 'https://us.i.posthog.com') as string;
 
 const CONSENT_KEY = 'sf_analytics_consent'; // 'granted' | 'denied' (absent → undecided)
-const CONSENT_EVENT = 'skillforge:consent-changed';
+const CONSENT_EVENT = 'maglakbai:consent-changed';
 
 export type ConsentStatus = 'granted' | 'denied' | 'undecided';
 
@@ -133,7 +143,67 @@ export function identify(userId: string, traits: Record<string, unknown> = {}): 
 
 export function reset(): void {
   _distinctId = '';
-  try { localStorage.removeItem('sf_analytics_id'); } catch {}
+  try {
+    localStorage.removeItem('sf_analytics_id');
+    localStorage.removeItem(RETENTION_KEY); // re-evaluate retention if the user re-consents / resets
+  } catch {}
+}
+
+// ─── Retention (session-based) ───────────────────────────────────────────────
+// retention_dN = the user was active (opened the app) on or after N calendar
+// days since joining. Fired once per milestone, driven by app opens rather than
+// by logging an output, so genuine returns aren't missed.
+
+export const RETENTION_MILESTONES = [1, 7, 30] as const;
+const RETENTION_KEY = 'sf_retention_fired';
+
+/**
+ * Pure: which retention milestones should fire given the user's age (in whole
+ * days since join) and the milestones already fired. Uses `>=` so a user whose
+ * first return is on day 10 still counts toward d1/d7 — they are demonstrably
+ * retained past those marks. Monotonic and dedup-safe.
+ */
+export function pendingRetentionMilestones(
+  daysSinceJoin: number,
+  alreadyFired: readonly number[],
+): number[] {
+  return RETENTION_MILESTONES.filter(
+    (m) => daysSinceJoin >= m && !alreadyFired.includes(m),
+  );
+}
+
+function readFiredMilestones(): number[] {
+  try {
+    const raw = localStorage.getItem(RETENTION_KEY);
+    if (!raw) return [];
+    const arr = JSON.parse(raw);
+    return Array.isArray(arr) ? arr.filter((n): n is number => typeof n === 'number') : [];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Call on every session start (app open / resume), passing the user's joinedAt.
+ * Fires any not-yet-fired retention milestones the user has reached. No-op
+ * until analytics consent is granted, so the guard isn't burned before opt-in.
+ */
+export function trackRetention(joinedAtISO: string | null | undefined): void {
+  if (!joinedAtISO) return;
+  if (getConsentStatus() !== 'granted') return;
+  const joined = new Date(joinedAtISO).getTime();
+  if (Number.isNaN(joined)) return;
+  const daysSinceJoin = Math.floor((Date.now() - joined) / 86_400_000);
+  if (daysSinceJoin < RETENTION_MILESTONES[0]) return;
+  const fired = readFiredMilestones();
+  const pending = pendingRetentionMilestones(daysSinceJoin, fired);
+  if (pending.length === 0) return;
+  for (const m of pending) {
+    track(`retention_d${m}`, { days_since_join: daysSinceJoin });
+  }
+  try {
+    localStorage.setItem(RETENTION_KEY, JSON.stringify([...fired, ...pending]));
+  } catch {}
 }
 
 export function sessionStarted(properties: Record<string, unknown> = {}): void {

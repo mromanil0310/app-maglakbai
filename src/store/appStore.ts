@@ -12,6 +12,7 @@ import {
   CustomSkill,
   LogOutputPayload,
   LogOutputResult,
+  UnlockedAchievementInfo,
   SkillStatus,
   RoadmapEntry,
   RoadmapPriorityStatus,
@@ -101,7 +102,9 @@ import { createProfileSlice } from './slices/profileSlice';
 
 export interface PendingCelebration {
   skillId: string;
-  xpGained: number;
+  xpGained: number;          // XP from this output (base + bonuses + skill-completion)
+  sessionXpGained?: number;  // UX-030: total XP delta incl. achievement + streak-milestone bonuses
+  newAchievements?: UnlockedAchievementInfo[]; // achievements unlocked alongside this milestone
   leveledUp: boolean;
   newLevel: number;
 }

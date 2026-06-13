@@ -430,6 +430,8 @@ export default function LogOutputScreen() {
         navigation.navigate('MilestoneDetail', {
           skillId: effectiveSkillId,
           xpGained: result.xpGained,
+          sessionXpGained: result.sessionXpGained,
+          achievements: result.newAchievements,
           leveledUp: result.leveledUp,
           newLevel: result.newLevel,
         });

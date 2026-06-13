@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, Modal, ScrollView, TouchableOpacity } from 'react-native';
 import { useThemeColors, ColorsType, Spacing, Radius, FontSize } from '../utils/theme';
 
-export const PRIVACY_POLICY_EFFECTIVE = 'June 3, 2026';
+export const PRIVACY_POLICY_EFFECTIVE = 'June 12, 2026';
 
 export const PRIVACY_CONTACT = 'marlo.romanillos@gmail.com';
 
@@ -37,7 +37,7 @@ const SECTIONS: Section[] = [
   {
     heading: 'Deleting your data',
     body:
-      'You are always in control. Use Settings → Reset All Progress to permanently erase everything from this device. If you signed in via Cloud Backup, contact us at ' + PRIVACY_CONTACT + ' to request deletion of your cloud data. Turning analytics off also clears your anonymous analytics ID.',
+      'You are always in control. Use Settings → Reset All Progress to permanently erase everything from this device; if you were signed in, Reset also signs you out of Cloud Backup. Reset does NOT delete the copy already in your cloud backup — signing in again can restore it. To permanently delete your cloud data, email ' + PRIVACY_CONTACT + ' and we will erase it. Turning analytics off also clears your anonymous analytics ID.',
   },
   {
     heading: 'Children',

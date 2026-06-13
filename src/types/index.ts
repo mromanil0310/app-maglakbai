@@ -209,9 +209,19 @@ export interface LogOutcomePayload {
   date: string; // YYYY-MM-DD
 }
 
+// Compact info for an achievement unlocked by a single action — used to
+// surface it on the milestone celebration (UX-030).
+export interface UnlockedAchievementInfo {
+  id: string;
+  title: string;
+  xpGranted: number;
+}
+
 export interface LogOutputResult {
   skillCompleted: boolean;
-  xpGained: number;
+  xpGained: number;          // XP from THIS output (base type + quality/takeaway + skill-completion bonus)
+  sessionXpGained?: number;  // UX-030: TOTAL XP delta from this action, incl. achievement + streak-milestone bonuses
+  newAchievements?: UnlockedAchievementInfo[]; // achievements unlocked by this action (for the celebration)
   leveledUp: boolean;
   newLevel: number;
   newSkillId?: string;

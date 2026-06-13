@@ -17,7 +17,7 @@ import { useAppStore } from '../store/appStore';
 import { useThemeColors, ColorsType, Spacing, Radius, FontSize } from '../utils/theme';
 import { useToast } from '../components/Toast';
 import { page, getConsentStatus, setConsent } from '../utils/analytics';
-import PrivacyPolicyModal from '../components/PrivacyPolicyModal';
+import PrivacyPolicyModal, { PRIVACY_CONTACT } from '../components/PrivacyPolicyModal';
 // ARCH-001: Supabase auth
 import { sendMagicLink, signOut, isSupabaseEnabled } from '../lib/auth';
 
@@ -40,7 +40,7 @@ function exportProgress(): boolean {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `skillforge-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    a.download = `maglakbai-backup-${new Date().toISOString().slice(0, 10)}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -569,8 +569,9 @@ export default function SettingsScreen() {
         <View style={styles.noticeRow}>
           <Text style={styles.noticeIcon}>📱</Text>
           <Text style={styles.noticeText}>
-            Your progress is stored only on this device. Export a backup regularly so you don’t lose
-            it if you clear your browser or switch devices.
+            {supabaseUserId
+              ? 'Your progress is stored on this device and synced to your cloud backup, so it survives clearing your browser or switching devices.'
+              : 'Your progress is stored only on this device. Export a backup regularly so you don’t lose it if you clear your browser or switch devices.'}
           </Text>
         </View>
 
@@ -626,7 +627,11 @@ export default function SettingsScreen() {
       <ConfirmModal
         visible={showResetConfirm}
         title="Reset All Progress?"
-        message={`This will permanently delete all your XP, outputs, skills, and settings. Your account @${user.handle} will be wiped. This cannot be undone.`}
+        message={
+          supabaseUserId
+            ? `This will permanently delete all progress for @${user.handle} from THIS DEVICE and sign you out of Cloud Backup. Your cloud backup is NOT deleted — signing in again can restore it. To erase your cloud data too, email ${PRIVACY_CONTACT}. This cannot be undone on this device.`
+            : `This will permanently delete all your XP, outputs, skills, and settings. Your account @${user.handle} will be wiped. This cannot be undone.`
+        }
         confirmLabel="Reset Everything"
         confirmColor="#EF4444"
         onConfirm={handleReset}

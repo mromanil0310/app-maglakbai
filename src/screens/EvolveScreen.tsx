@@ -1147,7 +1147,9 @@ export default function EvolveScreen() {
   useEffect(() => {
     if (pendingCelebration) {
       clearCelebration();
-      navigation.navigate('MilestoneDetail', pendingCelebration);
+      const { newAchievements, ...rest } = pendingCelebration;
+      // Map newAchievements → achievements to match the MilestoneDetail params (UX-030).
+      navigation.navigate('MilestoneDetail', { ...rest, achievements: newAchievements });
     }
   }, [pendingCelebration]);
 
@@ -1308,24 +1310,30 @@ export default function EvolveScreen() {
   const renderCompactRoadmap = (pathId: string) => {
     const info = getPathInfo(pathId);
     return (
-      <TouchableOpacity
+      // QA-002: card tap + ⋯ options are DOM siblings inside a plain View
+      // container — never a <button> nested in a <button> (invalid HTML + a11y).
+      <View
         key={pathId}
         style={[styles.compactRoadmap, { borderColor: info.borderColor }]}
-        onPress={() => setActiveViewPathId(pathId)}
-        activeOpacity={0.85}
-        accessibilityRole="button"
-        accessibilityLabel={`${info.name} roadmap, ${info.pct}% complete`}
       >
-        <View style={[styles.compactIcon, { backgroundColor: info.color + '18' }]}>
-          <Text style={{ fontSize: 14 }}>{info.icon}</Text>
-        </View>
-        <Text style={styles.compactName} numberOfLines={1}>{info.name}</Text>
-        <View style={styles.compactMeta}>
-          <View style={[styles.compactBar, { backgroundColor: info.color + '18' }]}>
-            <View style={[styles.compactBarFill, { width: `${info.pct}%` as any, backgroundColor: info.color }]} />
+        <TouchableOpacity
+          style={styles.compactMain}
+          onPress={() => setActiveViewPathId(pathId)}
+          activeOpacity={0.85}
+          accessibilityRole="button"
+          accessibilityLabel={`${info.name} roadmap, ${info.pct}% complete`}
+        >
+          <View style={[styles.compactIcon, { backgroundColor: info.color + '18' }]}>
+            <Text style={{ fontSize: 14 }}>{info.icon}</Text>
           </View>
-          <Text style={[styles.compactPct, { color: info.color }]}>{info.pct}%</Text>
-        </View>
+          <Text style={styles.compactName} numberOfLines={1}>{info.name}</Text>
+          <View style={styles.compactMeta}>
+            <View style={[styles.compactBar, { backgroundColor: info.color + '18' }]}>
+              <View style={[styles.compactBarFill, { width: `${info.pct}%` as any, backgroundColor: info.color }]} />
+            </View>
+            <Text style={[styles.compactPct, { color: info.color }]}>{info.pct}%</Text>
+          </View>
+        </TouchableOpacity>
         <TouchableOpacity
           style={styles.compactMore}
           onPress={() => setManagingPathId(pathId)}
@@ -1335,7 +1343,7 @@ export default function EvolveScreen() {
         >
           <Text style={styles.moreBtnText}>⋯</Text>
         </TouchableOpacity>
-      </TouchableOpacity>
+      </View>
     );
   };
 
@@ -1344,17 +1352,16 @@ export default function EvolveScreen() {
     const isViewing = effectiveViewId === pathId;
 
     return (
-      <TouchableOpacity
+      // QA-002: outer is a plain View container; the card tap, the ⋯ options
+      // button, and the footer "view skills" affordance are DOM siblings —
+      // never a <button> nested inside a <button> (invalid HTML + a11y defect).
+      <View
         key={pathId}
         style={[
           isPriority ? styles.priorityCard : styles.secondaryCard,
           { borderColor: info.borderColor, backgroundColor: info.dimColor },
           isViewing && !isPriority && { borderColor: info.color + '80' },
         ]}
-        onPress={() => setActiveViewPathId(pathId)}
-        activeOpacity={0.88}
-        accessibilityRole="button"
-        accessibilityLabel={`${info.name} roadmap, ${info.pct}% complete`}
       >
         {isPriority && (
           <View style={[styles.priorityBadge, { backgroundColor: info.color }]}>
@@ -1363,17 +1370,25 @@ export default function EvolveScreen() {
         )}
 
         <View style={styles.cardTopRow}>
-          <View style={[styles.cardIconBox, { backgroundColor: info.color + '20' }]}>
-            <Text style={styles.cardIcon}>{info.icon}</Text>
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={[styles.cardName, { color: isPriority ? info.textColor : Colors.text }]}>
-              {info.name}
-            </Text>
-            <Text style={styles.cardMeta}>
-              {info.completedCount}/{info.skills.length} skills · {info.pct}% complete
-            </Text>
-          </View>
+          <TouchableOpacity
+            style={styles.cardTapMain}
+            onPress={() => setActiveViewPathId(pathId)}
+            activeOpacity={0.88}
+            accessibilityRole="button"
+            accessibilityLabel={`${info.name} roadmap, ${info.pct}% complete`}
+          >
+            <View style={[styles.cardIconBox, { backgroundColor: info.color + '20' }]}>
+              <Text style={styles.cardIcon}>{info.icon}</Text>
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.cardName, { color: isPriority ? info.textColor : Colors.text }]}>
+                {info.name}
+              </Text>
+              <Text style={styles.cardMeta}>
+                {info.completedCount}/{info.skills.length} skills · {info.pct}% complete
+              </Text>
+            </View>
+          </TouchableOpacity>
           <TouchableOpacity
             style={styles.moreBtn}
             onPress={() => setManagingPathId(pathId)}
@@ -1391,17 +1406,23 @@ export default function EvolveScreen() {
         </View>
 
         {isPriority && (
-          <View style={styles.priorityFooter}>
+          <TouchableOpacity
+            style={styles.priorityFooter}
+            onPress={() => setActiveViewPathId(pathId)}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel={isViewing ? `Viewing ${info.name} skills` : `View ${info.name} skills`}
+          >
             <Text style={[styles.viewSkillsBtn, { color: info.color }]}>
               {isViewing ? '▾ Viewing skills below' : '▸ Tap to view skills'}
             </Text>
-          </View>
+          </TouchableOpacity>
         )}
 
         {!isPriority && isViewing && (
           <Text style={[styles.viewingLabel, { color: info.color }]}>▾ Viewing skills</Text>
         )}
-      </TouchableOpacity>
+      </View>
     );
   };
 
@@ -1882,6 +1903,7 @@ const makeStyles = (Colors: ColorsType) => StyleSheet.create({
   },
 
   cardTopRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  cardTapMain: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 12 },
   cardIconBox: {
     width: 44, height: 44, borderRadius: 12,
     alignItems: 'center', justifyContent: 'center', flexShrink: 0,
@@ -1941,6 +1963,7 @@ const makeStyles = (Colors: ColorsType) => StyleSheet.create({
     minWidth: 28,
     textAlign: 'right',
   },
+  compactMain: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10 },
   compactMore: {
     paddingLeft: 4,
   },

@@ -19,7 +19,7 @@ export async function sendMagicLink(email: string): Promise<AuthResult> {
   const { error } = await supabase.auth.signInWithOtp({
     email: email.trim().toLowerCase(),
     options: {
-      emailRedirectTo: typeof window !== 'undefined' ? window.location.origin : 'skillforge://auth',
+      emailRedirectTo: typeof window !== 'undefined' ? window.location.origin : 'maglakbai://auth',
     },
   });
   if (error) return { ok: false, error: error.message };

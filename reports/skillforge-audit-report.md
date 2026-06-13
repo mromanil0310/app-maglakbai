@@ -1,7 +1,173 @@
 # MaglakbAI Audit Report
-_Last updated: 2026-06-09 (sprint 42 — MaglakbAI rebrand; premium fonts + text-scale; Key Takeaway fix (BUG-014); evidence gate UX; score 7.7/10)_
+_Last updated: 2026-06-12 (sprint 44 — public board review: NO GO public / pilot Conditional Go stands. Same-day fixes: PRIV-003 ✅ resolved, OPS-002 🔶 resolved-in-code (owner: set PostHog key in Netlify + verify one live event). 114 tests.)_
 
-> **Governed by BAEF** — the [Biboy Application Excellence Framework](../Biboy_BAEF/BAEF.md) is now the operating standard for this app. The authoritative current assessment is the **BAEF Release Readiness Audit** below. The legacy product scorecard that follows is retained for history but was **superseded on 2026-06-01**: its "10/10 pilot ready" predates the release-readiness audit that reframed MaglakbAI as a web/PWA pilot (not a native iOS app) and surfaced the P0 blockers since resolved.
+> **Governed by BAEF** — the [Biboy Application Excellence Framework](../Biboy_BAEF/BAEF.md) is the operating standard for this app. The authoritative current assessment is the **sprint-44 Public-Release Board Review** immediately below. Earlier dated sections are retained for history (do not delete) and are superseded by the most recent dated section.
+
+---
+
+## 🏛️ BAEF Public-Release Board Review (sprint 44, 2026-06-12)
+
+_Question under review: is MaglakbAI ready for **public release** at BIBOY Group quality standards — a strictly higher bar than the closed web/PWA pilot cleared at sprint 43. Evidence-driven: secrets/CSP/RLS/legal surfaces inspected directly this run._
+
+### Decision
+**❌ NO GO — public release.** ✅ The sprint-43 **Conditional Go for the closed pilot stands** (none of the new findings break the closed-pilot posture, but PRIV-003 and OPS-002 should be fixed during the pilot regardless).
+
+### New backlog items (sprint 44)
+
+#### PRIV-003 — Privacy policy materially false since the backend went live ✅ Resolved (sprint 44)
+- **Priority:** **P0 (public)** / P1 (pilot) · **Severity:** 🔴 Critical · **Category:** Privacy / Compliance / Trust
+- **Description (refined during fix):** The in-app `PrivacyPolicyModal` had already been updated for Cloud Backup (largely accurate); the materially false artifact was **`docs/PRIVACY.md`** — the "keep in sync" standalone copy still claiming *"We do not have a server," "email stored only on this device," "Reset removes it permanently."* Two Settings strings also lied when signed in ("stored only on this device"; Reset "will be wiped"), and **`resetApp` didn't clear the Supabase session** — after Reset the user stayed signed in and the auth listener could silently re-sync cloud data into the "reset" app.
+- **Resolution (sprint 44):**
+  1. **Behavior:** `coreSlice.resetApp` now calls `signOut()` (fire-and-forget) and clears `supabaseUserId/supabaseEmail/supabaseSyncing` — Reset = device wiped + signed out, no silent re-sync. Unit test added ("resetApp wipes the device AND clears the cloud session"); **114 tests green**.
+  2. **Settings copy:** Reset confirm is now conditional — signed-in users are told the cloud backup is NOT deleted, they'll be signed out, and how to request cloud erasure (PRIVACY_CONTACT); the Data & Privacy notice is conditional on sign-in state.
+  3. **Policy:** `docs/PRIVACY.md` fully rewritten to mirror the modal (cloud backup disclosure incl. profile fields + output text, honest Reset semantics, erasure-by-email path, dependent-artifact warning banner); modal "Deleting your data" section tightened (Reset signs out; cloud copy persists until erasure requested); effective date bumped to June 12, 2026.
+  4. **Verified live in preview:** modal shows the new effective date, cloud disclosure, honest Reset wording, erasure path; no "we do not have a server" claim anywhere; signed-out Settings variants render; 0 console errors.
+- **Remaining (tracked separately):** in-app self-serve cloud deletion = **COMP-001** (needs RLS delete policies on the live Supabase project). The erasure-by-email path is the lawful interim.
+
+#### OPS-002 — Production analytics + error monitoring are dead-on-arrival (key empty, CSP blocks the endpoint)
+- **Priority:** **P0 (public)** / P1 (pilot — defeats the pilot's measurement purpose) · **Severity:** 🔴 Critical · **Category:** Ops / Analytics
+- **Description:** Two independent kills: (1) `VITE_POSTHOG_API_KEY` is **EMPTY** in `.env` (verified) → `analytics.ts:97 post()` no-ops everywhere, so every event — including `retention_d1/d7/d30` (ANL-001) and `client_error` (OPS-001) — is silently dropped; Netlify env unverified. (2) Even with a key, the CSP in `netlify.toml` allows `connect-src … https://app.posthog.com` while `analytics.ts:34` defaults to `https://us.i.posthog.com` → production capture calls are CSP-blocked. Bonus footgun: `?? 'https://us.i.posthog.com'` doesn't survive an *empty-string* env var (`'' ?? x` → `''`), which would POST to the app's own origin.
+- **Business impact:** The pilot exists to produce activation/retention data; with this configuration **zero events ever arrive**, so the pilot cannot answer its own go/no-go question and crashes are invisible despite the monitor being wired. **User impact:** none directly.
+- **Acceptance criteria:** PostHog key + host set in Netlify env; CSP `connect-src` includes the actual ingest host; `??` → `||` (or trim+validate); **a real event verified end-to-end in the deployed prod app** (network 200 + visible in PostHog).
+- **QA validation:** Deployed site → grant consent → log output → event visible in PostHog; forced error → `client_error` visible. **Effort:** S. **Dependencies:** PostHog project provisioning.
+- **Status (sprint 44): 🔶 Resolved in code — one manual owner step remains.** (1) CSP `connect-src` now includes `https://us.i.posthog.com` (the client's actual default ingest host) alongside `app.posthog.com` (`netlify.toml`). (2) `analytics.ts` host/key fallbacks changed `??` → `||` so an empty-string env var can't produce a same-origin POST. (3) `netlify.toml` header now documents all four required env vars + the post-deploy verification recipe. **Remaining manual step (owner):** create the PostHog project, set `VITE_POSTHOG_API_KEY` in the Netlify dashboard, redeploy, then run the documented verification (consent → log output → event 200 in PostHog; forced error → `client_error`). Until that step, analytics/error events remain no-ops by design (key guard) — but no longer CSP-blocked or misrouted once the key exists.
+
+#### BRAND-002 — CSP blocks Google Fonts in production: premium brand fonts have never shipped
+- **Priority:** P1 · **Severity:** 🟠 High · **Category:** Brand / UX / Ops
+- **Description:** `index.html:40-42` (and shipped `dist/index.html`) load Plus Jakarta Sans + Space Grotesk from `fonts.googleapis.com` / `fonts.gstatic.com`, but the Netlify CSP allows only `style-src 'self' 'unsafe-inline'` and `font-src 'self'` → in production the stylesheet and font files are blocked and the app silently falls back to system fonts. The sprint-42 "premium fonts" flagship has **never rendered in production**. Undetectable in local e2e because localhost serves no Netlify headers.
+- **Acceptance criteria:** Either add `https://fonts.googleapis.com` to `style-src` + `https://fonts.gstatic.com` to `font-src`, or (better for CSP tightness + performance) self-host the two font families and keep `font-src 'self'`. Verify rendered font-family **on the deployed site**, not localhost. **Effort:** S.
+
+#### COMP-001 — No Terms of Service; no server-side account deletion (right to erasure)
+- **Priority:** **P0 (public)** / P2 (pilot) · **Severity:** 🔴 Critical (public) · **Category:** Compliance / Legal
+- **Description:** No ToS anywhere in app or docs (verified by repo-wide search). `src/lib/db.ts` has zero delete functions — once a signed-in user's profile/outputs reach Supabase there is **no user-facing way to erase them** (GDPR Art.17 / PH DPA right to erasure). Settings "Reset" misleadingly suggests full deletion (see PRIV-003).
+- **Acceptance criteria:** ToS reachable pre-signup; "Delete my cloud data" (or full account deletion via Supabase) in Settings; Reset semantics honest. **Effort:** M. **Dependencies:** PRIV-003 wording.
+
+#### AUTH-001 — Magic Link on Supabase default SMTP cannot survive public traffic
+- **Priority:** P1 (public) · **Severity:** 🟠 High · **Category:** Ops / Auth
+- **Description:** Auth uses Supabase's built-in email service, which is explicitly not for production (low hourly send limits, shared-IP deliverability/spam issues). At public scale, sign-in emails throttle or land in spam → auth is effectively down. **Acceptance criteria:** Custom SMTP (Resend/Postmark/SES) configured + deliverability tested; rate-limit/abuse posture reviewed. **Effort:** S–M.
+
+#### PERF-002 — No service worker: the "PWA" has no offline support
+- **Priority:** P2 · **Severity:** 🟡 Medium · **Category:** Performance / UX
+- **Description:** Manifest + A2HS exist but no service worker (verified) → installed app white-screens offline; no asset caching. Combined with the ~353KB-gzip JS payload, mid-range-device cold loads are mediocre vs. best-in-class PWAs. **Acceptance criteria:** Workbox (or vite-plugin-pwa) precache + offline shell; route-level code splitting for the 699KB app chunk. **Effort:** M.
+
+#### GROW-001 — No public-facing growth surface
+- **Priority:** P2 (pilot) / P1 (public) · **Severity:** 🟡 Medium · **Category:** Growth
+- **Description:** `index.html` IS the app — no landing page, no SEO content, no referral mechanic; community is PREVIEW-only so the Share→Recognition half of the addiction loop doesn't exist publicly; no monetization model defined anywhere. OG/Twitter cards exist (good). **Acceptance criteria (public):** landing page + live community (Phase 2) + referral hook + a monetization thesis before paid acquisition. **Effort:** L–XL (Phase 2 scope).
+
+### Public-release scorecard (0–100, board scale)
+
+| Score | Value | One-line basis |
+|---|---|---|
+| **Release Readiness (public)** | **38/100** | 3 unresolved public-P0s (PRIV-003, OPS-002, COMP-001) + REL-001 still open + fonts broken in prod. |
+| **Product Quality** | **72/100** | Core loop excellent and 113-test-verified; community half is sample-only; god screens; no component/e2e tests (ARCH-004). |
+| **UX** | **80/100** | Onboarding→first-win verified end-to-end three times, celebrations reconcile (UX-030); a11y audit missing (A11Y-011); prod font fallback undermines intended polish. |
+| **Security** | **70/100** | Opt-in/PII-scrub/CSP/RLS-by-design/no committed secrets all good; live RLS unverified, no abuse/rate-limit story, localStorage unencrypted. |
+| **Growth Readiness** | **35/100** | No live community/referral/landing/monetization; analytics pipeline currently delivers zero events; magic-link email ceiling. |
+
+### BAEF 12-dimension re-score (public-release context)
+Product Strategy 7 · UX 8 · Accessibility 6 · Performance 6 · Security 7 · Stability 8 · Scalability 5 · Technical Quality 8 · Retention 5 (unmeasurable until OPS-002) · Operational Readiness 4 (telemetry dead in prod) · Documentation 7 (privacy policy false → docs can't score 9) · Release Readiness 3 (public). **Overall (public): 4.5/10 — NO GO.** _Pilot context remains ~7.9/10 Conditional Go._
+
+### Sign-off
+Product, UX, QA cleared the **core loop** quality. Compliance, Security, Ops, Growth, and the independent skeptics **veto public release** on PRIV-003 / OPS-002 / COMP-001 / dead telemetry / preview-only community. Brand flags BRAND-002.
+
+---
+
+## 🎯 BAEF Re-Audit — Elite Launch Readiness — Web/PWA Pilot (sprint 43, 2026-06-12)
+
+_Full 10-phase re-audit ahead of MaglakbAI's framing as the **first BIBOY Group pilot launch**. Verified the live artifact directly (ran the suite, built, grepped brand surfaces) rather than trusting the prior report. Supersedes the sprint-42 scorecard._
+
+### Verified facts (this run)
+- **Tests:** `npm test` → **94 passing** at audit start → **112 passing** after this run (added 7 retention-logic + 11 error-monitor tests). Confirmed green, not aspirational.
+- **Build:** `npm run build` → clean (`613 modules`, App chunk 699 KB / 185 KB gzip, vendor 545 KB / 168 KB gzip). Largest-chunk warning persists (no code-splitting beyond vendor/nav).
+- **`tsc --noEmit`:** ❌ at audit start — exit code 2, `web-index.tsx` missing `@types/react-dom`. ✅ **Fixed this run** (CI-001/TD-001) — now exit 0.
+- **CI reality check:** the workflow's `npm ci` step **also failed** at audit start (ERESOLVE peer conflict, no `.npmrc`). Combined with the `tsc` failure, **the "green CI gate" the report relied on was not actually running.** Both fixed this run (see CI-001).
+
+### Release Decision (sprint 43)
+**Decision:** ✅ **CONDITIONAL GO** — closed web/PWA pilot · ❌ **NO GO** — public launch / App Store.
+**Release scope:** Closed **web / PWA pilot** (browser + Add-to-Home-Screen), invited cohort. Not a native iOS/Android store release.
+
+- **P0 blockers:** 0 open. The five original P0s remain resolved. **BRAND-001** (rebrand never reached distribution surfaces) was found this run and **fixed in-session** — see below.
+- **Conditions to monitor for the pilot:**
+  1. Community must stay labeled **PREVIEW** with sample data marked (TRUST-001 must not regress).
+  2. Brand surfaces must stay on **MaglakbAI** (BRAND-001 regression guard — add a CI grep).
+  3. Privacy contact + analytics opt-in + export/import must remain intact.
+- **Rationale:** The core loop is polished, tested (94 tests + CI), and infra-hardened (CSP, Supabase backup, consent gate, schema-versioned persistence, export/import). The one launch-credibility defect — three competing brand names across the installed PWA name, browser tab, social cards, and user-shared portfolios (`MaglakbAI` in-app, `LakbAI` on distribution surfaces, `skillforge.app` in shared portfolio text) — was corrected this run. Accepted risks for a **closed** cohort: sample-only community (Phase 2), god-component screens + no e2e/component tests (ARCH-004). _(Error monitoring OPS-001 — previously an accepted risk — was closed this run.)_
+- **Sign-off:** Product, UX, Accessibility, Security, Privacy → cleared for **pilot scope**. Independent skeptics + QA → withhold sign-off for **public/store launch** pending REL-001 (web/PWA positioning) and ARCH-004 (component/e2e tests). _OPS-001 (error monitoring) closed this run; only the PostHog alert threshold remains a dashboard config step._
+
+### BAEF Production Readiness Scorecard — sprint 43 (12 dimensions)
+
+| Dimension | Score | Δ | Notes |
+|---|---|---|---|
+| Product Strategy | 8/10 | – | Strong differentiator (proof-based progression); market-demand layer adds real signal. PMF still unproven (no live retention data). |
+| UX | 9/10 | – | First-run win (25 XP + streak), evidence gate, editable roadmaps. Minor open: UX-022 weekly-unit consistency. |
+| Accessibility | 7/10 | – | Labels, AA contrast, pinch-zoom, tap targets fixed. No full screen-reader/keyboard audit (A11Y-011). |
+| Performance | 8/10 | – | Chunk-split; ~185 KB gzip app chunk. Not load-tested; no route-level lazy-loading. |
+| Security | 8/10 | – | CSP header, Magic Link auth, PII scrub, 0 console errors. localStorage unencrypted (acceptable for pilot). |
+| Stability | 8/10 | ▼1 | Root + per-screen error boundaries; 101 tests. **CI gate was silently broken** (CI-001: `npm ci` + `tsc` both failed on a clean runner) — fixed this run, so the gate is now real. No e2e/component render tests (ARCH-004). |
+| Scalability | 7/10 | – | Supabase backend live (auth, backup, multi-device). Community still single-device/Phase 2. |
+| Technical Quality | 8/10 | ▼1 | Solid domain/slice separation; `tsc` type gap (TD-001) fixed this run → clean type-check. God-screens persist (Profile 2,992 / Dashboard 2,086 / Evolve 1,886 lines — ARCH-004). |
+| User Retention | 7/10 | – | Loops well-designed; unproven at scale; no push (Phase 3). |
+| Operational Readiness | 8/10 | ▲1 | Netlify auto-deploy + CSP + **working CI gate** (CI-001). Retention instrumentation corrected (ANL-001). **Client error monitoring wired** (OPS-001) — consent-gated `client_error` events; only the PostHog alert threshold remains a dashboard config step. |
+| Documentation | 9/10 | – | Complete doc set + ADRs. Minor: CLAUDE.md tagline ("Stop watching. Start building.") differs from in-app tagline ("Navigate Your Future / Isulong ang pangarap") — DOC-015. |
+| Release Readiness | 8/10 | – | Closed web/PWA pilot: Conditional Go. Open P1: REL-001 (positioning). BRAND-001 fixed this run. |
+| **Overall (pilot)** | **7.9/10** | ▲0.2 | **Conditional Go — closed web/PWA pilot. No Go — public/store.** This run closed BRAND-001 (full rebrand cleanup + CI guard), ANL-001 (retention instrumentation), CI-001/TD-001 (CI gate now actually runs), and OPS-001 (client error monitoring). Genuine hardening across Ops/Stability. Remaining for public launch: owner-decision REL-001 (web/PWA vs native) and ARCH-004 (component/e2e tests). |
+
+### New backlog items (sprint 43)
+
+#### BRAND-001 — Rebrand never reached distribution surfaces ✅ Resolved (this run)
+- **Priority:** P1 (P0 for any *branded* public launch) · **Severity:** 🟠 High · **Category:** Product / Brand / Trust
+- **Description:** Sprint-42 renamed the app to **MaglakbAI** in-screen, but the install/share surfaces still carried older brands: `index.html` `<title>` + `apple-mobile-web-app-title` + OG/Twitter titles = "LakbAI"; `public/manifest.json` `name`/`short_name` = "LakbAI" (the name shown on the home screen when installed); `app.json` `name`/`slug` = "LakbAI"/"lakbai"; and `PortfolioScreen.tsx:242` shared-portfolio footer = **`skillforge.app`** (two brands stale, externally shared).
+- **Business impact:** A first BIBOY-Group brand launch shipping three different names (installed PWA, browser tab, social preview card, user-shared portfolio) reads as unfinished and erodes brand trust at the worst moment — first impression and word-of-mouth share.
+- **User impact:** Installs an app named "LakbAI," shares a portfolio that cites a dead `skillforge.app`.
+- **Acceptance criteria:** Every distribution/share surface reads "MaglakbAI" / `maglakbai.app`; in-app wordmark already correct.
+- **QA validation:** `grep -rn "LakbAI" index.html public/manifest.json app.json` → no matches; portfolio share text cites `maglakbai.app`; build clean.
+- **Effort:** XS · **Resolution (sprint 43):** Two passes. (1) Distribution surfaces: `index.html` (title + apple title + OG + Twitter), `public/manifest.json` (name + short_name), `app.json` (name + slug), `PortfolioScreen.tsx:242` (`skillforge.app` → `maglakbai.app`). (2) Deeper residue surfaced by the CI guard below: native bundle id + Android package (`com.skillforge.app` → `com.maglakbai.app`), Magic-Link deep-link scheme (`skillforge://auth` → `maglakbai://auth`), internal DOM event namespaces (`skillforge:consent-changed`, `skillforge:storage-quota-exceeded` → `maglakbai:*`, both ends matched), and the user-downloaded backup filename (`skillforge-backup-*.json` → `maglakbai-backup-*.json`). **Only** the `skillforge_v1` localStorage key is intentionally kept (renaming would orphan existing pilot data). **CI grep guard added** (`.github/workflows/ci.yml`) so any stale brand fails the build. 101 tests + build green after changes.
+
+#### ANL-001 — Retention events wired to the wrong trigger (under-count) ✅ Resolved (this run)
+- **Priority:** P1 · **Severity:** 🟠 High · **Category:** Analytics / Ops
+- **Description:** The activation funnel (`onboarding_*`, `first_output_logged`, `output_logged`, `skill_completed`, `level_up`, `streak_milestone`) was well-instrumented, but the **retention** events were broken: `retention_d7`/`d30` fired from *inside* `logOutput` (`coreSlice.ts`) with exact-day equality (`daysSinceJoin === 7`). Retention measures whether a user **returns** — but this only fired if they happened to *log an output on the exact Nth calendar day*. A genuinely-retained user who opened the app on day 7 (or day 8) without logging produced **no event**, so D1/D7/D30 — the single most important pilot KPI — would have been massively under-counted. No dedup guard (multiple day-7 outputs → duplicate events); `retention_d1_activated` was also redundant with `first_output_logged`.
+- **Business impact:** The pilot's go/no-go retention numbers would have been wrong (under-reported), risking a false "low retention → kill" or "looks fine" read on bad data.
+- **Acceptance criteria:** retention_dN driven by **app opens** (session start), fired **once** per milestone, counting users active **on or after** day N. **QA validation:** `pendingRetentionMilestones` unit-tested (dedup, `>=`, back-fill, day-8 case); app boots cleanly with the session-start call (verified in preview — 0 console errors). **Effort:** S.
+- **Resolution (sprint 43):** Added pure `pendingRetentionMilestones(daysSinceJoin, alreadyFired)` + session-based `trackRetention(joinedAt)` in `analytics.ts` (once-guarded via `sf_retention_fired`, consent-gated so the guard isn't burned pre-opt-in, cleared on analytics reset). Wired into `App.tsx` session-start + resume. Removed the broken block from `coreSlice.logOutput`. **7 new unit tests** (101 total green). Events renamed `retention_d1_activated`→`retention_d1`; semantics documented in `analytics.ts`.
+
+#### OPS-001 — No error monitoring / alerting ✅ Resolved (this run)
+- **Priority:** P1 (for public launch) / P2 (closed pilot) · **Severity:** 🟡 Medium · **Category:** Ops
+- **Description:** Error boundaries recovered the UI but had **no `componentDidCatch`** — crashes were invisible. Once external users hit the pilot, nothing was reported.
+- **Acceptance criteria:** Client error reporting wired (consent-respecting, PII-scrubbed) with an alert path. **QA:** forced error is captured; identical errors deduped; no PII in payload.
+- **Effort:** S · **Resolution (sprint 43):** Added `src/utils/errorMonitor.ts` — `captureError()` routes crashes through the **existing consent-gated, PII-scrubbed `track()`** as a `client_error` event (no new vendor SDK, ~0 bundle cost; PostHog can alert on volume). Defensive sanitizing on top: emails redacted, URL query/hash stripped (auth tokens), message/stack truncated; per-session dedupe + 25-event cap prevent floods. Wired into **both** error boundaries (`App.tsx` root + `AppNavigator.tsx` per-screen `componentDidCatch`) and **global** `window` `error` + `unhandledrejection` handlers. **11 unit tests** (PII redaction, payload shape, dedupe signature). **Verified live in preview:** clean boot (0 console errors); a synthetic `unhandledrejection` carrying an email was captured; 3 identical errors produced 1 capture (dedupe confirmed). 112 tests total green. _Alert wiring is a PostHog dashboard config step (no code) — set an alert on `client_error` count._
+
+#### QA-002 — EvolveScreen emitted DOM-nesting console errors (nested `<button>`) ✅ Resolved (this run)
+- **Priority:** P2 · **Severity:** 🟡 Medium · **Category:** QA / Accessibility / Technical Quality
+- **Description:** Surfaced during the sprint-43 **live test run** (mobile 375×812, full tab sweep). Navigating to **Evolve** emitted repeating React/RN-web `console.error`s: (1) **"validateDOMNesting: `<button>` cannot appear as a descendant of `<button>`"** (×8) — the roadmap cards (`renderRoadmapCard` priority + `renderCompactRoadmap` secondary) were a `TouchableOpacity` containing an inner `⋯` options `TouchableOpacity`; RN-web renders `accessibilityRole="button"` as a real `<button>`, so the card-button wrapped the options-button (DOM-verified: 2 nested buttons — "Options for AI Engineer", "Options for Data Architect"); (2) **"Unexpected text node: . A text node cannot be a child of a `<View>`"** (×16).
+- **Business/Technical impact:** Nested interactive controls are invalid HTML and an **accessibility defect** (ambiguous focus/activation target). Also corrected the record: the report's "0 console errors" only ever covered the `background:` CSS storm (NEW-001); this was a separate, open source. Confirmed **not** captured by the OPS-001 monitor (these are `console.error` warnings, not thrown errors).
+- **Acceptance criteria:** Evolve renders with **0** console errors; no `<button>` nested in a `<button>`; primary card tap + ⋯ options work independently.
+- **Resolution (sprint 43):** Restructured both cards so the outer is a plain `View` container and the card-tap, the `⋯` options button, and (for the priority card) the "view skills" footer are **DOM siblings** — no nested interactive elements. Added `cardTapMain` + `compactMain` styles; visual layout unchanged. **Verified live in light mode:** `document.querySelectorAll('button button').length === 0`; a fresh `console.error` hook captured **0 errors** across repeated Evolve mounts (Home→Evolve→Profile→Evolve); the "Unexpected text node" warning also no longer fires. tsc + build clean; 112 tests green. **Effort:** S · Pre-existing (not introduced by sprint-43 changes).
+
+#### UX-030 — Milestone "XP earned this session" under-reported actual XP gained ✅ Resolved (this run)
+- **Priority:** P2 · **Severity:** 🟡 Medium · **Category:** UX / Trust
+- **Description:** Found during the sprint-43 **live test run** completing a skill. `coreSlice.logOutput` built the celebration with `xpGained: totalXPGained = OUTPUT_XP + skillXP` (coreSlice.ts:207, 388) — **excluding** achievement XP (`bonusXP`) and streak-milestone bonus awarded by the *same* action. `MilestoneScreen` rendered this as "+{xpGained} XP — earned this session." Observed: completing **Python Fundamentals** (3rd skill) showed **"+195 XP"** while `user.xp` actually rose **+695** (1,435 → 2,130) because **`triple-master` (+500)** unlocked simultaneously — and that achievement was not surfaced on the milestone screen.
+- **Business/User impact:** Under-credited the user at the highest-emotion moment and left a notable achievement uncelebrated — a numbers-don't-reconcile trust gap (same family as the resolved UX-025). XP was always **correctly stored** — purely a display/celebration-completeness gap.
+- **Acceptance criteria:** The milestone "earned this session" figure equals the true session delta (incl. achievement + streak-milestone XP), **and** the unlocked achievement(s) are shown so the totals reconcile on screen. **Both** delivered.
+- **Resolution (sprint 43):** Added `sessionXpGained = absoluteFinalXP − state.user.xp` and a `newAchievements` list (id/title/xpGranted) to the `logOutput` result + `PendingCelebration` (types: `UnlockedAchievementInfo`, `LogOutputResult`, `PendingCelebration`, `RootStackParamList.MilestoneDetail`). `MilestoneScreen` now shows `displayXp = sessionXpGained ?? xpGained` and renders an **"🏆 Achievement unlocked: <title> +XP"** card. Both nav paths updated (`LogOutputScreen` direct nav + `EvolveScreen` pendingCelebration, mapping `newAchievements`→`achievements`). The per-output stored `output.xpGained` is untouched (accounting unaffected). **Unit test added** (appStore.test.ts: `sessionXpGained === xpAfter − xpBefore === xpGained + Σ achievement grants`; 113 tests green). **Verified live (light mode):** completing REST APIs while crossing a 7-day streak showed **"+420 XP earned this session"** + "Achievement unlocked: Consistent +150"; persisted `user.xp` delta = exactly **420** (95 output + 150 skill + 150 achievement + 25 streak bonus). **Effort:** S · Pre-existing (not introduced by sprint-43 changes).
+
+#### A11Y-011 — No full screen-reader / keyboard audit
+- **Priority:** P2 · **Severity:** 🟡 Medium · **Category:** Accessibility
+- **Description:** Labels/contrast/zoom/tap-targets are fixed, but no end-to-end VoiceOver/TalkBack + keyboard-only pass has been run. **Effort:** M.
+
+#### CI-001 — The CI gate wasn't actually running (npm ci + tsc both failed) ✅ Resolved (this run)
+- **Priority:** P1 · **Severity:** 🟠 High · **Category:** Ops / Stability
+- **Description:** The report credited a "94-test CI gate" as a stability guarantee, but on a clean runner the workflow failed before it ever ran tests: (1) **`npm ci` failed** with ERESOLVE — `react-native-screens@4.25.1` peers `react-native >=0.82` while Expo 55 pins `0.76.9`, and there was **no `.npmrc`** to relax it; (2) **`tsc --noEmit` exited 2** — `@types/react-dom` was never installed (`web-index.tsx` TS7016). Local `node_modules` had been installed with `--legacy-peer-deps`, masking the problem; CI got neither that flag nor the types.
+- **Business/Technical impact:** Every "CI is green" assumption was false — regressions and type errors could merge unguarded. This is a release-readiness gap, not cosmetic.
+- **Acceptance criteria:** Fresh-runner `npm ci` succeeds; `tsc --noEmit` exits 0; tests + build run as gates. **QA validation:** `npm ci --dry-run` exit 0; `tsc --noEmit` exit 0; full local pipeline green.
+- **Effort:** S · **Resolution (sprint 43):** Added `.npmrc` (`legacy-peer-deps=true`, documented as web/PWA-only rationale) so `npm ci` is deterministic; installed `@types/react-dom@^18` (TD-001). Verified `npm ci --dry-run` exit 0, `tsc --noEmit` exit 0, 101 tests green, build clean. **Also hardened the gate:** added a **brand guard** step to `.github/workflows/ci.yml` (fails the build on any stale `skillforge`/standalone `LakbAI` on a user-facing surface — protects BRAND-001).
+
+#### TD-001 — Missing `@types/react-dom` (was breaking the CI type-check) ✅ Resolved (this run)
+- **Priority:** P1 (reclassified up from P3 — it was failing the CI `tsc` gate, exit 2) · **Severity:** 🟠 High · **Category:** Technical Quality
+- **Description:** `web-index.tsx` triggered TS7016 on `react-dom/client` because `@types/react-dom` was absent. Did not break the Vite build, but **did break `tsc --noEmit`** — the CI type-check step. **Resolution:** `npm i -D @types/react-dom@^18`; `tsc` now exits 0. Folded into CI-001. **Effort:** XS.
+
+#### DOC-015 — Tagline mismatch (docs vs in-app)
+- **Priority:** P3 · **Severity:** 🟢 Low · **Category:** Documentation
+- **Description:** `CLAUDE.md` cites "Level up through proof, not promises" / "Stop watching. Start building." while the shipped in-app tagline is "Navigate Your Future. / Isulong ang pangarap." Pick the canonical line and align docs. **Effort:** XS.
 
 ---
 

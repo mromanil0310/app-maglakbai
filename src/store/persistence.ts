@@ -70,7 +70,7 @@ function saveToStorage(data: PersistedState): void {
   } catch {
     // Notify UI (e.g. avatar too large) — components listen for this event
     if (typeof window !== 'undefined') {
-      window.dispatchEvent(new CustomEvent('skillforge:storage-quota-exceeded'));
+      window.dispatchEvent(new CustomEvent('maglakbai:storage-quota-exceeded'));
     }
   }
 }

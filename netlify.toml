@@ -1,9 +1,19 @@
 # ─── Netlify configuration ───────────────────────────────────────────────────
-# SkillForge web/PWA deployment.
+# MaglakbAI web/PWA deployment.
 # SPA routing is handled by public/_redirects (/* /index.html 200).
-# Env vars VITE_SUPABASE_URL + VITE_SUPABASE_ANON_KEY must be set in the
-# Netlify dashboard → Site configuration → Environment variables.
-# Vite inlines VITE_* vars at build time, so they must exist before `npm run build`.
+#
+# REQUIRED env vars — Netlify dashboard → Site configuration → Environment variables.
+# Vite inlines VITE_* vars at build time, so they must exist before `npm run build`:
+#   VITE_SUPABASE_URL        — Supabase project URL (cloud backup)
+#   VITE_SUPABASE_ANON_KEY   — Supabase anon key (safe for client; RLS enforces access)
+#   VITE_POSTHOG_API_KEY     — PostHog project key. WITHOUT THIS, analytics AND
+#                              client error monitoring are silent no-ops (OPS-002).
+#   VITE_POSTHOG_HOST        — optional; defaults to https://us.i.posthog.com.
+#                              Must match a host allowed in the CSP connect-src below.
+#
+# OPS-002 verification after deploy: open the live site → allow analytics →
+# log an output → confirm the /capture request returns 200 (no CSP violation
+# in console) and the event appears in PostHog.
 
 [build]
   command = "npm run build"
@@ -22,7 +32,11 @@
     X-XSS-Protection = "1; mode=block"
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "camera=(), microphone=(), geolocation=()"
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://app.posthog.com; frame-ancestors 'none';"
+    # connect-src must include the PostHog INGEST host the client actually posts
+    # to (default https://us.i.posthog.com — see src/utils/analytics.ts). The old
+    # value allowed only app.posthog.com, which CSP-blocked every analytics and
+    # client_error event in production (OPS-002).
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://us.i.posthog.com https://app.posthog.com; frame-ancestors 'none';"
 
 # ─── Long-cache for hashed Vite assets ───────────────────────────────────────
 # Vite names assets with a content hash (e.g. index-EKHkK-LI.js), so

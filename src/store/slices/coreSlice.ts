@@ -19,6 +19,7 @@ import { getEvidenceTier, OUTCOME_XP, getCareerMastery, calculateOutputXP, CUSTO
 import { initUserSkills, unlockDependentSkills, checkAchievements } from '../../domain/skillGraph';
 // ARCH-001: fire-and-forget Supabase sync after local state is updated
 import { upsertProfile, insertOutput, upsertSkillProgress } from '../../lib/db';
+import { signOut } from '../../lib/auth';
 
 type Set = StoreApi<AppState>['setState'];
 type Get = StoreApi<AppState>['getState'];
@@ -343,6 +344,16 @@ export const createCoreSlice = (set: Set, get: Get): Pick<AppState, 'completeOnb
     const absoluteFinalLevel = getLevelFromXP(absoluteFinalXP);
     const allNewAchievementIds = [...newAchievementIds, ...streakAchievementIds];
 
+    // UX-030: the TOTAL XP the user actually gained this action (output + skill
+    // bonus + achievement grants + streak-milestone bonus), plus the unlocked
+    // achievements — so the milestone celebration reconciles with the real
+    // XP change instead of showing only output+skill XP.
+    const sessionXpGained = absoluteFinalXP - state.user.xp;
+    const newAchievements = allNewAchievementIds
+      .map((id) => ALL_ACHIEVEMENTS.find((a) => a.id === id))
+      .filter((a) => !!a)
+      .map((a) => ({ id: a!.id, title: a!.title, xpGranted: a!.xpGranted }));
+
     const updatedUser: User = {
       ...state.user,
       xp: absoluteFinalXP,
@@ -385,7 +396,7 @@ export const createCoreSlice = (set: Set, get: Get): Pick<AppState, 'completeOnb
     const updatedAchievementIds = [...state.unlockedAchievementIds, ...allNewAchievementIds];
 
     const celebration: PendingCelebration | null = skillCompleted
-      ? { skillId: payload.skillId, xpGained: totalXPGained, leveledUp: absoluteFinalLevel > oldLevel, newLevel: absoluteFinalLevel }
+      ? { skillId: payload.skillId, xpGained: totalXPGained, sessionXpGained, newAchievements, leveledUp: absoluteFinalLevel > oldLevel, newLevel: absoluteFinalLevel }
       : null;
 
     const newState = {
@@ -447,14 +458,10 @@ export const createCoreSlice = (set: Set, get: Get): Pick<AppState, 'completeOnb
     if (streakMilestoneBonus > 0) {
       track('streak_milestone', { streak: newStreak, bonus_xp: streakMilestoneBonus });
     }
-    // Retention milestone events — fire once per cohort day (D1 / D7 / D30)
-    if (daysSinceJoin === 1 && newOutputs.length === 1) {
-      track('retention_d1_activated');
-    } else if (daysSinceJoin === 7) {
-      track('retention_d7', { total_outputs: newOutputs.length, streak: newStreak });
-    } else if (daysSinceJoin === 30) {
-      track('retention_d30', { total_outputs: newOutputs.length, streak: newStreak });
-    }
+    // NOTE: retention_dN events are NOT fired here. Retention is "did the user
+    // come back," which is driven by app opens — see trackRetention() called on
+    // session start in App.tsx. Firing them from logOutput (the old behaviour)
+    // missed every returning user who didn't happen to log on the exact Nth day.
     // ─────────────────────────────────────────────────────────────────────────
 
     // ARCH-001: fire-and-forget Supabase sync (localStorage already updated above via set())
@@ -469,6 +476,8 @@ export const createCoreSlice = (set: Set, get: Get): Pick<AppState, 'completeOnb
     return {
       skillCompleted,
       xpGained: totalXPGained,
+      sessionXpGained,
+      newAchievements,
       leveledUp: absoluteFinalLevel > oldLevel,
       newLevel: absoluteFinalLevel,
       newSkillId: skillCompleted ? payload.skillId : undefined,
@@ -691,6 +700,12 @@ export const createCoreSlice = (set: Set, get: Get): Pick<AppState, 'completeOnb
 
   resetApp: () => {
     try { localStorage.removeItem('skillforge_v1'); } catch {}
+    // PRIV-003: Reset wipes THIS DEVICE and signs out of Cloud Backup. It does
+    // NOT delete cloud rows (no server-side delete path yet — COMP-001); the
+    // Settings copy and privacy policy state this honestly. Signing out here
+    // prevents the auth listener from silently re-syncing cloud data back
+    // into the freshly reset app.
+    signOut().catch(() => {});
     set({
       hasOnboarded: false,
       user: null,
@@ -704,6 +719,9 @@ export const createCoreSlice = (set: Set, get: Get): Pick<AppState, 'completeOnb
       prioritizedPathId: null,
       roadmaps: [],
       celebratedMilestones: [],
+      supabaseUserId: null,
+      supabaseEmail: null,
+      supabaseSyncing: false,
     });
   },
 

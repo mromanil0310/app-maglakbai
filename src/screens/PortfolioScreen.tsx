@@ -239,7 +239,7 @@ export default function PortfolioScreen() {
       ``,
       `${portfolioScore.totalBuilds} build${portfolioScore.totalBuilds !== 1 ? 's' : ''} · ${portfolioScore.verifiedCount} verified · ${skillsDemonstrated} skill${skillsDemonstrated !== 1 ? 's' : ''} demonstrated`,
       ``,
-      `skillforge.app`,
+      `maglakbai.app`,
     ]
       .filter((l) => l !== null)
       .join('\n');

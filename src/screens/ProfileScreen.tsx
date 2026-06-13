@@ -236,8 +236,8 @@ export default function ProfileScreen() {
       showToast({ message: 'Storage full — try removing old outputs or use a smaller photo', emoji: '⚠️', variant: 'warning' });
     };
     if (typeof window !== 'undefined') {
-      window.addEventListener('skillforge:storage-quota-exceeded', onQuotaExceeded);
-      return () => window.removeEventListener('skillforge:storage-quota-exceeded', onQuotaExceeded);
+      window.addEventListener('maglakbai:storage-quota-exceeded', onQuotaExceeded);
+      return () => window.removeEventListener('maglakbai:storage-quota-exceeded', onQuotaExceeded);
     }
   }, []);
 
