@@ -6,7 +6,7 @@
 The pilot has no backend. User progress must persist across reloads on a single device with zero infrastructure. A full auth + database (Supabase) is planned for Phase 2 but is out of scope for validating the core loop.
 
 ## Decision
-Persist a defined slice of state to `localStorage` key `skillforge_v1` via a single `subscribe()` listener (`src/store/persistence.ts` → `attachPersistence`), with reference-equality short-circuiting. Provide **Export / Import** in Settings as the user's backup mechanism. Only user-created feed posts are persisted; `MOCK_FEED` is reconstructed on load.
+Persist a defined slice of state to `localStorage` key `maglakbai_v1` via a single `subscribe()` listener (`src/store/persistence.ts` → `attachPersistence`), with reference-equality short-circuiting. Provide **Export / Import** in Settings as the user's backup mechanism. Only user-created feed posts are persisted; `MOCK_FEED` is reconstructed on load.
 
 ## Consequences
 - No server, no per-action save calls; adding a persisted field touches only `getPersistable()`.

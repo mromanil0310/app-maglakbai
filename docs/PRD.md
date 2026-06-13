@@ -5,7 +5,7 @@
 **Tagline:** "Stop watching. Start building."
 **Audience:** Anyone who wants to grow their skills — any field, any level. Not just tech professionals.
 
-> **Status (sprint 39):** This PRD captures the product vision and core loop. The **current shipping reality** is a **live web/PWA pilot** on Netlify (`fascinating-kitten-b6a79d.netlify.app`) with Supabase cloud backup (ARCH-001 shipped). The live source of truth for release decisions and backlog is `reports/skillforge-audit-report.md`. Phase 2 items (live community feed, real leaderboard, AI share posts) remain planned.
+> **Status (sprint 39):** This PRD captures the product vision and core loop. The **current shipping reality** is a **live web/PWA pilot** on Netlify (`fascinating-kitten-b6a79d.netlify.app`) with Supabase cloud backup (ARCH-001 shipped). The live source of truth for release decisions and backlog is `reports/maglakbai-audit-report.md`. Phase 2 items (live community feed, real leaderboard, AI share posts) remain planned.
 
 ---
 

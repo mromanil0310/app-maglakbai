@@ -1,6 +1,6 @@
-# Contributing to SkillForge
+# Contributing to MaglakbAI
 
-> SkillForge is a proprietary product (see `LICENSE`). This guide is for authorized contributors working on the codebase.
+> MaglakbAI is a proprietary product (see `LICENSE`). This guide is for authorized contributors working on the codebase.
 
 ## Prerequisites
 
@@ -10,8 +10,8 @@
 ## Setup
 
 ```bash
-git clone https://github.com/mromanil0310/skillforge.git
-cd skillforge
+git clone https://github.com/mromanil0310/maglakbai.git
+cd maglakbai
 npm install
 cp .env.example .env   # optional — all vars are optional (analytics/Phase 2)
 ```
@@ -59,4 +59,4 @@ AI tutoring / course content · course marketplace · DMs / private messaging ·
 1. `tsc --noEmit` is clean (or no new errors).
 2. `npm test` is green.
 3. `npm run build` succeeds.
-4. Update docs when behavior/structure changes — especially `CLAUDE.md`, `docs/ARCHITECTURE.md`, and the backlog in `reports/skillforge-audit-report.md` (this project is BAEF-governed: every finding/change is a tracked backlog item).
+4. Update docs when behavior/structure changes — especially `CLAUDE.md`, `docs/ARCHITECTURE.md`, and the backlog in `reports/maglakbai-audit-report.md` (this project is BAEF-governed: every finding/change is a tracked backlog item).

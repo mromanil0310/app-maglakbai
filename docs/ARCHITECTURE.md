@@ -1,6 +1,6 @@
 # MaglakbAI — Architecture & Technical Decisions
 
-> Describes the **current implemented architecture** (web/PWA pilot, as of sprint 39 — post ARCH-001 Supabase integration). This is the BAEF Phase 3 artifact; it must match the code. If you change structure, update this doc (see DOC-002 history in `reports/skillforge-audit-report.md`).
+> Describes the **current implemented architecture** (web/PWA pilot, as of sprint 39 — post ARCH-001 Supabase integration). This is the BAEF Phase 3 artifact; it must match the code. If you change structure, update this doc (see DOC-002 history in `reports/maglakbai-audit-report.md`).
 
 ---
 
@@ -14,7 +14,7 @@
 | State | Zustand 5 — **one store composed from slices** (`src/store/appStore.ts`) | Actions split into 4 slices; catalog + pure logic extracted (see Module Map) |
 | Styling | `StyleSheet.create()` with design tokens | No NativeWind/Tailwind; all colors in `src/utils/theme.ts` |
 | Animations | React Native `Animated` API | No Reanimated; no Lottie; confetti via injected CSS keyframes |
-| Persistence | `localStorage` key `skillforge_v1` (`src/store/persistence.ts`) | No backend yet; single-device. Schema-versioned envelope `{ v, data }` with migration + validation (ARCH-003) |
+| Persistence | `localStorage` key `maglakbai_v1` (`src/store/persistence.ts`) | No backend yet; single-device. Schema-versioned envelope `{ v, data }` with migration + validation (ARCH-003) |
 | Testing | Vitest — 46 unit + integration tests (`npm test`) | Pure domain + store-action coverage (see Testing) |
 | Analytics | PostHog-compatible HTTP API (`src/utils/analytics.ts`) | **Opt-in + PII-scrubbed**; no-ops without consent or `VITE_POSTHOG_API_KEY` |
 | Icons | Unicode emoji only | No icon library dependency |
@@ -102,7 +102,7 @@ attachPersistence(useAppStore);
 
 Slices add **actions only**; all state fields are initialized in `appStore.ts` (so `tsc` enforces a complete `AppState`). Actions read full state via `get()` and update via `set()` — a `logOutput` call still mutates skills, XP, achievements, streak, and feed in a single transaction.
 
-### Persisted fields (14) — `localStorage` key `skillforge_v1`
+### Persisted fields (14) — `localStorage` key `maglakbai_v1`
 
 `getPersistable()` in `src/store/persistence.ts` persists exactly:
 
@@ -124,7 +124,7 @@ showWelcomeCard: boolean          // fires once per new-user session
 
 ### Persistence mechanism — `src/store/persistence.ts`
 
-`attachPersistence(store)` registers a single `store.subscribe()` listener (not per-action `saveToStorage` calls). It diffs the persistable slice by reference equality and writes only when a persisted field changed. `saveToStorage` swallows quota errors and dispatches a `skillforge:storage-quota-exceeded` event for the UI. On load, `loadFromStorage()` + module-level rehydration in `appStore.ts` heal achievements/XP against the restored state.
+`attachPersistence(store)` registers a single `store.subscribe()` listener (not per-action `saveToStorage` calls). It diffs the persistable slice by reference equality and writes only when a persisted field changed. `saveToStorage` swallows quota errors and dispatches a `maglakbai:storage-quota-exceeded` event for the UI. On load, `loadFromStorage()` + module-level rehydration in `appStore.ts` heal achievements/XP against the restored state.
 
 > **Schema versioning (ARCH-003):** the payload is a versioned envelope `{ v: SCHEMA_VERSION, data }`. On load, `loadFromStorage` detects the version, runs a `migrate()` chain (legacy unversioned saves are treated as v0 and migrated forward), validates the shape, and returns `null` (clean reset) on corrupt data or a newer-than-current version. To evolve the shape: bump `SCHEMA_VERSION` and add a migration step.
 

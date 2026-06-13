@@ -9,13 +9,13 @@
 
 | File | Purpose |
 |------|---------|
-| `docs/skillforge-daily-qa.md` | Canonical skill definition for the daily QA scheduled task |
-| `reports/skillforge-audit-report.md` | Live backlog and run log — source of truth for bugs, fixes, and next actions |
+| `docs/maglakbai-daily-qa.md` | Canonical skill definition for the daily QA scheduled task |
+| `reports/maglakbai-audit-report.md` | Live backlog and run log — source of truth for bugs, fixes, and next actions |
 | `docs/PRD.md` | Full product requirements and feature specs |
 | `docs/ARCHITECTURE.md` | Tech decisions, animation patterns, Edge Function spec |
 | `docs/DATABASE.md` | Supabase schema design (live — project `wovceouygyobczkkeyxy`) |
-| `docs/design/skillforge-prototype.html` | Interactive UI prototype — open in browser for visual reference |
-| `docs/USER_GUIDE.html` | End-user how-to guide (on-brand, self-contained) |
+| `docs/design/maglakbai-prototype.html` | Interactive UI prototype — open in browser for visual reference |
+| `public/USER_GUIDE.html` | End-user how-to guide (on-brand, self-contained; the copy that deploys) |
 
 ---
 
@@ -40,9 +40,9 @@ MaglakbAI is a skill gamification app for anyone who wants to grow — not just 
 | State | Zustand store — `src/store/appStore.ts` (runtime state + slice composition). Static catalog in `src/data/`, pure calculators in `src/domain/`, store slices in `src/store/slices/`. |
 | Styling | StyleSheet.create() with design tokens in `src/utils/theme.ts` |
 | Web bundler | Vite (for fast web dev), Metro (for native) |
-| Persistence | `localStorage` key `skillforge_v1` (primary, always-on) + **Supabase** (cloud backup, activated on Magic Link sign-in). Schema-versioned envelope `{ v, data }` with migration + validation (`src/store/persistence.ts`). |
+| Persistence | `localStorage` key `maglakbai_v1` (primary, always-on) + **Supabase** (cloud backup, activated on Magic Link sign-in). Schema-versioned envelope `{ v, data }` with migration + validation (`src/store/persistence.ts`). |
 | Backend | **Live (ARCH-001)** — Supabase project `wovceouygyobczkkeyxy`. Auth (Magic Link), profiles, outputs, skill_progress. Client in `src/lib/`. |
-| Testing | Vitest (`npm test`) — **94 tests** across domain, persistence, and all store-action slices + CI gate |
+| Testing | Vitest (`npm test`) — **116 tests** across domain, persistence, and all store-action slices + CI gate |
 | Deployment | Netlify (`netlify.toml`) — auto-deploys on push to `main`. Live at `https://fascinating-kitten-b6a79d.netlify.app` |
 | AI | **Not yet integrated** — OpenAI Edge Function planned (see `docs/ARCHITECTURE.md`) |
 
@@ -76,13 +76,12 @@ MaglakbAI/
 │   ├── ARCHITECTURE.md              ← Tech decisions, animation patterns, Supabase integration
 │   ├── DATABASE.md                  ← Supabase schema (live — project wovceouygyobczkkeyxy)
 │   ├── DEPLOYMENT.md                ← Netlify deploy guide + env vars + Supabase URL config
-│   ├── USER_GUIDE.html              ← end-user how-to guide (also deployed via public/)
-│   ├── skillforge-daily-qa.md       ← canonical daily-QA scheduled-task skill definition
+│   ├── maglakbai-daily-qa.md       ← canonical daily-QA scheduled-task skill definition
 │   └── design/
-│       └── skillforge-prototype.html  ← Interactive UI prototype (open in browser)
+│       └── maglakbai-prototype.html  ← Interactive UI prototype (open in browser)
 │
 ├── reports/
-│   └── skillforge-audit-report.md   ← live backlog + run log (BAEF-governed source of truth)
+│   └── maglakbai-audit-report.md   ← live backlog + run log (BAEF-governed source of truth)
 │
 └── src/
     ├── components/                  ← 10 presentational components
@@ -209,7 +208,7 @@ pendingCelebration, selectedSkillId
 - **Profile:** `updateName`, `updateEmail`, `updateBio`, `updateAvatar`, `updateAvatarImage`, `updateTargetRole`, `setPaceMode`, `setComebackGoal`, `setColorScheme`, `dismissWelcomeCard`
 - **Auth:** `setSupabaseSession`, `setSupabaseSyncing`, `syncFromSupabase`
 
-**Persistence:** Dual-layer. (1) `localStorage` key `skillforge_v1` — always-on, fast, offline-capable. Schema-versioned envelope `{ v, data }` with migration chain. (2) Supabase — activated on Magic Link sign-in; `logOutput` and `completeOnboarding` fire-and-forget sync to cloud. `syncFromSupabase()` merges remote on sign-in (remote wins on XP/streak; union on outputs).
+**Persistence:** Dual-layer. (1) `localStorage` key `maglakbai_v1` — always-on, fast, offline-capable. Schema-versioned envelope `{ v, data }` with migration chain. (2) Supabase — activated on Magic Link sign-in; `logOutput` and `completeOnboarding` fire-and-forget sync to cloud. `syncFromSupabase()` merges remote on sign-in (remote wins on XP/streak; union on outputs).
 
 ---
 
@@ -270,7 +269,7 @@ Colors.textMuted     = '#44446A'
 
 Never hardcode hex values in components — always import from theme.ts.
 
-For the full visual target, open `docs/design/skillforge-prototype.html` in a browser.
+For the full visual target, open `docs/design/maglakbai-prototype.html` in a browser.
 
 ---
 
@@ -281,7 +280,7 @@ For the full visual target, open `docs/design/skillforge-prototype.html` in a br
 npx vite
 
 # Run unit tests (Vitest)
-npm test                          # 94 tests, all green
+npm test                          # 116 tests, all green
 
 # Production build
 npm run build                     # → dist/

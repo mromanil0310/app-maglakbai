@@ -2,7 +2,7 @@
 
 ## Reporting a vulnerability
 
-If you discover a security or privacy issue in SkillForge, please report it privately — do **not** open a public GitHub issue.
+If you discover a security or privacy issue in MaglakbAI, please report it privately — do **not** open a public GitHub issue.
 
 - **Contact:** `marlo.romanillos@gmail.com`
 

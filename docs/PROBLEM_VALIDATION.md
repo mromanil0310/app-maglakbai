@@ -57,4 +57,4 @@ No monetization is implemented; this is a closed web/PWA pilot to test the core 
 
 ---
 
-_See `docs/PRD.md` for product definition (Phase 2), `reports/skillforge-audit-report.md` for the live release decision + backlog._
+_See `docs/PRD.md` for product definition (Phase 2), `reports/maglakbai-audit-report.md` for the live release decision + backlog._

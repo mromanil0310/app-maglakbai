@@ -24,18 +24,18 @@ jobs:
         # wordmark is "MaglakbAI" (renders as "Maglakb"+"AI"); the substring
         # "LakbAI" therefore appears legitimately inside "MaglakbAI", so we
         # scan only the distribution/share surfaces for a standalone "LakbAI"
-        # and forbid the dead "skillforge" brand anywhere user-facing.
+        # and forbid the dead "maglakbai" brand anywhere user-facing.
         run: |
           set -e
           fail=0
-          # 1) Dead brand "skillforge" must not appear in user-facing code.
-          #    ONLY exception: the localStorage key 'skillforge_v1', kept stable
+          # 1) Dead brand "maglakbai" must not appear in user-facing code.
+          #    ONLY exception: the localStorage key 'maglakbai_v1', kept stable
           #    on purpose so existing pilot data isn't orphaned (renaming it would
           #    wipe every current user). Everything else must read maglakbai.
-          if grep -rniI "skillforge" index.html public/manifest.json app.json src \
+          if grep -rniI "maglakbai" index.html public/manifest.json app.json src \
                --include=*.ts --include=*.tsx --include=*.html --include=*.json \
-             | grep -viE "skillforge_v1" ; then
-            echo "::error::Found stale 'skillforge' brand in user-facing code. Use MaglakbAI / maglakbai.app."
+             | grep -viE "maglakbai_v1" ; then
+            echo "::error::Found stale 'maglakbai' brand in user-facing code. Use MaglakbAI / maglakbai.app."
             fail=1
           fi
           # 2) Distribution surfaces must not carry the prior standalone "LakbAI" brand.

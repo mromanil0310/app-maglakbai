@@ -1,8 +1,8 @@
 # Changelog
 
-All notable changes to SkillForge are documented here. Format based on
+All notable changes to MaglakbAI are documented here. Format based on
 [Keep a Changelog](https://keepachangelog.com/). This is a pre-release **web/PWA pilot**;
-the detailed engineering log lives in `reports/skillforge-audit-report.md`.
+the detailed engineering log lives in `reports/maglakbai-audit-report.md`.
 
 ## [Unreleased]
 

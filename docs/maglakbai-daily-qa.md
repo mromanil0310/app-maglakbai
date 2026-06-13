@@ -1,5 +1,5 @@
 ---
-name: skillforge-daily-qa
+name: maglakbai-daily-qa
 category: App Dev
 description: Daily QA and improvement pass on the MaglakbAI app. Audits the codebase, fixes the top bug or implements the highest-priority backlog item, rebuilds, and serves the updated app.
 schedule: Mon–Fri at 9:00 AM
@@ -9,13 +9,13 @@ status: Active
 You are performing a daily QA audit and improvement pass on the MaglakbAI app — a skill gamification PWA ("Level up through proof, not promises.") built with React Native Web, Vite, Zustand, and React Navigation. Open to any skill, any field, any level — not just tech professionals.
 
 ## App context
-- Root: /Users/marloromanillos/Documents/Claude/Projects/App_MaglakbAI
+- Root: /Users/marloromanillos/Documents/Claude/08_Projects/App_MaglakbAI
 - Live URL (production): https://fascinating-kitten-b6a79d.netlify.app
 - Local dev: `npx vite` → http://localhost:8082
-- Storage key: skillforge_v1 (do NOT rename)
-- Backlog report: /Users/marloromanillos/Documents/Claude/Projects/App_MaglakbAI/reports/skillforge-audit-report.md
+- Storage key: maglakbai_v1 (do NOT rename — legacy `skillforge_v1` data is migrated forward on load by `loadFromStorage`; keep that fallback intact)
+- Backlog report: /Users/marloromanillos/Documents/Claude/08_Projects/App_MaglakbAI/reports/maglakbai-audit-report.md
 - Stack: React Native Web · Vite 5 · React Navigation v7 · Zustand · TypeScript strict · Supabase (live backend)
-- Tests: 94 passing — run via `npm test` (Vitest)
+- Tests: 116 passing — run via `npm test` (Vitest)
 - Deploy: Netlify auto-deploys on `git push main`
 
 ## Screen map
@@ -36,7 +36,7 @@ You are performing a daily QA audit and improvement pass on the MaglakbAI app �
 ---
 
 ## Step 1 — Read the current backlog report
-Read /Users/marloromanillos/Documents/Claude/Projects/App_MaglakbAI/reports/skillforge-audit-report.md. This is the BAEF-governed source of truth for open items, priorities, and run history. Focus on the **Open Items** table at the top and the **Recommended sequence**.
+Read /Users/marloromanillos/Documents/Claude/08_Projects/App_MaglakbAI/reports/maglakbai-audit-report.md. This is the BAEF-governed source of truth for open items, priorities, and run history. Focus on the **Open Items** table at the top and the **Recommended sequence**.
 
 ## Step 2 — Audit the codebase
 Read the source files, focusing on:
@@ -63,16 +63,16 @@ Make the change. Implementation rules:
 - Animations must use `useNativeDriver: false`
 - Safe area on iPhone: use `env(safe-area-inset-bottom, Npx)` via `// @ts-ignore`
 - Do NOT break existing navigation — tab names (Home, Feed, Log, Map, Profile) and stack names (Onboarding, Main, MilestoneDetail) must remain stable
-- Keep store key `skillforge_v1`
+- Keep store key `maglakbai_v1` (and the `skillforge_v1` legacy-migration fallback)
 - New store action → add to AppState interface + appropriate slice + slice Pick<> type
 - New pure logic → add to src/domain/ with a Vitest test
-- Run `npm test` before declaring success — all 94 tests must pass
+- Run `npm test` before declaring success — all tests must pass (116 at last count)
 
 ## Step 5 — Build
 On the local Mac, `npm run build` works directly (no workaround needed):
 
 ```bash
-cd /Users/marloromanillos/Documents/Claude/Projects/App_MaglakbAI
+cd /Users/marloromanillos/Documents/Claude/08_Projects/App_MaglakbAI
 npm test          # must be green first
 npm run build     # → dist/
 ```
@@ -85,7 +85,7 @@ node node_modules/.bin/vite build --outDir /tmp/sf_dist_today --emptyOutDir
 Fix any TypeScript or Vite errors before proceeding. Do not report success until the build output shows `✓ built`.
 
 ## Step 6 — Update the backlog report
-Update /Users/marloromanillos/Documents/Claude/Projects/App_MaglakbAI/reports/skillforge-audit-report.md:
+Update /Users/marloromanillos/Documents/Claude/08_Projects/App_MaglakbAI/reports/maglakbai-audit-report.md:
 - Mark resolved items with ✅ + sprint number
 - Add a new Run Log entry (newest first) with: what was done, files changed, test count, build status
 - Update the Open Items table count
@@ -96,7 +96,7 @@ Update /Users/marloromanillos/Documents/Claude/Projects/App_MaglakbAI/reports/sk
 git add <changed files>
 git commit -m "fix/feat: <description>
 
-Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>"
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 ```
 Never `git push` — the owner does that.
 
@@ -110,10 +110,10 @@ Summarize the run concisely:
   - src/screens/XxxScreen.tsx
   - src/store/slices/xxxSlice.ts  (if applicable)
 
-🧪 Tests: 94/94 (or N/N if count changed)
+🧪 Tests: 116/116 (or N/N if count changed)
 🏗  Build: ✓
 
-📋 Backlog updated: reports/skillforge-audit-report.md
+📋 Backlog updated: reports/maglakbai-audit-report.md
 
 ⏭️  Next up: <the next highest-priority item from the recommended sequence>
 ```
