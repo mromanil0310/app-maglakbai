@@ -425,7 +425,7 @@ export default function MilestoneScreen() {
             <View style={styles.validationCardLeft}>
               <Text style={styles.validationCardTitle}>Prove you know it 🎓</Text>
               <Text style={styles.validationCardSub}>
-                Answer 3 questions · earn +50 XP · get the Validated badge
+                Answer {builtInSkill.validationQuestions!.length} questions · earn +100 XP · get the Validated badge
               </Text>
             </View>
             <TouchableOpacity
@@ -443,7 +443,7 @@ export default function MilestoneScreen() {
         {/* Already validated confirmation */}
         {userSkills[skillId]?.validated && (
           <Animated.View style={[styles.validatedConfirm, { opacity: contentOpacity }]}>
-            <Text style={styles.validatedConfirmText}>🎓 Knowledge Validated · +50 XP earned</Text>
+            <Text style={styles.validatedConfirmText}>🎓 Knowledge Validated · +100 XP earned</Text>
           </Animated.View>
         )}
 

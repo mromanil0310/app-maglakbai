@@ -492,7 +492,7 @@ export const createCoreSlice = (set: Set, get: Get): Pick<AppState, 'completeOnb
     if (!state.user) return;
     const us = state.userSkills[skillId];
     if (!us || us.status !== 'completed' || us.validated) return; // guard: must be completed and not already validated
-    const VALIDATION_BONUS_XP = 50;
+    const VALIDATION_BONUS_XP = 100;
     const newXP = state.user.xp + VALIDATION_BONUS_XP;
     const newLevel = getLevelFromXP(newXP);
     set({

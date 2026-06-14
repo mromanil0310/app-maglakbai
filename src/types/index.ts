@@ -100,6 +100,7 @@ export interface ValidationQuestion {
   choices: [string, string, string, string]; // always exactly 4
   correctIndex: number; // 0–3
   explanation: string; // shown after answering
+  source?: string; // citation to a verified, reliable reference (e.g. official docs)
 }
 
 export interface UserSkill {

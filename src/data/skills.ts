@@ -1,7 +1,8 @@
 // MaglakbAI skill node catalog — pure static data extracted from appStore.ts (ARCH-002).
 import type { Skill } from '../types';
+import { VALIDATION_QUESTIONS } from './validationQuestions';
 
-export const ALL_SKILLS: Skill[] = [
+const RAW_SKILLS: Skill[] = [
   // ── Data Architect ──
   {
     id: 'sql-foundations',
@@ -1973,3 +1974,12 @@ export const ALL_SKILLS: Skill[] = [
     whyItMatters: 'AI leverage for operations is a rising skill (LinkedIn 2026) — founders who use AI tools to multiply their output run leaner, faster companies and can compete with teams five times their size.',
   },
 ];
+
+// Attach the 10-question validation bank (src/data/validationQuestions.ts) by
+// skill id. A skill present in the bank uses its bank questions; otherwise it
+// keeps any inline validationQuestions defined above (legacy 3-question sets).
+export const ALL_SKILLS: Skill[] = RAW_SKILLS.map((skill) =>
+  VALIDATION_QUESTIONS[skill.id]
+    ? { ...skill, validationQuestions: VALIDATION_QUESTIONS[skill.id] }
+    : skill
+);

@@ -182,7 +182,7 @@ describe('validateSkill', () => {
     expect(get().user!.xp).toBe(ONBOARDING_XP_GRANT); // no change from onboarding grant
   });
 
-  it('validates a completed skill and grants the 50 XP bonus', () => {
+  it('validates a completed skill and grants the 100 XP bonus', () => {
     reset();
     onboard();
     log({ title: 'o1', description: 'a'.repeat(60) });
@@ -191,6 +191,6 @@ describe('validateSkill', () => {
     get().validateSkill('sql-foundations');
     const s = get();
     expect(s.userSkills['sql-foundations'].validated).toBe(true);
-    expect(s.user!.xp).toBe(before + 50);
+    expect(s.user!.xp).toBe(before + 100);
   });
 });

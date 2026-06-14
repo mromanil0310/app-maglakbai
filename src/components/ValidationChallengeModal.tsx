@@ -13,8 +13,9 @@ import { useThemeColors, ColorsType, Spacing, Radius, FontSize } from '../utils/
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
-const VALIDATION_BONUS_XP = 50;
-const PASS_THRESHOLD = 2; // correct answers needed out of 3
+const VALIDATION_BONUS_XP = 100;
+// Pass bar scales with the question count: 70% rounded up (7 of 10).
+const passThresholdFor = (count: number) => Math.max(1, Math.ceil(count * 0.7));
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
@@ -134,7 +135,8 @@ export default function ValidationChallengeModal({
   if (!question) return null;
 
   const isLastQuestion = questionIndex === questions.length - 1;
-  const passed = score >= PASS_THRESHOLD;
+  const passThreshold = passThresholdFor(questions.length);
+  const passed = score >= passThreshold;
 
   const handleSelect = (choiceIndex: number) => {
     if (revealed) return;
@@ -277,7 +279,12 @@ export default function ValidationChallengeModal({
                     <Text style={styles.explanationIcon}>
                       {currentSelection === question.correctIndex ? '✓' : '✗'}
                     </Text>
-                    <Text style={styles.explanationText}>{question.explanation}</Text>
+                    <View style={styles.explanationBody}>
+                      <Text style={styles.explanationText}>{question.explanation}</Text>
+                      {question.source ? (
+                        <Text style={styles.explanationSource}>📚 {question.source}</Text>
+                      ) : null}
+                    </View>
                   </View>
                 )}
               </Animated.View>
@@ -497,11 +504,20 @@ const makeStyles = (Colors: ColorsType) => StyleSheet.create({
     flexShrink: 0,
     marginTop: 2,
   },
-  explanationText: {
+  explanationBody: {
     flex: 1,
+  },
+  explanationText: {
     fontSize: FontSize.xs,
     color: Colors.textSub,
     lineHeight: 17,
+  },
+  explanationSource: {
+    fontSize: FontSize.xs,
+    color: Colors.textMuted,
+    lineHeight: 16,
+    marginTop: 4,
+    fontStyle: 'italic',
   },
   actionBtn: {
     borderRadius: Radius.full,
