@@ -17,35 +17,41 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
-      - name: Brand guard (no stale brand names on distribution surfaces)
-        # BRAND-001 regression guard: the installed-PWA name, browser tab,
-        # social cards, Expo config, and shared-portfolio copy must read
-        # "MaglakbAI" / maglakbai.app — never an older brand. The in-app
-        # wordmark is "MaglakbAI" (renders as "Maglakb"+"AI"); the substring
-        # "LakbAI" therefore appears legitimately inside "MaglakbAI", so we
-        # scan only the distribution/share surfaces for a standalone "LakbAI"
-        # and forbid the dead "maglakbai" brand anywhere user-facing.
+      - name: Brand guard (no dead brand names on distribution surfaces)
+        # BRAND-001 regression guard. The app's brand is "MaglakbAI" (maglakbai.app).
+        # The installed-PWA name, browser tab, social cards, Expo config, and
+        # in-app share copy must never show a DEAD brand — either the original
+        # "SkillForge" or the rejected "LakbAI" experiment. The wordmark renders
+        # as "Maglakb"+"AI", so the substring "LakbAI" legitimately appears inside
+        # "MaglakbAI" and is allowed; we only forbid a STANDALONE "LakbAI".
         run: |
           set -e
           fail=0
-          # 1) Dead brand "maglakbai" must not appear in user-facing code.
-          #    ONLY exception: the localStorage key 'maglakbai_v1', kept stable
-          #    on purpose so existing pilot data isn't orphaned (renaming it would
-          #    wipe every current user). Everything else must read maglakbai.
-          if grep -rniI "maglakbai" index.html public/manifest.json app.json src \
-               --include=*.ts --include=*.tsx --include=*.html --include=*.json \
-             | grep -viE "maglakbai_v1" ; then
-            echo "::error::Found stale 'maglakbai' brand in user-facing code. Use MaglakbAI / maglakbai.app."
+          surfaces="index.html public/manifest.json app.json"
+          # 1) Dead "SkillForge" brand must not appear on distribution surfaces.
+          if grep -rniI "skillforge" $surfaces ; then
+            echo "::error::Found dead 'SkillForge' brand on a distribution surface. Use MaglakbAI."
             fail=1
           fi
-          # 2) Distribution surfaces must not carry the prior standalone "LakbAI" brand.
-          if grep -rnI "LakbAI" index.html public/manifest.json app.json \
-             | grep -v "MaglakbAI" ; then
-            echo "::error::Found standalone 'LakbAI' on a distribution surface. Must be MaglakbAI."
+          # 2) Rejected standalone "LakbAI" brand must not appear on distribution
+          #    surfaces (allowed only as the substring inside "MaglakbAI").
+          if grep -rnI "LakbAI" $surfaces | grep -v "MaglakbAI" ; then
+            echo "::error::Found standalone 'LakbAI' on a distribution surface. Use MaglakbAI."
+            fail=1
+          fi
+          # 3) No dead "SkillForge" brand in app source (share copy, labels, UI text).
+          #    Exceptions: the legacy localStorage key 'skillforge_v1' and the
+          #    persistence migration code/comments that reference it on purpose
+          #    (kept so the SkillForge -> MaglakbAI rename never orphans user data).
+          if grep -rniI "skillforge" src \
+               --include='*.ts' --include='*.tsx' --include='*.html' --include='*.json' \
+             | grep -viE "skillforge_v1" \
+             | grep -v "src/store/persistence.ts" ; then
+            echo "::error::Found dead 'SkillForge' brand in app source. Use MaglakbAI."
             fail=1
           fi
           if [ "$fail" -eq 1 ]; then exit 1; fi
-          echo "Brand guard passed: distribution surfaces are MaglakbAI."
+          echo "Brand guard passed: surfaces are MaglakbAI."
       - name: Type-check
         run: node node_modules/.bin/tsc --noEmit
       - name: Unit tests
