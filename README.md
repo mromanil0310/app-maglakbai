@@ -1,4 +1,6 @@
-# MaglakbAI ⚒️
+<p align="center"><img src="public/icon-512.png" width="96" alt="MaglakbAI logo" /></p>
+
+# MaglakbAI
 
 > **Level up through proof, not promises.**
 > Any skill. Any field. Any level.

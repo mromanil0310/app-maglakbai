@@ -158,7 +158,32 @@
 <body>
 
 <div class="hero">
-  <div class="logo">⚡</div>
+  <div class="logo" style="font-size:0;">
+    <svg width="78" height="78" viewBox="0 0 120 120" style="display:block;margin:0 auto;overflow:visible;" aria-label="MaglakbAI logo" role="img">
+      <defs>
+        <linearGradient id="lgTop" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#5CB4FF"/><stop offset="100%" stop-color="#2563EB"/></linearGradient>
+        <linearGradient id="lgLeft" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#1E3A8A"/><stop offset="100%" stop-color="#11214F"/></linearGradient>
+        <linearGradient id="lgRight" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#2F6BDD"/><stop offset="100%" stop-color="#1D4ED8"/></linearGradient>
+        <linearGradient id="lgGem" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#A5F3FC"/><stop offset="100%" stop-color="#22D3EE"/></linearGradient>
+        <filter id="lgGlow" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <g id="lgStep">
+          <polygon points="0,0 24,12 0,24 -24,12" fill="url(#lgTop)"/>
+          <polygon points="-24,12 0,24 0,42 -24,30" fill="url(#lgLeft)"/>
+          <polygon points="0,24 24,12 24,30 0,42" fill="url(#lgRight)"/>
+          <polygon points="0,0 24,12 0,24 -24,12" fill="none" stroke="rgba(255,255,255,0.28)" stroke-width="0.75"/>
+        </g>
+      </defs>
+      <use href="#lgStep" transform="translate(76,30)"/>
+      <use href="#lgStep" transform="translate(56,48)"/>
+      <use href="#lgStep" transform="translate(36,66)"/>
+      <path d="M32,84 C50,75 48,60 62,53 S80,38 84,30" fill="none" stroke="#070C1A" stroke-width="5.5" stroke-linecap="round" opacity="0.9"/>
+      <path d="M32,84 C50,75 48,60 62,53 S80,38 84,30" fill="none" stroke="#60A5FA" stroke-width="1.4" stroke-linecap="round" opacity="0.5"/>
+      <g filter="url(#lgGlow)">
+        <polygon points="86,8 97,19 86,30 75,19" fill="url(#lgGem)"/>
+        <polygon points="86,8 97,19 86,30 75,19" fill="none" stroke="#CFFAFE" stroke-width="0.8"/>
+      </g>
+    </svg>
+  </div>
   <h1>Welcome to MaglakbAI</h1>
   <p class="tagline">Navigate Your Future. Isulong Ang Pangarap.</p>
   <p class="sub" style="font-size:13px;font-weight:700;color:#7C3AED;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;">Any skill. Any field. Any level.</p>
