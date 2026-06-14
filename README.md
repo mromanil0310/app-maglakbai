@@ -6,7 +6,7 @@
 MaglakbAI is a skill gamification app for anyone who wants to grow. You log real proof-of-work outputs — projects, scripts, books, certifications, diagrams, GitHub repos — to earn XP, unlock milestone achievements, and share your progress. XP comes from **building, not watching.**
 
 **📱 Live app:** https://fascinating-kitten-b6a79d.netlify.app
-**📖 User guide:** https://mromanil0310.github.io/maglakbai/USER_GUIDE.html
+**📖 User guide:** https://mromanil0310.github.io/app-maglakbai/USER_GUIDE.html
 
 ---
 

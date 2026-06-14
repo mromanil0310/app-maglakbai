@@ -10,8 +10,8 @@
 ## Setup
 
 ```bash
-git clone https://github.com/mromanil0310/maglakbai.git
-cd maglakbai
+git clone https://github.com/mromanil0310/app-maglakbai.git
+cd app-maglakbai
 npm install
 cp .env.example .env   # optional — all vars are optional (analytics/Phase 2)
 ```
