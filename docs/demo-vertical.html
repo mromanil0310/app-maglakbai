@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MaglakbAI — Vertical Trailer (9:16)</title>
+<style>
+  :root{
+    --bg:#0A0A0F; --surface:#13131F; --surface-high:#1A1A2E; --border:rgba(255,255,255,0.08);
+    --primary:#7C3AED; --primary-light:#A855F7; --gold:#F59E0B; --green:#10B981;
+    --blue:#3B82F6; --cyan:#22D3EE; --text:#EEEEF8; --text-sub:#8888AA; --text-muted:#44446A;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:#000;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:14px}
+
+  /* 9:16 stage — a query container so everything scales to the frame */
+  #stage{position:relative;height:min(100vh,calc(100vw*16/9));aspect-ratio:9/16;background:var(--bg);
+    overflow:hidden;border-radius:18px;box-shadow:0 24px 90px rgba(0,0,0,.7);container-type:size}
+
+  .bgfx{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+  .orb{position:absolute;border-radius:50%;filter:blur(50px);opacity:.55;animation:drift 22s ease-in-out infinite}
+  .orb.a{width:80%;height:45%;left:-20%;top:-10%;background:radial-gradient(circle,rgba(124,58,237,.6),transparent 70%)}
+  .orb.b{width:90%;height:50%;right:-25%;bottom:-12%;background:radial-gradient(circle,rgba(59,130,246,.45),transparent 70%);animation-delay:-8s}
+  .orb.c{width:60%;height:30%;right:8%;top:30%;background:radial-gradient(circle,rgba(34,211,238,.25),transparent 70%);animation-delay:-14s}
+  @keyframes drift{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(5%,4%) scale(1.1)}66%{transform:translate(-4%,-3%) scale(.95)}}
+  .grain{position:absolute;inset:0;opacity:.05;mix-blend-mode:overlay;background-image:radial-gradient(rgba(255,255,255,.7) .5px,transparent .5px);background-size:3px 3px}
+  .vig{position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 120cqw 18cqw rgba(0,0,0,.5)}
+
+  .scene{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;padding:9cqh 7cqw;opacity:0;transform:scale(1.05);
+    transition:opacity .55s ease,transform .9s cubic-bezier(.2,.7,.2,1);pointer-events:none;gap:3.5cqh}
+  .scene.active{opacity:1;transform:scale(1);pointer-events:auto}
+  .scene.active .zoom{animation:slowzoom var(--dur,3.5s) linear both}
+  @keyframes slowzoom{from{transform:scale(1)}to{transform:scale(1.05)}}
+
+  /* kinetic burned-in text */
+  .kicker{font-size:3.6cqw;letter-spacing:.42em;text-transform:uppercase;font-weight:800;color:var(--primary-light);opacity:0}
+  .scene.active .kicker{animation:up .45s .05s ease both}
+  h1{font-size:11cqw;line-height:1.02;letter-spacing:-.02em;font-weight:880}
+  h1 .ln{display:block;opacity:0}
+  .scene.active h1 .ln{animation:up .5s ease both}
+  .scene.active h1 .ln:nth-child(1){animation-delay:.08s}
+  .scene.active h1 .ln:nth-child(2){animation-delay:.95s}
+  .headline{font-size:8.4cqw;line-height:1.04;letter-spacing:-.02em;font-weight:850;opacity:0}
+  .scene.active .headline{animation:up .5s .08s ease both}
+  .tag{font-size:4.4cqw;color:var(--text-sub);font-weight:600;opacity:0}
+  .scene.active .tag{animation:up .55s .35s ease both}
+  .grad{background:linear-gradient(100deg,var(--primary-light),var(--cyan));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .gold{color:var(--gold)} .green{color:var(--green)} .cyan{color:var(--cyan)}
+  @keyframes up{from{opacity:0;transform:translateY(3.5cqh)}to{opacity:1;transform:translateY(0)}}
+  @keyframes pop{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:scale(1)}}
+
+  /* phone */
+  .phone{width:62cqw;aspect-ratio:9/19.5;background:#050509;border:0.4cqw solid var(--border);
+    border-radius:11% / 5%;padding:2.4%;box-shadow:0 4cqh 8cqh rgba(0,0,0,.6);position:relative}
+  .scene.active .phone{animation:phoneIn .6s .1s cubic-bezier(.2,.85,.2,1) both}
+  @keyframes phoneIn{from{opacity:0;transform:translateY(5cqh) scale(.95)}to{opacity:1;transform:none}}
+  .scr{width:100%;height:100%;background:var(--bg);border-radius:9.5% / 4.4%;border:1px solid var(--border);
+    overflow:hidden;padding:5% 5%;display:flex;flex-direction:column;gap:1.4cqh;text-align:left;position:relative}
+
+  .t{font-size:3.6cqw;font-weight:850} .s{font-size:2.5cqw;color:var(--text-sub);margin-top:-.6cqh}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:3cqw;padding:1.5cqh 3cqw}
+  .card.hi{border-color:rgba(124,58,237,.55);background:rgba(124,58,237,.10)}
+  .card.ok{border-color:rgba(16,185,129,.45);background:rgba(16,185,129,.08)}
+  .row{display:flex;align-items:center;justify-content:space-between}
+  .lbl{font-size:2.7cqw;font-weight:650} .val{font-size:2.5cqw;color:var(--text-sub)}
+  .chip{font-size:2.1cqw;font-weight:800;padding:.5cqh 2cqw;border-radius:999px;background:rgba(124,58,237,.2);color:var(--primary-light)}
+  .chip.green{background:rgba(16,185,129,.2);color:var(--green)} .chip.gold{background:rgba(245,158,11,.2);color:var(--gold)}
+  .btn{background:var(--primary);color:#fff;font-size:2.8cqw;font-weight:850;padding:1.6cqh 3cqw;border-radius:999px;text-align:center}
+  .pbar{height:1.4cqh;border-radius:4px;background:var(--surface-high);overflow:hidden;margin:.6cqh 0}
+  .pbar>i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--primary),var(--primary-light))}
+  .grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:2cqw}
+  .ty{background:var(--surface);border:1px solid var(--border);border-radius:2.4cqw;padding:1.4cqh .4cqw;text-align:center}
+  .ty .e{font-size:4cqw}.ty .n{font-size:2cqw;font-weight:700}.ty .x{font-size:1.9cqw;color:var(--gold);font-weight:800}
+  .ty.sel{border-color:var(--primary);background:rgba(124,58,237,.12)}
+  .stat{text-align:center}.stat .v{font-size:3.8cqw;font-weight:880}.stat .l{font-size:1.8cqw;letter-spacing:.05em;color:var(--text-sub)}
+  .ring{width:30cqw;height:30cqw;align-self:center;position:relative;margin:1cqh 0}
+  .toggle{width:7cqw;height:4cqw;border-radius:999px;background:var(--primary);position:relative}
+  .toggle::after{content:"";position:absolute;top:9%;right:6%;width:42%;height:82%;border-radius:50%;background:#fff}
+  .tabs{display:flex;justify-content:space-between;margin-top:auto;padding-top:1.2cqh;border-top:1px solid var(--border)}
+  .tab{font-size:1.7cqw;color:var(--text-muted);text-align:center}.tab.on{color:var(--primary-light)}.tab .e{font-size:3.2cqw;display:block}
+  .plus{width:6.4cqw;height:6.4cqw;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:4cqw;margin:-2cqh auto 0}
+
+  .xpfloat{position:absolute;left:50%;top:40%;transform:translateX(-50%);font-size:6cqw;font-weight:900;color:var(--gold);opacity:0;text-shadow:0 0 5cqw rgba(245,158,11,.6)}
+  .scene.active .xpfloat{animation:xpf 2s 1.2s ease both}
+  @keyframes xpf{0%{opacity:0;transform:translate(-50%,2cqh) scale(.7)}20%{opacity:1;transform:translate(-50%,-2cqh) scale(1.1)}75%{opacity:1;transform:translate(-50%,-7cqh) scale(1)}100%{opacity:0;transform:translate(-50%,-12cqh)}}
+  .burst{position:absolute;left:50%;bottom:9%;transform:translateX(-50%);background:rgba(16,185,129,.16);border:1px solid rgba(16,185,129,.5);color:var(--green);font-size:2.15cqw;font-weight:850;padding:1.1cqh 2.4cqw;border-radius:999px;opacity:0;white-space:nowrap}
+  .scene.active .burst{animation:pop .5s 1.9s ease both, gpulse 1.8s 2.4s ease-in-out infinite}
+  @keyframes gpulse{0%,100%{box-shadow:0 0 0 rgba(16,185,129,0)}50%{box-shadow:0 0 6cqw rgba(16,185,129,.5)}}
+
+  .evrow{display:flex;align-items:center;gap:1.5cqw;margin:.6cqh 0}
+  .node{width:5cqw;height:5cqw;border-radius:50%;border:0.6cqw solid var(--border);flex:0 0 auto;display:flex;align-items:center;justify-content:center;font-size:2.3cqw}
+  .node.done{background:var(--green);border-color:var(--green);color:#022}
+  .node.now{border-color:var(--primary-light);color:var(--primary-light)}
+  .node.lock{opacity:.45}
+  .nl{flex:1;height:0.5cqh;background:var(--border)} .nl.done{background:var(--green)}
+  .scene.active .node.now{animation:nglow 1.6s 1s ease-in-out infinite}
+  @keyframes nglow{0%,100%{box-shadow:0 0 0 rgba(168,85,247,0)}50%{box-shadow:0 0 5cqw rgba(168,85,247,.7)}}
+  .sync{display:flex;align-items:center;justify-content:center;gap:4cqw;margin-top:2cqh;font-size:5cqw}
+  .sd{width:2cqw;height:2cqw;border-radius:50%;background:var(--cyan);opacity:.25}
+  .scene.active .sd{animation:sp 1.3s linear infinite}
+  .scene.active .sd:nth-child(2){animation-delay:.18s}.scene.active .sd:nth-child(3){animation-delay:.36s}.scene.active .sd:nth-child(4){animation-delay:.54s}
+  @keyframes sp{0%,100%{opacity:.2;transform:scale(.8)}50%{opacity:1;transform:scale(1.4)}}
+
+  /* logo step rise */
+  .scene.active .ls{opacity:0}
+  .scene.active .ls.s1{animation:rise .55s .15s cubic-bezier(.2,.8,.2,1) both}
+  .scene.active .ls.s2{animation:rise .55s .35s cubic-bezier(.2,.8,.2,1) both}
+  .scene.active .ls.s3{animation:rise .55s .55s cubic-bezier(.2,.8,.2,1) both}
+  .scene.active .lg{opacity:0;animation:pop .55s .85s cubic-bezier(.2,.9,.3,1.4) both}
+  @keyframes rise{from{opacity:0;transform:translateY(4cqh)}to{opacity:1;transform:translateY(0)}}
+
+  #bar{position:absolute;left:0;bottom:0;height:0.7cqh;width:0;background:linear-gradient(90deg,var(--primary),var(--cyan));z-index:4;opacity:.85}
+
+  #ov{position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    background:rgba(6,6,12,.82);backdrop-filter:blur(8px);cursor:pointer;transition:opacity .5s ease;text-align:center;padding:0 8cqw}
+  #ov.hide{opacity:0;pointer-events:none}
+  .play{width:20cqw;height:20cqw;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-size:8cqw;color:#fff;animation:ping 2.2s ease-out infinite}
+  @keyframes ping{0%{box-shadow:0 0 0 0 rgba(124,58,237,.5)}100%{box-shadow:0 0 0 16cqw rgba(124,58,237,0)}}
+  #ov h3{margin-top:4cqh;font-size:5cqw;font-weight:850}#ov p{margin-top:1.5cqh;color:var(--text-sub);font-size:3.2cqw;line-height:1.5}
+
+  /* controls live OUTSIDE the stage so a screen-recording of the frame stays clean */
+  .controls{display:flex;gap:8px}
+  .ctrl{background:rgba(255,255,255,.07);border:1px solid var(--border);color:var(--text);font-size:13px;font-weight:700;padding:7px 14px;border-radius:999px;cursor:pointer}
+  .ctrl:hover{background:rgba(255,255,255,.14)}
+  .hint{color:var(--text-muted);font-size:12px;letter-spacing:.04em}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="bgfx"><div class="orb a"></div><div class="orb b"></div><div class="orb c"></div></div>
+
+  <!-- shared SVG defs (logo) -->
+  <svg width="0" height="0" style="position:absolute"><defs>
+    <linearGradient id="t" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5CB4FF"/><stop offset="1" stop-color="#2563EB"/></linearGradient>
+    <linearGradient id="l" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1E3A8A"/><stop offset="1" stop-color="#11214F"/></linearGradient>
+    <linearGradient id="r" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2F6BDD"/><stop offset="1" stop-color="#1D4ED8"/></linearGradient>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#A5F3FC"/><stop offset="1" stop-color="#22D3EE"/></linearGradient>
+    <filter id="gl" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <g id="st"><polygon points="0,0 24,12 0,24 -24,12" fill="url(#t)"/><polygon points="-24,12 0,24 0,42 -24,30" fill="url(#l)"/><polygon points="0,24 24,12 24,30 0,42" fill="url(#r)"/><polygon points="0,0 24,12 0,24 -24,12" fill="none" stroke="rgba(255,255,255,.28)" stroke-width=".75"/></g>
+  </defs></svg>
+
+  <!-- 1 HOOK -->
+  <section class="scene" style="--dur:3s">
+    <div class="zoom" style="display:flex;flex-direction:column;align-items:center;gap:4cqh">
+      <svg width="30cqw" height="30cqw" viewBox="0 0 120 120" style="overflow:visible">
+        <g class="ls s3"><use href="#st" transform="translate(76,30)"/></g>
+        <g class="ls s2"><use href="#st" transform="translate(56,48)"/></g>
+        <g class="ls s1"><use href="#st" transform="translate(36,66)"/></g>
+        <g class="lg" filter="url(#gl)"><polygon points="86,8 97,19 86,30 75,19" fill="url(#g)"/><polygon points="86,8 97,19 86,30 75,19" fill="none" stroke="#CFFAFE" stroke-width=".8"/></g>
+      </svg>
+      <h1><span class="ln">Anyone can<br>say it.</span><span class="ln grad">Few can<br>prove it.</span></h1>
+    </div>
+  </section>
+
+  <!-- 2 PATH -->
+  <section class="scene">
+    <div class="kicker zoom">Your goal</div>
+    <div class="headline">Pick your path. 🚀</div>
+    <div class="phone"><div class="scr">
+      <div class="t">Choose your path</div><div class="s">Any skill. Any field.</div>
+      <div class="card"><div class="row"><span class="lbl">🏗️ Data Architect</span><span class="val">5 skills</span></div></div>
+      <div class="card hi"><div class="row"><span class="lbl">🤖 AI Engineer</span><span class="chip">Selected</span></div></div>
+      <div class="card"><div class="row"><span class="lbl">🌐 Full Stack</span><span class="val">6 skills</span></div></div>
+      <div class="card"><div class="row"><span class="lbl">✨ Build my own</span><span class="val">›</span></div></div>
+      <div class="btn" style="margin-top:auto">Begin My Evolution ⚡</div>
+    </div></div>
+  </section>
+
+  <!-- 3 LOG (hero) -->
+  <section class="scene" style="--dur:4.2s">
+    <div class="kicker zoom">The core loop</div>
+    <div class="headline">Every action<br>becomes <span class="gold">proof.</span></div>
+    <div class="phone"><div class="scr">
+      <div class="t">Log Your Work</div><div class="s">Build it, then log it.</div>
+      <div class="grid">
+        <div class="ty sel"><div class="e">🔨</div><div class="n">Project</div><div class="x">+75</div></div>
+        <div class="ty"><div class="e">🏅</div><div class="n">Cert</div><div class="x">+200</div></div>
+        <div class="ty"><div class="e">💻</div><div class="n">GitHub</div><div class="x">+60</div></div>
+        <div class="ty"><div class="e">📖</div><div class="n">Book</div><div class="x">+50</div></div>
+        <div class="ty"><div class="e">⚙️</div><div class="n">Script</div><div class="x">+50</div></div>
+        <div class="ty"><div class="e">📐</div><div class="n">Design</div><div class="x">+75</div></div>
+      </div>
+      <div class="card hi"><div style="font-size:2cqw;color:var(--text-sub)">COUNTS TOWARD</div><div class="row"><span class="lbl" style="color:var(--primary-light)">REST APIs</span><span class="chip green">🎉 Completes!</span></div></div>
+      <div class="btn">Log It & Earn XP ⚡</div>
+      <div class="xpfloat">+95 XP</div>
+      <div class="burst">🏆 Validated · +100 XP</div>
+    </div></div>
+  </section>
+
+  <!-- 4 HOME / XP -->
+  <section class="scene">
+    <div class="kicker zoom">Watch it grow</div>
+    <div class="headline">Real progress.<br>Visible. 🔥</div>
+    <div class="phone"><div class="scr">
+      <div class="row"><div><div class="t" style="font-size:3cqw">Good morning, Alex</div><div class="s">Builder</div></div><span class="chip gold">🔥 7</span></div>
+      <div class="ring"><svg viewBox="0 0 120 120" style="width:100%;height:100%"><circle cx="60" cy="60" r="50" fill="none" stroke="#1A1A2E" stroke-width="10"/><circle class="rfill" cx="60" cy="60" r="50" fill="none" stroke="url(#g)" stroke-width="10" stroke-linecap="round" transform="rotate(-90 60 60)" stroke-dasharray="314" stroke-dashoffset="314"/></svg>
+        <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center"><div style="font-size:6cqw;font-weight:900;color:var(--primary-light)">42%</div><div style="font-size:1.7cqw;letter-spacing:.15em;color:var(--text-sub)">EVOLUTION</div></div></div>
+      <div class="card"><div class="row"><div class="stat"><div class="v">640</div><div class="l">TOTAL XP</div></div><div class="stat"><div class="v">7</div><div class="l">STREAK</div></div><div class="stat"><div class="v">5</div><div class="l">THIS WK</div></div></div></div>
+      <div class="card hi"><div style="font-size:2cqw;font-weight:800;color:var(--primary-light)">⚡ NEXT MILESTONE</div><div class="row"><span class="lbl">Vector Databases</span><span class="val">1 to go</span></div></div>
+    </div></div>
+  </section>
+
+  <!-- 5 EVOLVE -->
+  <section class="scene" style="--dur:3.6s">
+    <div class="kicker zoom">Evolve map</div>
+    <div class="headline">Level up —<br>for real.</div>
+    <div class="phone"><div class="scr">
+      <div class="row"><div class="t" style="font-size:3cqw">🤖 AI Engineer</div><span class="chip">Evolve</span></div>
+      <div class="evrow"><div class="node done">✓</div><div class="nl done"></div><div class="node done">✓</div><div class="nl"></div><div class="node now">◆</div></div>
+      <div class="card ok"><div class="row"><span class="lbl">✅ Python Fundamentals</span><span class="chip green">VALIDATED</span></div></div>
+      <div class="card ok"><div class="row"><span class="lbl">✅ REST APIs</span><span class="chip green">DONE</span></div></div>
+      <div class="card hi"><div class="row"><span class="lbl">⚡ Prompt Engineering</span><span class="val">2/3</span></div><div class="pbar"><i style="width:66%"></i></div></div>
+      <div class="card" style="opacity:.5"><div class="row"><span class="lbl">🔒 Vector Databases</span><span class="val">Next</span></div></div>
+    </div></div>
+  </section>
+
+  <!-- 6 VALIDATED -->
+  <section class="scene">
+    <div class="kicker zoom">Prove you know it</div>
+    <div class="headline">Don't just learn.<br><span class="green">Validate.</span></div>
+    <div class="phone"><div class="scr">
+      <div class="t">Knowledge Challenge</div><div class="s">SQL Foundations</div>
+      <div class="card"><div class="val" style="font-size:2.2cqw">Question 1 of 10</div><div class="lbl" style="margin-top:.6cqh">Which clause filters AFTER aggregation?</div></div>
+      <div class="card"><div class="row"><span class="lbl">A · WHERE</span></div></div>
+      <div class="card ok"><div class="row"><span class="lbl">B · HAVING</span><span class="chip green">✓</span></div></div>
+      <div class="card"><div class="row"><span class="lbl">C · ORDER BY</span></div></div>
+      <div class="card hi" style="margin-top:auto"><div class="row"><span class="lbl">Score 7 / 10</span><span class="chip gold">+100 XP · ✓ Validated</span></div></div>
+    </div></div>
+  </section>
+
+  <!-- 7 PROFILE / MASTERY -->
+  <section class="scene">
+    <div class="kicker zoom">Your record</div>
+    <div class="headline">Proof that<br>speaks for you.</div>
+    <div class="phone"><div class="scr" style="text-align:center">
+      <div class="row"><div class="t" style="font-size:3cqw">Profile</div><span>⚙️</span></div>
+      <div style="width:14cqw;height:14cqw;border-radius:50%;background:var(--surface-high);border:0.7cqw solid var(--primary);display:flex;align-items:center;justify-content:center;font-size:7cqw;margin:1cqh auto">🤖</div>
+      <div style="font-weight:850;font-size:3.4cqw">Alex Rivera</div>
+      <div class="chip green" style="margin:.6cqh auto">Mastered AI Engineer Path</div>
+      <div class="card" style="margin-top:.6cqh"><div class="row"><div class="stat"><div class="v gold">640</div><div class="l">XP</div></div><div class="stat"><div class="v" style="color:var(--primary-light)">12</div><div class="l">OUTPUTS</div></div><div class="stat"><div class="v gold">7</div><div class="l">STREAK</div></div><div class="stat"><div class="v green">6</div><div class="l">SKILLS</div></div></div></div>
+      <div class="row" style="gap:1.4cqw;justify-content:center"><span class="chip gold">🏅 Consistent</span><span class="chip">⚡ Fast Start</span><span class="chip green">✓ Validated</span></div>
+    </div></div>
+  </section>
+
+  <!-- 8 COMMUNITY -->
+  <section class="scene" style="--dur:3s">
+    <div class="kicker zoom">Community</div>
+    <div class="headline">You're not<br>building alone.</div>
+    <div class="phone"><div class="scr">
+      <div class="row"><div class="t" style="font-size:3cqw">Community</div><span class="chip">Feed</span></div>
+      <div class="card"><div style="font-size:2cqw;color:var(--text-sub)">🏅 WEEKLY XP</div><div class="row" style="margin-top:.5cqh"><span class="lbl">🥇 Priya</span><span class="chip gold">390</span></div><div class="row" style="margin-top:.4cqh"><span class="lbl">🥈 Marcus</span><span class="chip gold">340</span></div><div class="row" style="margin-top:.4cqh"><span class="lbl">🥉 Aisha</span><span class="chip gold">310</span></div></div>
+      <div class="card"><div class="row"><span class="lbl">Kenji</span><span class="chip">ML Engineer</span></div><div style="font-size:2.4cqw;color:var(--primary-light);font-weight:800;margin-top:.5cqh">⚡ Offer Received · +500 XP</div></div>
+    </div></div>
+  </section>
+
+  <!-- 9 CLOUD / PRIVACY -->
+  <section class="scene" style="--dur:3s">
+    <div class="kicker zoom">Yours. Everywhere.</div>
+    <div class="headline">Synced. Private.<br><span class="cyan">Always yours.</span></div>
+    <div class="phone"><div class="scr" style="justify-content:center;align-items:center;text-align:center;gap:2.5cqh">
+      <div style="font-size:11cqw">☁️</div>
+      <div class="card ok" style="width:100%"><div class="row"><span class="lbl">Progress backed up</span><span class="chip green">Synced</span></div><div class="val" style="margin-top:.5cqh">One tap · no password</div></div>
+      <div class="sync"><span>📱</span><div class="sd"></div><div class="sd"></div><div class="sd"></div><div class="sd"></div><span>💻</span></div>
+      <div class="card" style="width:100%"><div class="row"><span class="lbl">📊 Anonymous Analytics</span><span class="toggle"></span></div></div>
+    </div></div>
+  </section>
+
+  <!-- 10 CTA -->
+  <section class="scene" style="--dur:4s">
+    <div class="zoom" style="display:flex;flex-direction:column;align-items:center;gap:3.5cqh">
+      <svg width="26cqw" height="26cqw" viewBox="0 0 120 120" style="overflow:visible"><use href="#st" transform="translate(76,30)"/><use href="#st" transform="translate(56,48)"/><use href="#st" transform="translate(36,66)"/><g filter="url(#gl)"><polygon points="86,8 97,19 86,30 75,19" fill="url(#g)"/><polygon points="86,8 97,19 86,30 75,19" fill="none" stroke="#CFFAFE" stroke-width=".8"/></g></svg>
+      <h1 style="font-size:9cqw"><span class="ln">Anyone can say it.</span><span class="ln grad">Few can prove it.</span></h1>
+      <div class="tag" style="font-size:5cqw;color:var(--text);font-weight:800;animation-delay:1.6s">Start building proof.</div>
+      <div style="margin-top:1cqh;display:flex;flex-direction:column;gap:1.6cqh;align-items:center">
+        <span style="background:var(--primary);color:#fff;font-weight:850;padding:1.8cqh 5cqw;border-radius:999px;font-size:3.6cqw">Get MaglakbAI →</span>
+        <span style="color:var(--text-sub);font-size:3.2cqw">maglakbai.app</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="grain"></div><div class="vig"></div>
+  <div id="bar"></div>
+  <div id="ov"><div class="play">▶</div><h3>MaglakbAI</h3><p>Vertical trailer · ~32s<br>Tap to play</p></div>
+</div>
+
+<div class="controls">
+  <button class="ctrl" id="btnPlay">⏸ Pause</button>
+  <button class="ctrl" id="btnReplay">↻ Replay</button>
+  <button class="ctrl" id="btnMute">🔊 Music</button>
+</div>
+<div class="hint">Controls sit outside the frame — screen-record just the phone-shaped frame for a clean 9:16 export.</div>
+
+<script>
+(function(){
+  const scenes=[...document.querySelectorAll('.scene')];
+  const DUR=[3000,3200,4200,3400,3600,3200,3200,3000,3000,4200];
+  const starts=[];let acc=0;for(const d of DUR){starts.push(acc);acc+=d;}const TOTAL=acc;
+  const bar=document.getElementById('bar'), ov=document.getElementById('ov');
+  let playhead=0,last=0,running=false,cur=-1,raf=null;
+
+  function activate(i){
+    scenes.forEach((s,j)=>{s.classList.toggle('active',j===i); if(j!==i) s.style.opacity='';});
+    const s=scenes[i]; void s.offsetWidth;
+    const rf=s.querySelector('.rfill');
+    if(rf){rf.style.transition='none';rf.style.strokeDashoffset='314';void rf.offsetWidth;rf.style.transition='stroke-dashoffset 1.5s .3s cubic-bezier(.3,.8,.3,1)';rf.style.strokeDashoffset=String(314*0.58);}
+    s.querySelectorAll('.pbar > i').forEach(el=>{const w=el.getAttribute('style');el.style.transition='none';const tw=el.style.width;el.style.width='0';void el.offsetWidth;el.style.transition='width 1.1s .4s ease';el.style.width=tw;});
+    if(musicOn && (i===2||i===5)) chime();
+  }
+  function frame(now){
+    if(last===0)last=now; if(running)playhead+=(now-last); last=now;
+    if(playhead>=TOTAL){playhead=TOTAL;running=false;finish();}
+    let i=0;while(i<starts.length-1&&playhead>=starts[i+1])i++;
+    if(i!==cur){cur=i;activate(i);}
+    bar.style.width=(100*playhead/TOTAL)+'%';
+    raf=requestAnimationFrame(frame);
+  }
+  function start(){ov.classList.add('hide');playhead=0;cur=-1;last=0;running=true;initAudio();if(musicOn)startMusic();if(!raf)raf=requestAnimationFrame(frame);document.getElementById('btnPlay').textContent='⏸ Pause';}
+  function finish(){document.getElementById('btnPlay').textContent='↻ Replay';stopMusic();}
+  function replay(){playhead=0;cur=-1;running=true;if(musicOn)startMusic();document.getElementById('btnPlay').textContent='⏸ Pause';}
+  ov.addEventListener('click',start);
+  document.getElementById('btnReplay').addEventListener('click',e=>{e.stopPropagation();replay();});
+  document.getElementById('btnPlay').addEventListener('click',e=>{e.stopPropagation();if(playhead>=TOTAL){replay();return;}running=!running;e.target.textContent=running?'⏸ Pause':'▶ Play';if(running&&musicOn)startMusic();else stopMusic();});
+
+  let actx=null,master=null,nodes=[],musicOn=true;
+  function initAudio(){if(actx)return;try{actx=new (window.AudioContext||window.webkitAudioContext)();master=actx.createGain();master.gain.value=0;master.connect(actx.destination);}catch(e){}}
+  function startMusic(){if(!actx)return;if(actx.state==='suspended')actx.resume();stopMusic();
+    const chord=[146.83,220,277.18,329.63];const filt=actx.createBiquadFilter();filt.type='lowpass';filt.frequency.value=950;filt.connect(master);
+    const lfo=actx.createOscillator(),lfg=actx.createGain();lfo.frequency.value=0.08;lfg.gain.value=360;lfo.connect(lfg);lfg.connect(filt.frequency);lfo.start();nodes.push(lfo);
+    chord.forEach((f,i)=>{const o=actx.createOscillator();o.type='sine';o.frequency.value=f;o.detune.value=(i-1)*4;const g=actx.createGain();g.gain.value=i===0?0.16:0.09;o.connect(g);g.connect(filt);o.start();nodes.push(o,g);});
+    master.gain.cancelScheduledValues(actx.currentTime);master.gain.setValueAtTime(master.gain.value,actx.currentTime);master.gain.linearRampToValueAtTime(0.5,actx.currentTime+2);}
+  function stopMusic(){if(!actx)return;try{master.gain.cancelScheduledValues(actx.currentTime);master.gain.setValueAtTime(master.gain.value,actx.currentTime);master.gain.linearRampToValueAtTime(0,actx.currentTime+0.5);}catch(e){}const n=nodes;nodes=[];setTimeout(()=>n.forEach(x=>{try{x.stop&&x.stop()}catch(e){}}),600);}
+  function chime(){if(!actx||!musicOn)return;const o=actx.createOscillator(),g=actx.createGain();o.type='triangle';o.frequency.setValueAtTime(880,actx.currentTime);o.frequency.exponentialRampToValueAtTime(1320,actx.currentTime+0.16);g.gain.setValueAtTime(0,actx.currentTime);g.gain.linearRampToValueAtTime(0.18,actx.currentTime+0.03);g.gain.exponentialRampToValueAtTime(0.001,actx.currentTime+0.8);o.connect(g);g.connect(master);o.start();o.stop(actx.currentTime+0.9);}
+  document.getElementById('btnMute').addEventListener('click',e=>{e.stopPropagation();musicOn=!musicOn;e.target.textContent=musicOn?'🔊 Music':'🔇 Muted';if(actx){if(musicOn&&running)startMusic();else stopMusic();}});
+})();
+</script>
+</body>
+</html>
