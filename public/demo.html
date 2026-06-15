@@ -3,495 +3,426 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>MaglakbAI — Product Trailer</title>
+<title>MaglakbAI — Product Launch Trailer</title>
 <style>
   :root{
-    --bg:#0A0A0F; --surface:#13131F; --surface-high:#1A1A2E;
-    --border:rgba(255,255,255,0.08);
-    --primary:#7C3AED; --primary-light:#A855F7;
-    --gold:#F59E0B; --green:#10B981; --blue:#3B82F6; --cyan:#22D3EE;
-    --text:#EEEEF8; --text-sub:#8888AA; --text-muted:#44446A;
+    --bg:#0A0A0F; --surface:#13131F; --surface-high:#1A1A2E; --border:rgba(255,255,255,0.08);
+    --primary:#7C3AED; --primary-light:#A855F7; --gold:#F59E0B; --green:#10B981;
+    --blue:#3B82F6; --cyan:#22D3EE; --text:#EEEEF8; --text-sub:#8888AA; --text-muted:#44446A;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:100%}
-  body{
-    background:#000; color:var(--text);
+  body{background:#000;color:var(--text);
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-    -webkit-font-smoothing:antialiased; overflow:hidden;
-    display:flex; align-items:center; justify-content:center;
-    min-height:100vh;
-  }
+    -webkit-font-smoothing:antialiased;overflow:hidden;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:14px}
 
-  /* ───────── Stage ───────── */
-  #stage{
-    position:relative; width:min(100vw,calc(100vh*16/9));
-    aspect-ratio:16/9; background:var(--bg); overflow:hidden;
-    border-radius:14px; box-shadow:0 30px 120px rgba(0,0,0,0.7);
-  }
-  /* ambient background motion graphics */
+  /* 16:9 stage = query container so everything scales to the frame */
+  #stage{position:relative;width:min(100vw,calc(100vh*16/9));aspect-ratio:16/9;background:var(--bg);
+    overflow:hidden;border-radius:14px;box-shadow:0 30px 120px rgba(0,0,0,.7);container-type:size}
+
   .bgfx{position:absolute;inset:0;overflow:hidden;pointer-events:none}
-  .orb{position:absolute;border-radius:50%;filter:blur(60px);opacity:.5;
-       animation:drift 26s ease-in-out infinite}
+  .orb{position:absolute;border-radius:50%;filter:blur(60px);opacity:.5;animation:drift 26s ease-in-out infinite}
   .orb.a{width:46%;height:46%;left:-12%;top:-16%;background:radial-gradient(circle,rgba(124,58,237,.55),transparent 70%)}
   .orb.b{width:50%;height:50%;right:-16%;bottom:-22%;background:radial-gradient(circle,rgba(59,130,246,.40),transparent 70%);animation-delay:-9s}
   .orb.c{width:34%;height:34%;right:14%;top:6%;background:radial-gradient(circle,rgba(34,211,238,.22),transparent 70%);animation-delay:-16s}
   @keyframes drift{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(6%,4%) scale(1.08)}66%{transform:translate(-5%,-3%) scale(.96)}}
-  .grain{position:absolute;inset:0;opacity:.05;mix-blend-mode:overlay;
-    background-image:radial-gradient(rgba(255,255,255,.7) .5px,transparent .5px);
-    background-size:3px 3px;pointer-events:none}
-  .vignette{position:absolute;inset:0;pointer-events:none;
-    box-shadow:inset 0 0 200px 40px rgba(0,0,0,.55)}
+  .grain{position:absolute;inset:0;opacity:.05;mix-blend-mode:overlay;background-image:radial-gradient(rgba(255,255,255,.7) .5px,transparent .5px);background-size:3px 3px;pointer-events:none}
+  .vig{position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 26cqw 4cqw rgba(0,0,0,.55)}
 
-  /* ───────── Scenes ───────── */
-  .scene{position:absolute;inset:0;display:flex;flex-direction:column;
-    align-items:center;justify-content:center;text-align:center;
-    padding:6% 7%; opacity:0; transform:scale(1.04);
-    transition:opacity .9s ease, transform 1.2s cubic-bezier(.2,.7,.2,1);
-    pointer-events:none}
+  .scene{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;padding:5cqh 6cqw;opacity:0;transform:scale(1.04);
+    transition:opacity .9s ease,transform 1.2s cubic-bezier(.2,.7,.2,1);pointer-events:none}
   .scene.active{opacity:1;transform:scale(1);pointer-events:auto}
-  /* cinematic slow zoom while active */
-  .scene.active .zoomwrap{animation:slowzoom var(--dur,8s) linear both}
-  @keyframes slowzoom{from{transform:scale(1)}to{transform:scale(1.06)}}
+  .scene.active .zoom{animation:slowzoom var(--dur,8s) linear both}
+  @keyframes slowzoom{from{transform:scale(1)}to{transform:scale(1.05)}}
 
-  .eyebrow{font-size:1.05vw;letter-spacing:.4em;text-transform:uppercase;
-    color:var(--primary-light);font-weight:800;opacity:0}
-  .scene.active .eyebrow{animation:fadeUp .8s .1s ease both}
-  h1.big{font-size:5.4vw;line-height:1.04;letter-spacing:-.02em;font-weight:850}
+  .eyebrow{font-size:1.1cqw;letter-spacing:.4em;text-transform:uppercase;color:var(--primary-light);font-weight:800;opacity:0}
+  .scene.active .eyebrow{animation:up .8s .1s ease both}
+  h1.big{font-size:5.4cqw;line-height:1.04;letter-spacing:-.02em;font-weight:850}
   .h-a,.h-b{display:block;opacity:0}
-  .scene.active .h-a{animation:fadeUp .9s .15s ease both}
-  .scene.active .h-b{animation:fadeUp .9s 1.5s ease both}
-  .grad{background:linear-gradient(100deg,var(--primary-light),var(--cyan));
-    -webkit-background-clip:text;background-clip:text;color:transparent}
-  .sub{font-size:1.7vw;color:var(--text-sub);max-width:62%;margin-top:2.2vh;opacity:0}
-  .scene.active .sub{animation:fadeUp 1s .6s ease both}
+  .scene.active .h-a{animation:up .9s .25s ease both}
+  .scene.active .h-b{animation:up .9s 1.6s ease both}
+  .grad{background:linear-gradient(100deg,var(--primary-light),var(--cyan));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .gold{color:var(--gold)} .green{color:var(--green)} .cyan{color:var(--cyan)}
+  .sub{font-size:1.7cqw;color:var(--text-sub);max-width:64%;margin-top:2.4cqh;opacity:0}
+  .scene.active .sub{animation:up 1s .6s ease both}
+  @keyframes up{from{opacity:0;transform:translateY(2.4cqh)}to{opacity:1;transform:translateY(0)}}
+  @keyframes pop{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:scale(1)}}
 
-  @keyframes fadeUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
-  @keyframes popIn{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:scale(1)}}
+  .stack{display:flex;align-items:center;gap:3.2cqw}
+  .copy{max-width:31cqw;text-align:left}
+  .copy .eyebrow{font-size:1cqw}
+  .copy h2{font-size:2.6cqw;line-height:1.08;letter-spacing:-.01em;font-weight:850;margin:.7cqh 0 1cqh;opacity:0}
+  .scene.active .copy h2{animation:up .9s .3s ease both}
+  .copy p{font-size:1.3cqw;color:var(--text-sub);opacity:0}
+  .scene.active .copy p{animation:up .9s .5s ease both}
 
-  /* ───────── Phone mock ───────── */
-  .phone{width:20vw;max-width:280px;aspect-ratio:9/19.5;background:#050509;
-    border:1.5px solid var(--border);border-radius:9% / 4.3%;padding:2.4%;
-    box-shadow:0 24px 70px rgba(0,0,0,.6);position:relative}
-  .pscreen{width:100%;height:100%;background:var(--bg);border-radius:7.5% / 3.6%;
-    border:1px solid var(--border);overflow:hidden;padding:6% 5.5%;
-    display:flex;flex-direction:column;gap:1.2vh;text-align:left;position:relative}
-  .scene.active .phone{animation:phoneIn 1.1s .15s cubic-bezier(.2,.8,.2,1) both}
-  @keyframes phoneIn{from{opacity:0;transform:translateY(34px) rotateX(8deg) scale(.96)}
-    to{opacity:1;transform:none}}
-  .stack{display:flex;align-items:center;gap:3vw}
-  .copy{max-width:30vw;text-align:left}
-  .copy .eyebrow{font-size:.95vw}
-  .copy h2{font-size:2.5vw;line-height:1.1;letter-spacing:-.01em;font-weight:800;margin:.6vh 0 1vh;opacity:0}
-  .scene.active .copy h2{animation:fadeUp .9s .25s ease both}
-  .copy p{font-size:1.25vw;color:var(--text-sub);opacity:0}
-  .scene.active .copy p{animation:fadeUp .9s .45s ease both}
+  /* phone */
+  .phone{width:20cqw;aspect-ratio:9/19.5;background:#050509;border:.3cqw solid var(--border);
+    border-radius:11%/5%;padding:2.2%;box-shadow:0 4cqh 9cqh rgba(0,0,0,.6);position:relative;flex:0 0 auto}
+  .scene.active .phone{animation:phoneIn 1s .15s cubic-bezier(.2,.85,.2,1) both}
+  @keyframes phoneIn{from{opacity:0;transform:translateY(3cqh) rotateX(7deg) scale(.96)}to{opacity:1;transform:none}}
+  .scr{width:100%;height:100%;background:var(--bg);border-radius:9.5%/4.4%;border:1px solid var(--border);
+    overflow:hidden;padding:5.5% 5%;display:flex;flex-direction:column;gap:1.1cqh;text-align:left;position:relative}
 
-  /* mock primitives */
-  .m-title{font-size:1.15vw;font-weight:800}
-  .m-sub{font-size:.78vw;color:var(--text-sub);margin-top:-.4vh}
-  .m-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.2vh 1vw}
-  .m-card.hi{border-color:rgba(124,58,237,.55);background:rgba(124,58,237,.10)}
-  .m-card.ok{border-color:rgba(16,185,129,.45);background:rgba(16,185,129,.08)}
-  .m-row{display:flex;align-items:center;justify-content:space-between}
-  .m-lbl{font-size:.85vw;font-weight:650}
-  .m-val{font-size:.78vw;color:var(--text-sub)}
-  .m-chip{font-size:.66vw;font-weight:800;padding:.3vh .6vw;border-radius:999px;background:rgba(124,58,237,.2);color:var(--primary-light)}
-  .m-chip.green{background:rgba(16,185,129,.2);color:var(--green)}
-  .m-chip.gold{background:rgba(245,158,11,.2);color:var(--gold)}
-  .m-btn{background:var(--primary);color:#fff;font-size:.8vw;font-weight:800;padding:.9vh 1vw;border-radius:999px;text-align:center}
-  .m-bar{height:.8vh;border-radius:4px;background:var(--surface-high);overflow:hidden;margin:.5vh 0}
-  .m-bar>i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--primary),var(--primary-light))}
-  .m-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.7vw}
-  .m-type{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1vh .3vw;text-align:center}
-  .m-type .e{font-size:1.3vw}.m-type .n{font-size:.62vw;font-weight:700}.m-type .x{font-size:.58vw;color:var(--gold);font-weight:800}
-  .m-type.sel{border-color:var(--primary);background:rgba(124,58,237,.12)}
-  .m-tabs{display:flex;justify-content:space-between;margin-top:auto;padding-top:1vh;border-top:1px solid var(--border)}
-  .m-tab{font-size:.55vw;color:var(--text-muted);text-align:center}
-  .m-tab.on{color:var(--primary-light)}.m-tab .e{font-size:1.05vw;display:block}
-  .m-plus{width:2.1vw;height:2.1vw;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.3vw;margin:-1.2vh auto 0}
-  .m-ring{width:8vw;height:8vw;align-self:center;position:relative;margin:.6vh 0}
-  .m-stat{text-align:center}.m-stat .v{font-size:1.25vw;font-weight:850}.m-stat .l{font-size:.55vw;letter-spacing:.05em;color:var(--text-sub)}
-  .m-toggle{width:2.4vw;height:1.35vw;border-radius:999px;background:var(--primary);position:relative}
-  .m-toggle::after{content:"";position:absolute;top:9%;right:6%;width:42%;height:82%;border-radius:50%;background:#fff}
+  .t{font-size:1.25cqw;font-weight:850}.s{font-size:.82cqw;color:var(--text-sub);margin-top:-.4cqh}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:1.1cqw;padding:1.1cqh 1cqw}
+  .card.hi{border-color:rgba(124,58,237,.55);background:rgba(124,58,237,.10)}
+  .card.ok{border-color:rgba(16,185,129,.45);background:rgba(16,185,129,.08)}
+  .row{display:flex;align-items:center;justify-content:space-between}
+  .lbl{font-size:.9cqw;font-weight:650}.val{font-size:.82cqw;color:var(--text-sub)}
+  .chip{font-size:.7cqw;font-weight:800;padding:.3cqh .6cqw;border-radius:999px;background:rgba(124,58,237,.2);color:var(--primary-light)}
+  .chip.green{background:rgba(16,185,129,.2);color:var(--green)}.chip.gold{background:rgba(245,158,11,.2);color:var(--gold)}
+  .chip.dim{background:rgba(136,136,170,.15);color:var(--text-sub)}
+  .btn{background:var(--primary);color:#fff;font-size:.85cqw;font-weight:850;padding:1cqh 1cqw;border-radius:999px;text-align:center}
+  .scene.active .btn.pulse{animation:btnpulse 1.6s ease-in-out infinite}
+  @keyframes btnpulse{0%,100%{box-shadow:0 0 0 rgba(124,58,237,0)}50%{box-shadow:0 0 2cqw rgba(124,58,237,.55)}}
+  .pbar{height:.8cqh;border-radius:4px;background:var(--surface-high);overflow:hidden;margin:.5cqh 0}
+  .pbar>i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--primary),var(--primary-light))}
+  .grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.7cqw}
+  .ty{background:var(--surface);border:1px solid var(--border);border-radius:.9cqw;padding:1cqh .3cqw;text-align:center}
+  .ty .e{font-size:1.4cqw}.ty .n{font-size:.64cqw;font-weight:700}.ty .x{font-size:.6cqw;color:var(--gold);font-weight:800}
+  .ty.sel{border-color:var(--primary);background:rgba(124,58,237,.12)}
+  .stat{text-align:center}.stat .v{font-size:1.3cqw;font-weight:880}.stat .l{font-size:.58cqw;letter-spacing:.05em;color:var(--text-sub)}
+  .ring{width:8.4cqw;height:8.4cqw;align-self:center;position:relative;margin:.6cqh 0}
+  .toggle{width:2.4cqw;height:1.35cqw;border-radius:999px;background:var(--primary);position:relative;transition:background .4s}
+  .toggle::after{content:"";position:absolute;top:9%;left:6%;width:42%;height:82%;border-radius:50%;background:#fff;transition:left .4s}
+  .toggle.on{background:var(--primary)}.toggle.on::after{left:52%}
+  .tabs{display:flex;justify-content:space-between;margin-top:auto;padding-top:1cqh;border-top:1px solid var(--border)}
+  .tab{font-size:.56cqw;color:var(--text-muted);text-align:center}.tab.on{color:var(--primary-light)}.tab .e{font-size:1.05cqw;display:block}
+  .plus{width:2.2cqw;height:2.2cqw;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.3cqw;margin:-1.2cqh auto 0}
+  .scene.active .plus{animation:btnpulse 1.6s ease-in-out infinite}
 
-  /* XP float + achievement */
-  .xpfloat{position:absolute;left:50%;top:42%;transform:translateX(-50%);
-    font-size:1.6vw;font-weight:900;color:var(--gold);opacity:0;text-shadow:0 0 18px rgba(245,158,11,.6)}
-  .scene.active .xpfloat{animation:xpFloat 2.4s 4.2s ease both}
-  @keyframes xpFloat{0%{opacity:0;transform:translate(-50%,10px) scale(.7)}
-    18%{opacity:1;transform:translate(-50%,-12px) scale(1.05)}
-    70%{opacity:1;transform:translate(-50%,-40px) scale(1)}
-    100%{opacity:0;transform:translate(-50%,-72px) scale(.95)}}
-  .achv{position:absolute;left:50%;bottom:9%;transform:translateX(-50%);
-    background:rgba(16,185,129,.14);border:1px solid rgba(16,185,129,.5);
-    color:var(--green);font-size:.8vw;font-weight:800;padding:.8vh 1.1vw;border-radius:999px;opacity:0;white-space:nowrap}
-  .scene.active .achv{animation:popIn .6s 5.6s ease both, glowpulse 2s 6.2s ease-in-out infinite}
-  @keyframes glowpulse{0%,100%{box-shadow:0 0 0 rgba(16,185,129,0)}50%{box-shadow:0 0 26px rgba(16,185,129,.45)}}
+  /* XP float + celebration */
+  .xpfloat{position:absolute;left:50%;top:42%;transform:translateX(-50%);font-size:1.7cqw;font-weight:900;color:var(--gold);opacity:0;text-shadow:0 0 2cqw rgba(245,158,11,.6)}
+  .scene.active .xpfloat{animation:xpf 2.6s 5s ease both}
+  @keyframes xpf{0%{opacity:0;transform:translate(-50%,1.5cqh) scale(.7)}18%{opacity:1;transform:translate(-50%,-1.5cqh) scale(1.08)}72%{opacity:1;transform:translate(-50%,-5cqh) scale(1)}100%{opacity:0;transform:translate(-50%,-9cqh)}}
+  .celebrate{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none}
+  .scene.active .celebrate{animation:fadein .5s 6.6s ease both}
+  @keyframes fadein{to{opacity:1}}
+  .skilldone{background:rgba(16,185,129,.16);border:1px solid rgba(16,185,129,.55);color:var(--green);font-size:1cqw;font-weight:850;padding:1cqh 1.4cqw;border-radius:999px;white-space:nowrap;opacity:0}
+  .scene.active .skilldone{animation:pop .6s 6.7s cubic-bezier(.2,.9,.3,1.5) both,gpulse 1.8s 7.3s ease-in-out infinite}
+  @keyframes gpulse{0%,100%{box-shadow:0 0 0 rgba(16,185,129,0)}50%{box-shadow:0 0 2.4cqw rgba(16,185,129,.5)}}
+  .confetti i{position:absolute;width:.5cqw;height:.5cqw;top:46%;left:50%;border-radius:1px;opacity:0}
+  .scene.active .confetti i{animation:conf 1.8s 6.7s ease-out both}
+  @keyframes conf{0%{opacity:1;transform:translate(0,0) rotate(0)}100%{opacity:0;transform:translate(var(--cx),var(--cy)) rotate(540deg)}}
 
-  /* Evolve nodes */
-  .evrow{display:flex;align-items:center;gap:.5vw;margin:.5vh 0}
-  .node{width:1.5vw;height:1.5vw;border-radius:50%;border:2px solid var(--border);flex:0 0 auto;display:flex;align-items:center;justify-content:center;font-size:.7vw}
+  /* knowledge challenge card (scene 6) */
+  .kc{position:absolute;right:1.5cqw;bottom:2cqh;width:15cqw;background:var(--surface-high);border:1px solid rgba(34,211,238,.4);
+    border-radius:1cqw;padding:1.2cqh 1cqw;box-shadow:0 2cqh 6cqh rgba(0,0,0,.5);opacity:0;text-align:left}
+  .scene.active .kc{animation:kcIn .7s 3.4s cubic-bezier(.2,.85,.2,1) both}
+  @keyframes kcIn{from{opacity:0;transform:translateY(2cqh) scale(.92)}to{opacity:1;transform:none}}
+
+  /* evolve nodes */
+  .evrow{display:flex;align-items:center;gap:.5cqw;margin:.5cqh 0}
+  .node{width:1.5cqw;height:1.5cqw;border-radius:50%;border:.16cqw solid var(--border);flex:0 0 auto;display:flex;align-items:center;justify-content:center;font-size:.7cqw}
   .node.done{background:var(--green);border-color:var(--green);color:#022}
-  .node.now{border-color:var(--primary-light);color:var(--primary-light)}
-  .node.lock{opacity:.45}
-  .nline{flex:1;height:2px;background:var(--border)}
-  .nline.done{background:var(--green)}
-  .scene.active .node.done{animation:popIn .5s ease both}
-  .scene.active .node.done:nth-of-type(1){animation-delay:.4s}
-  .scene.active .node.now{animation:nodeGlow 1.8s 1.2s ease-in-out infinite}
-  @keyframes nodeGlow{0%,100%{box-shadow:0 0 0 rgba(168,85,247,0)}50%{box-shadow:0 0 18px rgba(168,85,247,.7)}}
+  .node.now{border-color:var(--primary-light);color:var(--primary-light)}.node.lock{opacity:.45}
+  .nl{flex:1;height:2px;background:var(--border)}.nl.done{background:var(--green)}
+  .scene.active .node.now{animation:nglow 1.7s 1s ease-in-out infinite}
+  @keyframes nglow{0%,100%{box-shadow:0 0 0 rgba(168,85,247,0)}50%{box-shadow:0 0 1.6cqw rgba(168,85,247,.7)}}
+  .scene.active .node.lock.unlock{animation:unlockGlow 1s 2.4s ease both}
+  @keyframes unlockGlow{0%{opacity:.45}50%{opacity:1;box-shadow:0 0 1.6cqw rgba(124,58,237,.6)}100%{opacity:.7}}
 
-  /* sync arc */
-  .sync{display:flex;align-items:center;justify-content:center;gap:2vw;margin-top:1vh}
-  .syncdot{width:.7vw;height:.7vw;border-radius:50%;background:var(--cyan);opacity:.25}
-  .scene.active .syncdot{animation:syncpulse 1.4s linear infinite}
-  .scene.active .syncdot:nth-child(2){animation-delay:.2s}
-  .scene.active .syncdot:nth-child(3){animation-delay:.4s}
-  .scene.active .syncdot:nth-child(4){animation-delay:.6s}
-  @keyframes syncpulse{0%,100%{opacity:.2;transform:scale(.8)}50%{opacity:1;transform:scale(1.3)}}
+  /* mastery flip (scene 8) */
+  .pillwrap{position:relative;height:2.4cqh;display:flex;justify-content:center;align-items:center}
+  .pillwrap .chip{position:absolute}
+  .scene.active .pillwrap .p-before{animation:flipOut .6s 2.2s ease both}
+  .scene.active .pillwrap .p-after{opacity:0;animation:flipIn .6s 2.6s cubic-bezier(.2,.9,.3,1.4) both}
+  @keyframes flipOut{to{opacity:0;transform:translateY(-1.2cqh)}}
+  @keyframes flipIn{from{opacity:0;transform:translateY(1.2cqh) scale(.9)}to{opacity:1;transform:none}}
 
-  /* ───────── Logo (staircase) ───────── */
-  .logo-xl{width:13vw;height:13vw}
-  .scene.active .lstep{opacity:0}
-  .scene.active .lstep.s1{animation:stepRise .7s .2s cubic-bezier(.2,.8,.2,1) both}
-  .scene.active .lstep.s2{animation:stepRise .7s .45s cubic-bezier(.2,.8,.2,1) both}
-  .scene.active .lstep.s3{animation:stepRise .7s .7s cubic-bezier(.2,.8,.2,1) both}
-  .scene.active .lgem{opacity:0;animation:popIn .7s 1.05s cubic-bezier(.2,.9,.3,1.4) both}
-  .scene.active .lpath{opacity:0;animation:fadeUp .8s 1.0s ease both}
-  @keyframes stepRise{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:translateY(0)}}
+  /* sync / devices (scene 9) */
+  .devs{display:flex;align-items:center;justify-content:center;gap:2cqw}
+  .laptop{width:13cqw;opacity:0}
+  .scene.active .laptop{animation:up .8s 1.8s ease both}
+  .laptop .lscr{background:var(--bg);border:1px solid var(--border);border-radius:.8cqw;aspect-ratio:16/10;padding:1cqh;display:flex;flex-direction:column;gap:.6cqh}
+  .laptop .lbase{height:.7cqh;width:120%;margin-left:-10%;background:#1a1a26;border-radius:0 0 1cqw 1cqw}
+  .sync{display:flex;align-items:center;gap:.5cqw}
+  .sd{width:.5cqw;height:.5cqw;border-radius:50%;background:var(--cyan);opacity:.25}
+  .scene.active .sd{animation:sp 1.3s linear infinite}
+  .scene.active .sd:nth-child(2){animation-delay:.18s}.scene.active .sd:nth-child(3){animation-delay:.36s}
+  @keyframes sp{0%,100%{opacity:.2;transform:scale(.8)}50%{opacity:1;transform:scale(1.4)}}
 
-  /* ───────── Caption (narration) ───────── */
-  #caption{position:absolute;left:0;right:0;bottom:7%;text-align:center;
-    font-size:1.5vw;color:var(--text);font-weight:600;letter-spacing:.01em;
-    padding:0 12%;opacity:0;transition:opacity .5s ease;text-shadow:0 2px 18px rgba(0,0,0,.8)}
-  #caption.show{opacity:1}
-  #caption .q{color:var(--gold)}
+  /* logo step rise (open/close only) */
+  .logo-xl{width:13cqw;height:13cqw}
+  .scene.active .ls{opacity:0}
+  .scene.active .ls.s1{animation:rise .7s .2s cubic-bezier(.2,.8,.2,1) both}
+  .scene.active .ls.s2{animation:rise .7s .45s cubic-bezier(.2,.8,.2,1) both}
+  .scene.active .ls.s3{animation:rise .7s .7s cubic-bezier(.2,.8,.2,1) both}
+  .scene.active .lg{opacity:0;animation:pop .7s 1.05s cubic-bezier(.2,.9,.3,1.4) both}
+  @keyframes rise{from{opacity:0;transform:translateY(2.6cqh)}to{opacity:1;transform:translateY(0)}}
 
-  /* progress + controls */
-  #bar{position:absolute;left:0;bottom:0;height:3px;width:0;
-    background:linear-gradient(90deg,var(--primary),var(--cyan));z-index:5}
-  #scenelabel{position:absolute;top:3.5%;right:4%;font-size:.8vw;letter-spacing:.2em;
-    text-transform:uppercase;color:var(--text-muted);font-weight:700;z-index:5}
-  .controls{position:absolute;top:3.5%;left:4%;display:flex;gap:.6vw;z-index:6}
-  .ctrl{background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--text);
-    font-size:.8vw;font-weight:700;padding:.7vh 1vw;border-radius:999px;cursor:pointer;backdrop-filter:blur(6px)}
-  .ctrl:hover{background:rgba(255,255,255,.12)}
+  #caption{position:absolute;left:0;right:0;bottom:6.5cqh;text-align:center;font-size:1.55cqw;color:var(--text);
+    font-weight:600;padding:0 12cqw;opacity:0;transition:opacity .5s ease;text-shadow:0 2px 18px rgba(0,0,0,.85)}
+  #caption.show{opacity:1}#caption .q{color:var(--gold)}
+  #bar{position:absolute;left:0;bottom:0;height:3px;width:0;background:linear-gradient(90deg,var(--primary),var(--cyan));z-index:5}
 
-  /* play / replay overlay */
-  #overlay{position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;
-    align-items:center;justify-content:center;background:rgba(6,6,12,.78);backdrop-filter:blur(8px);
-    cursor:pointer;transition:opacity .5s ease}
-  #overlay.hide{opacity:0;pointer-events:none}
-  .playbtn{width:6vw;height:6vw;border-radius:50%;background:var(--primary);
-    display:flex;align-items:center;justify-content:center;font-size:2.4vw;color:#fff;
-    box-shadow:0 0 0 0 rgba(124,58,237,.5);animation:ping 2.4s ease-out infinite}
-  @keyframes ping{0%{box-shadow:0 0 0 0 rgba(124,58,237,.5)}100%{box-shadow:0 0 0 4vw rgba(124,58,237,0)}}
-  #overlay h3{margin-top:2.4vh;font-size:1.6vw;font-weight:800}
-  #overlay p{margin-top:.6vh;color:var(--text-sub);font-size:1vw}
+  #ov{position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    background:rgba(6,6,12,.8);backdrop-filter:blur(8px);cursor:pointer;transition:opacity .5s ease;text-align:center;padding:0 8cqw}
+  #ov.hide{opacity:0;pointer-events:none}
+  .play{width:6cqw;height:6cqw;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-size:2.4cqw;color:#fff;animation:ping 2.4s ease-out infinite}
+  @keyframes ping{0%{box-shadow:0 0 0 0 rgba(124,58,237,.5)}100%{box-shadow:0 0 0 5cqw rgba(124,58,237,0)}}
+  #ov h3{margin-top:2.6cqh;font-size:1.7cqw;font-weight:850}#ov p{margin-top:.8cqh;color:var(--text-sub);font-size:1.05cqw}
+
+  .controls{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+  .ctrl{background:rgba(255,255,255,.07);border:1px solid var(--border);color:var(--text);font-size:13px;font-weight:700;padding:7px 14px;border-radius:999px;cursor:pointer}
+  .ctrl:hover{background:rgba(255,255,255,.14)}
+  .hint{color:var(--text-muted);font-size:12px;letter-spacing:.03em;text-align:center}
 </style>
 </head>
 <body>
 <div id="stage">
   <div class="bgfx"><div class="orb a"></div><div class="orb b"></div><div class="orb c"></div></div>
+  <svg width="0" height="0" style="position:absolute"><defs>
+    <linearGradient id="t" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5CB4FF"/><stop offset="1" stop-color="#2563EB"/></linearGradient>
+    <linearGradient id="l" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1E3A8A"/><stop offset="1" stop-color="#11214F"/></linearGradient>
+    <linearGradient id="r" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2F6BDD"/><stop offset="1" stop-color="#1D4ED8"/></linearGradient>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#A5F3FC"/><stop offset="1" stop-color="#22D3EE"/></linearGradient>
+    <filter id="gl" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <g id="st"><polygon points="0,0 24,12 0,24 -24,12" fill="url(#t)"/><polygon points="-24,12 0,24 0,42 -24,30" fill="url(#l)"/><polygon points="0,24 24,12 24,30 0,42" fill="url(#r)"/><polygon points="0,0 24,12 0,24 -24,12" fill="none" stroke="rgba(255,255,255,.28)" stroke-width=".75"/></g>
+  </defs></svg>
 
-  <!-- ░░ SCENE 1 — OPENING ░░ -->
-  <section class="scene" data-cap="What if your progress could speak for itself?">
-    <div class="zoomwrap" style="display:flex;flex-direction:column;align-items:center">
+  <!-- 1 OPENING -->
+  <section class="scene" data-dur="6000" data-cap="What if your progress could speak for itself?">
+    <div class="zoom" style="display:flex;flex-direction:column;align-items:center">
       <svg class="logo-xl" viewBox="0 0 120 120" style="overflow:visible">
-        <defs>
-          <linearGradient id="t" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5CB4FF"/><stop offset="1" stop-color="#2563EB"/></linearGradient>
-          <linearGradient id="l" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1E3A8A"/><stop offset="1" stop-color="#11214F"/></linearGradient>
-          <linearGradient id="r" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2F6BDD"/><stop offset="1" stop-color="#1D4ED8"/></linearGradient>
-          <linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#A5F3FC"/><stop offset="1" stop-color="#22D3EE"/></linearGradient>
-          <filter id="gl" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-          <g id="st"><polygon points="0,0 24,12 0,24 -24,12" fill="url(#t)"/><polygon points="-24,12 0,24 0,42 -24,30" fill="url(#l)"/><polygon points="0,24 24,12 24,30 0,42" fill="url(#r)"/><polygon points="0,0 24,12 0,24 -24,12" fill="none" stroke="rgba(255,255,255,.28)" stroke-width=".75"/></g>
-        </defs>
-        <g class="lstep s3"><use href="#st" transform="translate(76,30)"/></g>
-        <g class="lstep s2"><use href="#st" transform="translate(56,48)"/></g>
-        <g class="lstep s1"><use href="#st" transform="translate(36,66)"/></g>
-        <g class="lpath"><path d="M32,84 C50,75 48,60 62,53 S80,38 84,30" fill="none" stroke="#070C1A" stroke-width="5.5" stroke-linecap="round" opacity=".9"/><path d="M32,84 C50,75 48,60 62,53 S80,38 84,30" fill="none" stroke="#60A5FA" stroke-width="1.4" stroke-linecap="round" opacity=".5"/></g>
-        <g class="lgem" filter="url(#gl)"><polygon points="86,8 97,19 86,30 75,19" fill="url(#g)"/><polygon points="86,8 97,19 86,30 75,19" fill="none" stroke="#CFFAFE" stroke-width=".8"/></g>
+        <g class="ls s3"><use href="#st" transform="translate(76,30)"/></g>
+        <g class="ls s2"><use href="#st" transform="translate(56,48)"/></g>
+        <g class="ls s1"><use href="#st" transform="translate(36,66)"/></g>
+        <g class="lg" filter="url(#gl)"><polygon points="86,8 97,19 86,30 75,19" fill="url(#g)"/><polygon points="86,8 97,19 86,30 75,19" fill="none" stroke="#CFFAFE" stroke-width=".8"/></g>
       </svg>
-      <h1 class="big" style="margin-top:3vh">
-        <span class="h-a">Anyone can say it.</span>
-        <span class="h-b grad">Few can prove it.</span>
-      </h1>
+      <h1 class="big" style="margin-top:3cqh"><span class="h-a">Anyone can say it.</span><span class="h-b grad">Few can prove it.</span></h1>
     </div>
   </section>
 
-  <!-- ░░ SCENE 2 — INSTALL & WELCOME ░░ -->
-  <section class="scene" data-cap="Start your journey with privacy and control from day one.">
-    <div class="stack zoomwrap">
-      <div class="copy"><span class="eyebrow">Get started</span><h2>Open. Install.<br>You're in control.</h2><p>A web app that installs like native — no app store, no friction.</p></div>
-      <div class="phone"><div class="pscreen" style="align-items:center;justify-content:center;text-align:center;gap:1.4vh">
-        <svg width="46" height="46" viewBox="0 0 120 120" style="overflow:visible"><use href="#st" transform="translate(76,30)"/><use href="#st" transform="translate(56,48)"/><use href="#st" transform="translate(36,66)"/><g filter="url(#gl)"><polygon points="86,8 97,19 86,30 75,19" fill="url(#g)"/></g></svg>
-        <div class="m-title" style="font-size:1.3vw">MaglakbAI</div>
-        <div class="m-card hi" style="margin-top:1vh"><div class="m-row"><span class="m-lbl">📊 Anonymous stats?</span></div><div class="m-val" style="margin-top:.4vh">Nothing is tracked until you say yes.</div>
-          <div style="display:flex;gap:.5vw;margin-top:1vh"><div style="flex:1" class="m-card" >No thanks</div><div style="flex:1.4" class="m-btn">Allow</div></div></div>
+  <!-- 2 INSTANT ACCESS -->
+  <section class="scene" data-dur="7000" data-cap="Start instantly — no download. From the first screen, your privacy is your choice.">
+    <div class="stack zoom">
+      <div class="copy"><span class="eyebrow">No friction</span><h2>Open instantly.<br>Install in a tap.</h2><p>A web app that runs in your browser — add it to your home screen, no app store needed.</p></div>
+      <div class="phone"><div class="scr" style="justify-content:flex-end;gap:1.4cqh">
+        <div class="card" style="text-align:center"><div style="font-size:1.6cqw">📲</div><div class="lbl" style="margin-top:.4cqh">Add to Home Screen</div><div class="val">Launches full-screen, like native</div><div class="chip green" style="margin-top:.8cqh;display:inline-block">✓ Added</div></div>
+        <div class="card hi"><div class="lbl">📊 Help shape MaglakbAI</div><div class="val" style="margin-top:.3cqh">Collect <b style="color:var(--text)">anonymous</b> usage stats? Nothing is sent until you say yes.</div>
+          <div style="display:flex;gap:.5cqw;margin-top:.9cqh"><div style="flex:1;text-align:center;font-size:.72cqw;font-weight:800;color:var(--text-sub);background:var(--surface-high);border-radius:8px;padding:.7cqh 0">No thanks</div><div style="flex:1.4" class="btn">Allow anonymous stats</div></div></div>
       </div></div>
     </div>
   </section>
 
-  <!-- ░░ SCENE 3 — PROFILE SETUP ░░ -->
-  <section class="scene" data-cap="Create your profile and define the future you're working toward.">
-    <div class="stack zoomwrap">
-      <div class="phone"><div class="pscreen">
-        <div class="m-title">Choose your path</div><div class="m-sub">Where do you want to grow?</div>
-        <div class="m-card"><div class="m-row"><span class="m-lbl">🏗️ Data Architect</span><span class="m-val">5 skills</span></div></div>
-        <div class="m-card hi"><div class="m-row"><span class="m-lbl">🤖 AI Engineer</span><span class="m-chip">Selected</span></div></div>
-        <div class="m-card"><div class="m-row"><span class="m-lbl">🌐 Full Stack</span><span class="m-val">6 skills</span></div></div>
-        <div class="m-card"><div class="m-row"><span class="m-lbl">✨ Build my own path</span><span class="m-val">›</span></div></div>
-        <div class="m-btn" style="margin-top:auto">Begin My Evolution ⚡</div>
+  <!-- 3 CHOOSE YOUR PATH -->
+  <section class="scene" data-dur="9000" data-cap="Pick any path — any skill, any field. Tell us where you're starting, and we'll meet you there.">
+    <div class="stack zoom">
+      <div class="phone"><div class="scr">
+        <div class="t">Choose your path</div><div class="s">Any skill. Any field. Any level.</div>
+        <div class="card"><div class="row"><span class="lbl">🏗️ Data Architect</span><span class="val">5 skills</span></div></div>
+        <div class="card hi"><div class="row"><span class="lbl">🤖 AI Engineer</span><span class="chip">Selected</span></div></div>
+        <div class="card"><div class="row"><span class="lbl">🌐 Full Stack</span><span class="val">6 skills</span></div></div>
+        <div class="card"><div class="row"><span class="lbl">✨ Build my own path</span><span class="val">›</span></div></div>
+        <div style="font-size:.62cqw;color:var(--text-sub);letter-spacing:.1em;margin-top:.4cqh">WHERE ARE YOU STARTING?</div>
+        <div class="row" style="gap:.4cqw"><span class="chip dim">🌱 Fresh</span><span class="chip">⚡ Some</span><span class="chip dim">🏆 Experienced</span></div>
       </div></div>
-      <div class="copy"><span class="eyebrow">Your goal</span><h2>Define the future<br>you're building.</h2><p>Pick a path — or design your own. Your roadmap adapts to your level.</p></div>
+      <div class="copy"><span class="eyebrow">Your goal</span><h2>From AI to design<br>to the trades.</h2><p>Choose a path or build your own — your roadmap adapts to your level.</p></div>
     </div>
   </section>
 
-  <!-- ░░ SCENE 4 — HOME DASHBOARD ░░ -->
-  <section class="scene" data-cap="Everything you accomplish is captured in one place.">
-    <div class="stack zoomwrap">
-      <div class="copy"><span class="eyebrow">Home</span><h2>Your whole journey,<br>at a glance.</h2><p>Progress, streaks, and your next milestone — one calm dashboard.</p></div>
-      <div class="phone"><div class="pscreen">
-        <div class="m-row"><div><div class="m-title" style="font-size:1vw">Good morning, Alex 👋</div><div class="m-sub">Builder</div></div><span class="m-chip gold">🔥 7</span></div>
-        <div class="m-ring"><svg viewBox="0 0 120 120" style="width:100%;height:100%"><circle cx="60" cy="60" r="50" fill="none" stroke="#1A1A2E" stroke-width="10"/><circle class="ring" cx="60" cy="60" r="50" fill="none" stroke="url(#g)" stroke-width="10" stroke-linecap="round" transform="rotate(-90 60 60)" stroke-dasharray="314" stroke-dashoffset="314"/></svg>
-          <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center"><div style="font-size:1.6vw;font-weight:900;color:var(--primary-light)">42%</div><div style="font-size:.5vw;letter-spacing:.15em;color:var(--text-sub)">EVOLUTION</div></div>
+  <!-- 4 HOME DASHBOARD -->
+  <section class="scene" data-dur="8000" data-cap="Every morning, see how far you've come — and exactly what's next.">
+    <div class="stack zoom">
+      <div class="copy"><span class="eyebrow">Home</span><h2>Your journey,<br>at a glance.</h2><p>Your evolution ring, streak, and the milestone you're closest to.</p></div>
+      <div class="phone"><div class="scr">
+        <div class="row"><div><div class="t" style="font-size:1cqw">Good morning, Alex 👋</div><div class="s">Builder</div></div><span class="chip gold">🔥 <span data-count="3"></span></span></div>
+        <div class="ring"><svg viewBox="0 0 120 120" style="width:100%;height:100%"><circle cx="60" cy="60" r="50" fill="none" stroke="#1A1A2E" stroke-width="10"/><circle class="rfill" data-pct="0.17" cx="60" cy="60" r="50" fill="none" stroke="url(#g)" stroke-width="10" stroke-linecap="round" transform="rotate(-90 60 60)" stroke-dasharray="314" stroke-dashoffset="314"/></svg>
+          <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center"><div style="font-size:1.7cqw;font-weight:900;color:var(--primary-light)"><span data-count="17"></span>%</div><div style="font-size:.5cqw;letter-spacing:.15em;color:var(--text-sub)">EVOLUTION</div></div></div>
+        <div class="card"><div class="row"><div class="stat"><div class="v"><span data-count="260"></span></div><div class="l">TOTAL XP</div></div><div class="stat"><div class="v"><span data-count="3"></span></div><div class="l">STREAK</div></div><div class="stat"><div class="v"><span data-count="2"></span></div><div class="l">THIS WEEK</div></div></div></div>
+        <div class="card hi"><div style="font-size:.6cqw;font-weight:800;color:var(--primary-light)">⚡ SO CLOSE</div><div class="row"><span class="lbl">REST APIs</span><span class="btn pulse" style="padding:.5cqh 1cqw">Complete It</span></div></div>
+      </div></div>
+    </div>
+  </section>
+
+  <!-- 5 LOG YOUR WORK (LONGEST) -->
+  <section class="scene" data-dur="18000"
+    data-cap="The heart of it: build something real — a project, a script, a cert, a book — then log it."
+    data-cap2='<span class="q">Every action becomes proof.</span>  Watch your progress grow, instantly.' style="--dur:18s">
+    <div class="stack zoom">
+      <div class="copy"><span class="eyebrow">The core loop</span><h2>Don't just say it.<br><span class="grad">Log it.</span></h2><p>Real outputs become real, visible proof — and instant momentum.</p></div>
+      <div class="phone"><div class="scr">
+        <div class="t">Log Your Work</div><div class="s">Build it, then log it.</div>
+        <div class="grid">
+          <div class="ty sel"><div class="e">🔨</div><div class="n">Project</div><div class="x">+75</div></div>
+          <div class="ty"><div class="e">🏅</div><div class="n">Cert</div><div class="x">+200</div></div>
+          <div class="ty"><div class="e">💻</div><div class="n">GitHub</div><div class="x">+60</div></div>
+          <div class="ty"><div class="e">📖</div><div class="n">Book</div><div class="x">+50</div></div>
+          <div class="ty"><div class="e">⚙️</div><div class="n">Script</div><div class="x">+50</div></div>
+          <div class="ty"><div class="e">📐</div><div class="n">Design</div><div class="x">+75</div></div>
         </div>
-        <div class="m-card"><div class="m-row"><div class="m-stat"><div class="v">640</div><div class="l">TOTAL XP</div></div><div class="m-stat"><div class="v">7</div><div class="l">STREAK</div></div><div class="m-stat"><div class="v">5</div><div class="l">THIS WEEK</div></div></div></div>
-        <div class="m-card hi"><div style="font-size:.6vw;font-weight:800;color:var(--primary-light)">⚡ NEXT MILESTONE</div><div class="m-row"><span class="m-lbl">Vector Databases</span><span class="m-val">1 to go</span></div></div>
-      </div></div>
-    </div>
-  </section>
-
-  <!-- ░░ SCENE 5 — LOG YOUR WORK (CORE) ░░ -->
-  <section class="scene" data-cap='<span class="q">Every action becomes proof.</span>  Build a record of what you&#39;ve actually done.' style="--dur:12s">
-    <div class="stack zoomwrap">
-      <div class="copy"><span class="eyebrow">The core loop</span><h2>Don't just say it.<br><span class="grad">Log it.</span></h2><p>Projects, certs, sessions, milestones — each one becomes real, visible proof.</p></div>
-      <div class="phone"><div class="pscreen">
-        <div class="m-title">Log Your Work</div><div class="m-sub">Build it, then log it.</div>
-        <div class="m-grid">
-          <div class="m-type sel"><div class="e">🔨</div><div class="n">Project</div><div class="x">+75</div></div>
-          <div class="m-type"><div class="e">🏅</div><div class="n">Cert</div><div class="x">+200</div></div>
-          <div class="m-type"><div class="e">💻</div><div class="n">GitHub</div><div class="x">+60</div></div>
-          <div class="m-type"><div class="e">📖</div><div class="n">Book</div><div class="x">+50</div></div>
-          <div class="m-type"><div class="e">⚙️</div><div class="n">Script</div><div class="x">+50</div></div>
-          <div class="m-type"><div class="e">📐</div><div class="n">Design</div><div class="x">+75</div></div>
-        </div>
-        <div class="m-card hi"><div style="font-size:.58vw;color:var(--text-sub)">COUNTS TOWARD</div><div class="m-row"><span class="m-lbl" style="color:var(--primary-light)">REST APIs</span><span class="m-chip green">🎉 Completes!</span></div></div>
-        <div class="m-btn">Log It & Earn XP ⚡</div>
+        <div class="card hi"><div style="font-size:.58cqw;color:var(--text-sub)">COUNTS TOWARD</div><div class="row"><span class="lbl" style="color:var(--primary-light)">REST APIs</span><span class="chip green">🎉 Completes skill!</span></div></div>
+        <div class="btn pulse">Log It & Earn XP ⚡</div>
         <div class="xpfloat">+95 XP</div>
-        <div class="achv">🏆 Achievement unlocked · Validated +100</div>
+        <div class="confetti">
+          <i style="--cx:-7cqw;--cy:-5cqh;background:#F59E0B"></i><i style="--cx:6cqw;--cy:-6cqh;background:#7C3AED"></i>
+          <i style="--cx:-5cqw;--cy:4cqh;background:#22D3EE"></i><i style="--cx:8cqw;--cy:3cqh;background:#10B981"></i>
+          <i style="--cx:2cqw;--cy:-8cqh;background:#A855F7"></i><i style="--cx:-9cqw;--cy:-1cqh;background:#3B82F6"></i>
+          <i style="--cx:4cqw;--cy:6cqh;background:#F59E0B"></i><i style="--cx:-3cqw;--cy:-7cqh;background:#22D3EE"></i>
+        </div>
+        <div class="celebrate"><div class="skilldone">🎉 Skill Completed! +150 XP</div></div>
       </div></div>
     </div>
   </section>
 
-  <!-- ░░ SCENE 6 — EVOLVE MAP ░░ -->
-  <section class="scene" data-cap="See exactly where you've been — and where you're going.">
-    <div class="stack zoomwrap">
-      <div class="phone"><div class="pscreen">
-        <div class="m-row"><div class="m-title" style="font-size:1vw">🤖 AI Engineer</div><span class="m-chip">Evolve</span></div>
-        <div class="evrow"><div class="node done">✓</div><div class="nline done"></div><div class="node done">✓</div></div>
-        <div class="m-card ok"><div class="m-row"><span class="m-lbl">✅ Python Fundamentals</span><span class="m-chip green">VALIDATED</span></div></div>
-        <div class="m-card ok"><div class="m-row"><span class="m-lbl">✅ REST APIs</span><span class="m-chip green">DONE</span></div></div>
-        <div class="evrow"><div class="node now">◆</div><div class="nline"></div><div class="node lock">🔒</div></div>
-        <div class="m-card hi"><div class="m-row"><span class="m-lbl">⚡ Prompt Engineering</span><span class="m-val">2/3</span></div><div class="m-bar"><i style="width:66%"></i></div></div>
-        <div class="m-card" style="opacity:.5"><div class="m-row"><span class="m-lbl">🔒 Vector Databases</span><span class="m-val">Next</span></div></div>
+  <!-- 6 EVOLVE MAP -->
+  <section class="scene" data-dur="10000" data-cap="See your whole journey — what you've mastered, what's next. Even prove what you know.">
+    <div class="stack zoom">
+      <div class="phone"><div class="scr">
+        <div class="row"><div class="t" style="font-size:1cqw">🤖 AI Engineer</div><span class="chip">Evolve</span></div>
+        <div class="evrow"><div class="node done">✓</div><div class="nl done"></div><div class="node now">◆</div><div class="nl"></div><div class="node lock unlock">🔓</div></div>
+        <div class="card ok"><div class="row"><span class="lbl">✅ Python Fundamentals</span><span class="chip green">COMPETENT</span></div></div>
+        <div class="card hi"><div class="row"><span class="lbl">⚡ REST APIs</span><span class="val">2/3</span></div><div class="pbar"><i style="width:66%"></i></div></div>
+        <div class="card"><div class="row"><span class="lbl">🔓 Prompt Engineering</span><span class="chip">Unlocked</span></div></div>
       </div></div>
-      <div class="copy"><span class="eyebrow">Evolve map</span><h2>Your growth,<br>made visible.</h2><p>A living map of milestones reached — and the ones glowing just ahead.</p></div>
+      <div class="copy"><span class="eyebrow">Evolve map</span><h2>Your growth,<br>made visible.</h2><p>Mastered, in-progress, and the milestones glowing just ahead.</p></div>
+      <div class="kc"><div style="font-size:.62cqw;color:var(--cyan);font-weight:800;letter-spacing:.1em">🎓 PROVE YOU KNOW IT</div>
+        <div class="lbl" style="margin:.4cqh 0">Which clause filters AFTER aggregation?</div>
+        <div class="card ok" style="padding:.6cqh .8cqw"><div class="row"><span class="lbl">HAVING</span><span class="chip green">✓</span></div></div>
+        <div class="row" style="margin-top:.6cqh"><span class="val">Score 7 / 10</span><span class="chip gold">+100 XP · ✓ Validated</span></div></div>
     </div>
   </section>
 
-  <!-- ░░ SCENE 7 — COMMUNITY ░░ -->
-  <section class="scene" data-cap="Grow alongside people building proof just like you.">
-    <div class="stack zoomwrap">
-      <div class="copy"><span class="eyebrow">Community</span><h2>You're not<br>building alone.</h2><p>Real momentum from people turning intention into evidence, every day.</p></div>
-      <div class="phone"><div class="pscreen">
-        <div class="m-row"><div class="m-title" style="font-size:1vw">Community</div><span class="m-chip">Feed</span></div>
-        <div class="m-card"><div style="font-size:.58vw;color:var(--text-sub)">🏅 WEEKLY XP</div><div class="m-row" style="margin-top:.4vh"><span class="m-lbl">🥇 Priya</span><span class="m-chip gold">390</span></div><div class="m-row" style="margin-top:.3vh"><span class="m-lbl">🥈 Marcus</span><span class="m-chip gold">340</span></div></div>
-        <div class="m-card"><div class="m-row"><span class="m-lbl">Kenji</span><span class="m-chip">ML Engineer</span></div><div style="font-size:.62vw;color:var(--primary-light);font-weight:800;margin-top:.4vh">⚡ Offer Received · +500 XP</div><div class="m-val" style="margin-top:.2vh">Proof-based progression is real.</div></div>
-      </div></div>
-    </div>
-  </section>
-
-  <!-- ░░ SCENE 8 — PROFILE ░░ -->
-  <section class="scene" data-cap="Your profile becomes a living record of your journey.">
-    <div class="stack zoomwrap">
-      <div class="phone"><div class="pscreen" style="text-align:center">
-        <div class="m-row"><div class="m-title" style="font-size:1vw">Profile</div><span>⚙️</span></div>
-        <div style="width:3.2vw;height:3.2vw;border-radius:50%;background:var(--surface-high);border:2px solid var(--primary);display:flex;align-items:center;justify-content:center;font-size:1.6vw;margin:.6vh auto">🤖</div>
-        <div style="font-weight:800;font-size:1vw">Alex Rivera</div>
-        <div class="m-chip green" style="margin:.3vh auto">Mastered AI Engineer Path</div>
-        <div class="m-card" style="margin-top:.6vh"><div class="m-row"><div class="m-stat"><div class="v" style="color:var(--gold)">640</div><div class="l">XP</div></div><div class="m-stat"><div class="v" style="color:var(--primary-light)">12</div><div class="l">OUTPUTS</div></div><div class="m-stat"><div class="v" style="color:var(--gold)">7</div><div class="l">STREAK</div></div><div class="m-stat"><div class="v" style="color:var(--green)">6</div><div class="l">SKILLS</div></div></div></div>
-        <div class="m-row" style="gap:.4vw"><span class="m-chip gold">🏅 Consistent</span><span class="m-chip">⚡ Fast Start</span><span class="m-chip green">✓ Validated</span></div>
-      </div></div>
-      <div class="copy"><span class="eyebrow">Profile</span><h2>A record that<br>speaks for you.</h2><p>Streaks, achievements, milestones — undeniable evidence of the work.</p></div>
-    </div>
-  </section>
-
-  <!-- ░░ SCENE 9 — CLOUD BACKUP ░░ -->
-  <section class="scene" data-cap="Your progress stays with you, everywhere.">
-    <div class="stack zoomwrap">
-      <div class="copy"><span class="eyebrow">Cloud backup</span><h2>Everywhere<br>you go.</h2><p>One tap, no password. Your proof syncs across every device.</p></div>
-      <div class="phone"><div class="pscreen" style="justify-content:center;align-items:center;text-align:center;gap:1.6vh">
-        <div style="font-size:2.6vw">☁️</div>
-        <div class="m-card ok" style="width:100%"><div class="m-row"><span class="m-lbl">Progress backed up</span><span class="m-chip green">Synced</span></div><div class="m-val" style="margin-top:.3vh">Signed in · Magic Link</div></div>
-        <div class="sync"><span>📱</span><div class="syncdot"></div><div class="syncdot"></div><div class="syncdot"></div><div class="syncdot"></div><span>💻</span></div>
+  <!-- 7 COMMUNITY (PREVIEW) -->
+  <section class="scene" data-dur="7000" data-cap="And soon — grow alongside a whole community of builders proving their progress too.">
+    <div class="stack zoom">
+      <div class="copy"><span class="eyebrow">Community · coming soon</span><h2>Build proof,<br>together.</h2><p>A glimpse of what's next — momentum from builders across every path.</p></div>
+      <div class="phone"><div class="scr">
+        <div class="row"><div class="t" style="font-size:1cqw">Community</div><span class="chip">PREVIEW</span></div>
+        <div class="row" style="gap:.4cqw"><span class="chip">🤖 AI</span><span class="chip dim">🌐 Full Stack</span><span class="chip dim">🏗️ Data</span></div>
+        <div class="card"><div style="font-size:.58cqw;color:var(--text-sub)">🏅 WEEKLY XP · sample</div><div class="row" style="margin-top:.4cqh"><span class="lbl">🥇 Priya</span><span class="chip gold">390</span></div><div class="row" style="margin-top:.3cqh"><span class="lbl">🥈 Marcus</span><span class="chip gold">340</span></div></div>
+        <div class="card"><div class="row"><span class="lbl">Kenji</span><span class="chip">ML Engineer</span></div><div style="font-size:.62cqw;color:var(--primary-light);font-weight:800;margin-top:.4cqh">⚡ Offer Received · +500 XP</div></div>
       </div></div>
     </div>
   </section>
 
-  <!-- ░░ SCENE 10 — PRIVACY & DATA ░░ -->
-  <section class="scene" data-cap="You stay in control of your data.">
-    <div class="stack zoomwrap">
-      <div class="phone"><div class="pscreen">
-        <div class="m-title">Data & Privacy</div><div class="m-sub">Your data, your rules.</div>
-        <div class="m-card"><div class="m-row"><span class="m-lbl">📊 Anonymous Analytics</span><span class="m-toggle"></span></div></div>
-        <div class="m-card"><div class="m-row"><span class="m-lbl">💾 Export Data</span><span class="m-val">Backup ›</span></div></div>
-        <div class="m-card"><div class="m-row"><span class="m-lbl">📥 Import Backup</span><span class="m-val">Restore ›</span></div></div>
-        <div class="m-card"><div class="m-row"><span class="m-lbl">🔒 Privacy Policy</span><span class="m-val">Read ›</span></div></div>
+  <!-- 8 PROFILE -->
+  <section class="scene" data-dur="7000" data-cap="Your profile becomes a living record — proof of everything you've built.">
+    <div class="stack zoom">
+      <div class="phone"><div class="scr" style="text-align:center">
+        <div class="row"><div class="t" style="font-size:1cqw">Profile</div><span>⚙️</span></div>
+        <div style="width:3.2cqw;height:3.2cqw;border-radius:50%;background:var(--surface-high);border:.2cqw solid var(--primary);display:flex;align-items:center;justify-content:center;font-size:1.7cqw;margin:.5cqh auto">🤖</div>
+        <div style="font-weight:850;font-size:1cqw">Alex Rivera</div>
+        <div class="pillwrap"><span class="chip dim p-before">Mastery in Progress</span><span class="chip green p-after">✓ Mastered AI Engineer Path</span></div>
+        <div class="card" style="margin-top:.4cqh"><div class="row"><div class="stat"><div class="v gold"><span data-count="640"></span></div><div class="l">XP</div></div><div class="stat"><div class="v" style="color:var(--primary-light)"><span data-count="12"></span></div><div class="l">OUTPUTS</div></div><div class="stat"><div class="v gold"><span data-count="7"></span></div><div class="l">STREAK</div></div><div class="stat"><div class="v green"><span data-count="6"></span></div><div class="l">SKILLS</div></div></div></div>
+        <div class="card"><div class="row"><span class="lbl">Level 2 · Builder</span><span class="val">62%</span></div><div class="pbar"><i style="width:62%"></i></div></div>
+        <div class="row" style="gap:.4cqw;justify-content:center"><span class="chip gold">🏅 Consistent</span><span class="chip">⚡ Fast Start</span><span class="chip green">✓ Validated</span></div>
       </div></div>
-      <div class="copy"><span class="eyebrow">Privacy first</span><h2>In control,<br>by default.</h2><p>Opt in, export, or erase anytime. We never see what you build.</p></div>
+      <div class="copy"><span class="eyebrow">Profile</span><h2>A record that<br>speaks for you.</h2><p>Streaks, achievements, mastery — growing every single day.</p></div>
     </div>
   </section>
 
-  <!-- ░░ SCENE 11 — HELP & FAQ ░░ -->
-  <section class="scene" data-cap="And help is here whenever you need it.">
-    <div class="stack zoomwrap">
-      <div class="copy"><span class="eyebrow">Support</span><h2>Guidance,<br>built in.</h2><p>Clear tips and quick answers — so nothing slows your momentum.</p></div>
-      <div class="phone"><div class="pscreen">
-        <div class="m-title">Tips & FAQ</div>
-        <div class="m-card"><div class="m-lbl">How do I earn XP fastest?</div><div class="m-val" style="margin-top:.3vh">Log real outputs — certs & projects pay most.</div></div>
-        <div class="m-card"><div class="m-lbl">What's the knowledge challenge?</div><div class="m-val" style="margin-top:.3vh">10 questions · 7 to pass · +100 XP.</div></div>
-        <div class="m-card"><div class="m-lbl">Is my progress safe?</div><div class="m-val" style="margin-top:.3vh">Yes — Cloud Backup syncs everywhere.</div></div>
-      </div></div>
-    </div>
-  </section>
-
-  <!-- ░░ FINAL ░░ -->
-  <section class="scene" data-cap="Start building proof today.">
-    <div class="zoomwrap" style="display:flex;flex-direction:column;align-items:center">
-      <svg class="logo-xl" viewBox="0 0 120 120" style="overflow:visible;width:9vw;height:9vw"><use href="#st" transform="translate(76,30)"/><use href="#st" transform="translate(56,48)"/><use href="#st" transform="translate(36,66)"/><g filter="url(#gl)"><polygon points="86,8 97,19 86,30 75,19" fill="url(#g)"/><polygon points="86,8 97,19 86,30 75,19" fill="none" stroke="#CFFAFE" stroke-width=".8"/></g></svg>
-      <h1 class="big" style="font-size:4vw;margin-top:2vh"><span class="h-a">Anyone can say it.</span><span class="h-b grad">Few can prove it.</span></h1>
-      <div class="sub" style="max-width:100%;margin-top:3vh;font-size:1.5vw;color:var(--text)">MaglakbAI</div>
-      <div style="margin-top:1.4vh;display:flex;gap:1vw;align-items:center;opacity:.85;font-size:1vw;color:var(--text-sub)">
-        <span style="background:var(--primary);color:#fff;font-weight:800;padding:.9vh 1.4vw;border-radius:999px;font-size:1vw">Start building proof →</span>
-        <span>maglakbai.app</span>
+  <!-- 9 CLOUD BACKUP -->
+  <section class="scene" data-dur="6000" data-cap="One tap, no password — your progress is safe, synced, and yours on every device.">
+    <div class="zoom" style="display:flex;flex-direction:column;align-items:center;gap:2cqh;width:100%">
+      <div class="eyebrow">Cloud backup · Magic Link</div>
+      <h2 style="font-size:2.4cqw;font-weight:850;opacity:1">No password. Everywhere you go.</h2>
+      <div class="devs">
+        <div class="phone" style="width:15cqw"><div class="scr" style="justify-content:center;gap:1cqh">
+          <div class="card"><div class="val">✉️ your@email.com</div></div>
+          <div class="btn">Send Sign-in Link</div>
+          <div class="card ok"><div class="row"><span class="lbl">✓ Progress backed up</span></div><div class="val">Signed in — no password</div></div>
+        </div></div>
+        <div class="sync"><div class="sd"></div><div class="sd"></div><div class="sd"></div></div>
+        <div class="laptop"><div class="lscr"><div class="row"><span class="chip gold">🔥 7</span><span class="chip green">Synced</span></div><div class="card" style="padding:.6cqh .8cqw"><div class="row"><span class="lbl">640 XP</span><span class="val">42%</span></div></div><div class="val" style="font-size:.7cqw">Same progress, instantly.</div></div><div class="lbase"></div></div>
       </div>
     </div>
   </section>
 
-  <div class="grain"></div><div class="vignette"></div>
-  <div id="caption"></div>
-  <div id="scenelabel"></div>
-  <div class="controls">
-    <button class="ctrl" id="btnPlay">⏸ Pause</button>
-    <button class="ctrl" id="btnReplay">↻ Replay</button>
-    <button class="ctrl" id="btnMute">🔊 Music</button>
-    <button class="ctrl" id="btnVo">🗣 Narrate: Off</button>
-  </div>
-  <div id="bar"></div>
+  <!-- 10 PRIVACY & CONTROL -->
+  <section class="scene" data-dur="5000" data-cap="Your data, your call — export it, back it up, or turn analytics off entirely.">
+    <div class="stack zoom">
+      <div class="phone"><div class="scr">
+        <div class="t">Data & Privacy</div><div class="s">Your data, your rules.</div>
+        <div class="card"><div class="row"><span class="lbl">📊 Anonymous Analytics</span><span class="toggle" id="tgl"></span></div></div>
+        <div class="card"><div class="row"><span class="lbl">💾 Export Data</span><span class="val">Backup ›</span></div></div>
+        <div class="card"><div class="row"><span class="lbl">📥 Import Backup</span><span class="val">Restore ›</span></div></div>
+        <div class="card"><div class="row"><span class="lbl">🔒 Privacy Policy</span><span class="val">Read ›</span></div></div>
+      </div></div>
+      <div class="copy"><span class="eyebrow">Always your decision</span><h2>You're in<br>control.</h2><p>Opt in, export, or erase anytime. We never see what you build.</p></div>
+    </div>
+  </section>
 
-  <div id="overlay">
-    <div class="playbtn">▶</div>
-    <h3>MaglakbAI — Product Trailer</h3>
-    <p>Tap to play · ~85s · sound on for the full experience</p>
-  </div>
+  <!-- FINAL -->
+  <section class="scene" data-dur="7000" data-cap="Anyone can say it. Few can prove it. Start building yours — today.">
+    <div class="zoom" style="display:flex;flex-direction:column;align-items:center">
+      <svg class="logo-xl" viewBox="0 0 120 120" style="overflow:visible;width:8.5cqw;height:8.5cqw"><use href="#st" transform="translate(76,30)"/><use href="#st" transform="translate(56,48)"/><use href="#st" transform="translate(36,66)"/><g filter="url(#gl)"><polygon points="86,8 97,19 86,30 75,19" fill="url(#g)"/><polygon points="86,8 97,19 86,30 75,19" fill="none" stroke="#CFFAFE" stroke-width=".8"/></g></svg>
+      <h1 class="big" style="font-size:3.8cqw;margin-top:2cqh"><span class="h-a">Anyone can say it.</span><span class="h-b grad">Few can prove it.</span></h1>
+      <div class="sub" style="max-width:100%;margin-top:2.4cqh;font-size:1.5cqw;color:var(--text)">Navigate Your Future. <span class="cyan">Isulong Ang Pangarap.</span></div>
+      <div style="margin-top:2cqh;display:flex;gap:1cqw;align-items:center;font-size:1cqw;color:var(--text-sub)">
+        <span style="background:var(--primary);color:#fff;font-weight:850;padding:1cqh 1.6cqw;border-radius:999px;font-size:1.05cqw">Start building proof today →</span>
+        <span>maglakbai.app · pilot v1.0.0</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="grain"></div><div class="vig"></div>
+  <div id="caption"></div><div id="bar"></div>
+  <div id="ov"><div class="play">▶</div><h3>MaglakbAI — Launch Trailer</h3><p>Tap to play · ~90s · sound on for the full experience</p></div>
 </div>
+
+<div class="controls">
+  <button class="ctrl" id="btnPlay">⏸ Pause</button>
+  <button class="ctrl" id="btnReplay">↻ Replay</button>
+  <button class="ctrl" id="btnMute">🔊 Music</button>
+  <button class="ctrl" id="btnVo">🗣 Narrate: Off</button>
+</div>
+<div class="hint">Controls sit outside the frame — screen-record just the 16:9 frame for a clean export. Toggle 🗣 for spoken narration.</div>
 
 <script>
 (function(){
-  const scenes = [...document.querySelectorAll('.scene')];
-  const DUR = [9000,6000,6500,6500,12000,8000,6000,6000,5500,5000,4500,9500]; // ms per scene
-  const TOTAL = DUR.length; // matches scenes
-  const starts = []; let acc=0; for(let i=0;i<DUR.length;i++){starts.push(acc);acc+=DUR[i];}
-  const TOTAL_MS = acc;
-  const cap = document.getElementById('caption');
-  const bar = document.getElementById('bar');
-  const label = document.getElementById('scenelabel');
-  const overlay = document.getElementById('overlay');
+  const scenes=[...document.querySelectorAll('.scene')];
+  const DUR=scenes.map(s=>+s.dataset.dur);
+  const starts=[];let acc=0;for(const d of DUR){starts.push(acc);acc+=d;}const TOTAL=acc;
+  const cap=document.getElementById('caption'),bar=document.getElementById('bar'),ov=document.getElementById('ov');
+  let playhead=0,last=0,running=false,cur=-1,raf=null,capState=0,voOn=false,musicOn=true;
 
-  let playhead=0, last=0, running=false, cur=-1, raf=null, started=false;
-
+  function counts(s){ s.querySelectorAll('[data-count]').forEach(el=>{const to=+el.dataset.count,d=1300,t0=performance.now();(function step(now){let k=Math.min(1,(now-t0)/d);k=1-Math.pow(1-k,3);el.textContent=Math.round(to*k);if(k<1)requestAnimationFrame(step);})(performance.now());});}
   function activate(i){
-    scenes.forEach((s,j)=>s.classList.toggle('active', j===i));
-    // restart the ring fill / staggered anims by reflow
-    const s = scenes[i]; void s.offsetWidth;
-    label.textContent = 'Scene ' + (i+1) + ' / ' + scenes.length;
-    // caption
-    cap.classList.remove('show');
-    setTimeout(()=>{ cap.innerHTML = s.dataset.cap || ''; cap.classList.add('show'); }, 220);
-    if(voOn) speak(s.dataset.cap);
-    // ring fill animation for home scene
-    const ring = s.querySelector('.ring');
-    if(ring){ ring.style.transition='none'; ring.style.strokeDashoffset='314'; void ring.offsetWidth; ring.style.transition='stroke-dashoffset 1.8s .4s cubic-bezier(.3,.8,.3,1)'; ring.style.strokeDashoffset=String(314*0.58); }
-    // progress bars inside the active phone
-    s.querySelectorAll('.m-bar > i').forEach(el=>{ const w=el.style.width; el.style.transition='none'; el.dataset.w=w; el.style.width='0'; void el.offsetWidth; el.style.transition='width 1.2s .5s ease'; el.style.width=el.dataset.w; });
-    if(s.dataset.cap && s.dataset.cap.indexOf('proof')>=0) chime();
+    scenes.forEach((s,j)=>s.classList.toggle('active',j===i));
+    const s=scenes[i];void s.offsetWidth;capState=0;
+    cap.classList.remove('show');setTimeout(()=>{cap.innerHTML=s.dataset.cap||'';cap.classList.add('show');},220);
+    if(voOn)speak(s.dataset.cap);
+    counts(s);
+    const rf=s.querySelector('.rfill');
+    if(rf){const off=314*(1-parseFloat(rf.dataset.pct));rf.style.transition='none';rf.style.strokeDashoffset='314';void rf.offsetWidth;rf.style.transition='stroke-dashoffset 1.6s .4s cubic-bezier(.3,.8,.3,1)';rf.style.strokeDashoffset=String(off);}
+    s.querySelectorAll('.pbar>i').forEach(el=>{const tw=el.style.width;el.style.transition='none';el.style.width='0';void el.offsetWidth;el.style.transition='width 1.2s .5s ease';el.style.width=tw;});
+    const tg=s.querySelector('#tgl'); if(tg){tg.classList.remove('on');setTimeout(()=>tg.classList.add('on'),900);setTimeout(()=>tg.classList.remove('on'),2100);}
+    if(musicOn && i===4) setTimeout(()=>chime(),6700);
   }
-
   function frame(now){
-    if(last===0) last=now;
-    if(running){ playhead += (now-last); }
-    last=now;
-    if(playhead>=TOTAL_MS){ playhead=TOTAL_MS; running=false; finish(); }
-    let i=0; while(i<starts.length-1 && playhead>=starts[i+1]) i++;
-    if(i!==cur){ cur=i; activate(i); }
-    bar.style.width = (100*playhead/TOTAL_MS)+'%';
+    if(last===0)last=now;if(running)playhead+=(now-last);last=now;
+    if(playhead>=TOTAL){playhead=TOTAL;running=false;finish();}
+    let i=0;while(i<starts.length-1&&playhead>=starts[i+1])i++;
+    if(i!==cur){cur=i;activate(i);}
+    else if(cur>=0&&capState===0&&scenes[cur].dataset.cap2&&(playhead-starts[cur])>DUR[cur]*0.5){capState=1;cap.classList.remove('show');setTimeout(()=>{cap.innerHTML=scenes[cur].dataset.cap2;cap.classList.add('show');},200);if(voOn)speak(scenes[cur].dataset.cap2);}
+    bar.style.width=(100*playhead/TOTAL)+'%';
     raf=requestAnimationFrame(frame);
   }
+  function start(){ov.classList.add('hide');playhead=0;cur=-1;last=0;running=true;initAudio();if(musicOn)startMusic();if(!raf)raf=requestAnimationFrame(frame);document.getElementById('btnPlay').textContent='⏸ Pause';}
+  function finish(){document.getElementById('btnPlay').textContent='↻ Replay';stopMusic();}
+  function replay(){playhead=0;cur=-1;running=true;if(musicOn)startMusic();document.getElementById('btnPlay').textContent='⏸ Pause';}
+  ov.addEventListener('click',start);
+  document.getElementById('btnReplay').addEventListener('click',e=>{e.stopPropagation();replay();});
+  document.getElementById('btnPlay').addEventListener('click',e=>{e.stopPropagation();if(playhead>=TOTAL){replay();return;}running=!running;e.target.textContent=running?'⏸ Pause':'▶ Play';if(running&&musicOn)startMusic();else stopMusic();});
 
-  function start(){
-    started=true; overlay.classList.add('hide');
-    playhead=0; cur=-1; last=0; running=true;
-    initAudio(); if(musicOn) startMusic();
-    if(!raf) raf=requestAnimationFrame(frame);
-    document.getElementById('btnPlay').textContent='⏸ Pause';
-  }
-  function finish(){
-    document.getElementById('btnPlay').textContent='↻ Replay';
-    stopMusic();
-  }
-  function replay(){ playhead=0; cur=-1; running=true; if(musicOn){startMusic();} document.getElementById('btnPlay').textContent='⏸ Pause'; }
+  let actx=null,master=null,nodes=[];
+  function initAudio(){if(actx)return;try{actx=new(window.AudioContext||window.webkitAudioContext)();master=actx.createGain();master.gain.value=0;master.connect(actx.destination);}catch(e){}}
+  function startMusic(){if(!actx)return;if(actx.state==='suspended')actx.resume();stopMusic();
+    const chord=[146.83,220,277.18,329.63];const filt=actx.createBiquadFilter();filt.type='lowpass';filt.frequency.value=900;filt.connect(master);
+    const lfo=actx.createOscillator(),lfg=actx.createGain();lfo.frequency.value=0.06;lfg.gain.value=350;lfo.connect(lfg);lfg.connect(filt.frequency);lfo.start();nodes.push(lfo);
+    chord.forEach((f,i)=>{const o=actx.createOscillator();o.type='sine';o.frequency.value=f;o.detune.value=(i-1)*4;const g=actx.createGain();g.gain.value=i===0?0.16:0.09;o.connect(g);g.connect(filt);o.start();nodes.push(o,g);});
+    master.gain.cancelScheduledValues(actx.currentTime);master.gain.setValueAtTime(master.gain.value,actx.currentTime);master.gain.linearRampToValueAtTime(0.5,actx.currentTime+2.5);}
+  function stopMusic(){if(!actx)return;try{master.gain.cancelScheduledValues(actx.currentTime);master.gain.setValueAtTime(master.gain.value,actx.currentTime);master.gain.linearRampToValueAtTime(0,actx.currentTime+0.6);}catch(e){}const n=nodes;nodes=[];setTimeout(()=>n.forEach(x=>{try{x.stop&&x.stop()}catch(e){}}),700);}
+  function chime(){if(!actx||!musicOn)return;const o=actx.createOscillator(),g=actx.createGain();o.type='triangle';o.frequency.setValueAtTime(880,actx.currentTime);o.frequency.exponentialRampToValueAtTime(1320,actx.currentTime+0.18);g.gain.setValueAtTime(0,actx.currentTime);g.gain.linearRampToValueAtTime(0.18,actx.currentTime+0.03);g.gain.exponentialRampToValueAtTime(0.001,actx.currentTime+0.9);o.connect(g);g.connect(master);o.start();o.stop(actx.currentTime+1);}
+  document.getElementById('btnMute').addEventListener('click',e=>{e.stopPropagation();musicOn=!musicOn;e.target.textContent=musicOn?'🔊 Music':'🔇 Muted';if(actx){if(musicOn&&running)startMusic();else stopMusic();}});
 
-  overlay.addEventListener('click', start);
-  document.getElementById('btnReplay').addEventListener('click', e=>{e.stopPropagation();replay();});
-  document.getElementById('btnPlay').addEventListener('click', e=>{
-    e.stopPropagation();
-    if(playhead>=TOTAL_MS){ replay(); return; }
-    running=!running;
-    e.target.textContent = running?'⏸ Pause':'▶ Play';
-    if(running && musicOn) startMusic(); else stopMusic();
-  });
-
-  /* ───── soft ambient music (Web Audio) ───── */
-  let actx=null, master=null, musicNodes=[], musicOn=true, voOn=false;
-  function initAudio(){ if(actx) return; try{ actx=new (window.AudioContext||window.webkitAudioContext)(); master=actx.createGain(); master.gain.value=0.0; master.connect(actx.destination);}catch(e){} }
-  function startMusic(){
-    if(!actx) return; if(actx.state==='suspended') actx.resume();
-    stopMusic();
-    const chord=[146.83,220.00,277.18,329.63]; // D3 A3 C#4 E4 — soft, hopeful pad
-    const filt=actx.createBiquadFilter(); filt.type='lowpass'; filt.frequency.value=900; filt.Q.value=0.5; filt.connect(master);
-    const lfo=actx.createOscillator(); const lfg=actx.createGain(); lfo.frequency.value=0.06; lfg.gain.value=350; lfo.connect(lfg); lfg.connect(filt.frequency); lfo.start();
-    musicNodes.push(lfo);
-    chord.forEach((f,i)=>{
-      const o=actx.createOscillator(); o.type='sine'; o.frequency.value=f; o.detune.value=(i-1)*4;
-      const g=actx.createGain(); g.gain.value=(i===0?0.16:0.09);
-      o.connect(g); g.connect(filt); o.start(); musicNodes.push(o,g);
-    });
-    master.gain.cancelScheduledValues(actx.currentTime);
-    master.gain.setValueAtTime(master.gain.value, actx.currentTime);
-    master.gain.linearRampToValueAtTime(musicOn?0.5:0.0, actx.currentTime+2.5);
-  }
-  function stopMusic(){ if(!actx) return; try{ master.gain.cancelScheduledValues(actx.currentTime); master.gain.setValueAtTime(master.gain.value,actx.currentTime); master.gain.linearRampToValueAtTime(0.0,actx.currentTime+0.6);}catch(e){} const n=musicNodes; musicNodes=[]; setTimeout(()=>n.forEach(x=>{try{x.stop&&x.stop()}catch(e){}}),700); }
-  function chime(){ if(!actx||!musicOn) return; const o=actx.createOscillator(),g=actx.createGain(); o.type='triangle'; o.frequency.setValueAtTime(880,actx.currentTime); o.frequency.exponentialRampToValueAtTime(1320,actx.currentTime+0.18); g.gain.setValueAtTime(0.0,actx.currentTime); g.gain.linearRampToValueAtTime(0.18,actx.currentTime+0.03); g.gain.exponentialRampToValueAtTime(0.001,actx.currentTime+0.9); o.connect(g); g.connect(master); o.start(); o.stop(actx.currentTime+1); }
-
-  document.getElementById('btnMute').addEventListener('click', e=>{
-    e.stopPropagation(); musicOn=!musicOn; e.target.textContent = musicOn?'🔊 Music':'🔇 Muted';
-    if(actx){ if(musicOn && running) startMusic(); else stopMusic(); }
-  });
-
-  /* ───── optional spoken narration (browser TTS) ───── */
-  function speak(html){ try{ const txt=(html||'').replace(/<[^>]+>/g,''); window.speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(txt); u.rate=0.98; u.pitch=1.0; window.speechSynthesis.speak(u);}catch(e){} }
-  document.getElementById('btnVo').addEventListener('click', e=>{ e.stopPropagation(); voOn=!voOn; e.target.textContent='🗣 Narrate: '+(voOn?'On':'Off'); if(!voOn){try{window.speechSynthesis.cancel()}catch(e){}} else if(cur>=0){ speak(scenes[cur].dataset.cap);} });
+  function speak(html){try{const txt=(html||'').replace(/<[^>]+>/g,'');window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(txt);u.rate=0.98;window.speechSynthesis.speak(u);}catch(e){}}
+  document.getElementById('btnVo').addEventListener('click',e=>{e.stopPropagation();voOn=!voOn;e.target.textContent='🗣 Narrate: '+(voOn?'On':'Off');if(!voOn){try{window.speechSynthesis.cancel()}catch(e){}}else if(cur>=0)speak(scenes[cur].dataset.cap);});
 })();
 </script>
 </body>
