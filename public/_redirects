@@ -1,1 +1,10 @@
+# Serve the standalone trailer pages as real files BEFORE the SPA catch-all
+# (otherwise /* would rewrite them to index.html). Extensionless aliases give
+# clean share URLs too.
+/demo               /demo.html             200
+/demo-vertical      /demo-vertical.html    200
+/demo.html          /demo.html             200
+/demo-vertical.html /demo-vertical.html    200
+
+# SPA fallback — everything else renders the app shell
 /* /index.html 200
