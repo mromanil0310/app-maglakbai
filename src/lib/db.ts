@@ -12,6 +12,14 @@ import { supabase, isSupabaseEnabled } from './supabase';
 import type { User } from '../types';
 import type { Output, UserSkill, MarketDemand, MarketSignal } from '../types';
 import { MARKET_DEMAND_MAP } from '../data/marketDemand';
+import { ALL_SKILLS } from '../data/skills';
+
+// CRIT-004: outputs are stored with skill_id only; the human-readable name is
+// resolved here so screens that render output.skillName directly (Portfolio,
+// Profile, Feed) show "SQL & Data Modeling" rather than the raw "da_skill_sql"
+// after a multi-device Supabase sync. Falls back to the id for custom/unknown skills.
+const resolveSkillName = (skillId: string): string =>
+  ALL_SKILLS.find((s) => s.id === skillId)?.name ?? skillId;
 
 // ─── Profiles ─────────────────────────────────────────────────────────────────
 
@@ -80,7 +88,7 @@ export async function fetchOutputs(userId: string): Promise<Output[]> {
   return (data ?? []).map((r) => ({
     id:          r.id,
     skillId:     r.skill_id,
-    skillName:   r.skill_id, // DB stores skillId; the human name is resolved in the store
+    skillName:   resolveSkillName(r.skill_id), // CRIT-004: resolve human name, not raw id
     type:        r.type,
     title:       r.title,
     description: r.description ?? '',

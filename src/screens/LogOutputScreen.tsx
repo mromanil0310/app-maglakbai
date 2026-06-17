@@ -212,6 +212,9 @@ export default function LogOutputScreen() {
   const [showSignalPrompt, setShowSignalPrompt] = useState(false);
   const [pendingSignalSkillId, setPendingSignalSkillId] = useState<string | null>(null);
   const hasSubmitted = useRef(false);
+  // CRIT-003: hold the recap auto-dismiss timer so a manual dismiss can cancel it,
+  // preventing a second navigation.navigate('Home') firing after the user already left.
+  const recapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const formStateRef = useRef({ skillId: '', title: '', description: '', keyTakeaway: '', outputType: 'project' as OutputType });
 
   // Keep formStateRef up to date so the cleanup function can read accurate values
@@ -259,6 +262,11 @@ export default function LogOutputScreen() {
   useEffect(() => {
     if (selectedSkillId) setSkillId(selectedSkillId);
   }, [selectedSkillId]);
+
+  // CRIT-003: clear any pending recap timer on unmount to avoid a late navigate / setState.
+  useEffect(() => () => {
+    if (recapTimerRef.current) clearTimeout(recapTimerRef.current);
+  }, []);
 
   // Auto-select the first available skill so outputs count toward career progression
   // without requiring the user to manually pick from the milestone list
@@ -460,7 +468,8 @@ export default function LogOutputScreen() {
           evidenceRequired: true,
         });
         setShowRecap(true);
-        setTimeout(() => {
+        recapTimerRef.current = setTimeout(() => {
+          recapTimerRef.current = null;
           setShowRecap(false);
           maybeShowSignalPrompt(effectiveSkillId);
         }, 3500);
@@ -483,7 +492,8 @@ export default function LogOutputScreen() {
           pathColor: recapPathColor,
         });
         setShowRecap(true);
-        setTimeout(() => {
+        recapTimerRef.current = setTimeout(() => {
+          recapTimerRef.current = null;
           setShowRecap(false);
           maybeShowSignalPrompt(effectiveSkillId);
         }, 3500);
@@ -858,6 +868,11 @@ export default function LogOutputScreen() {
           <SessionRecap
             data={recapData}
             onDismiss={() => {
+              // CRIT-003: cancel the pending auto-dismiss so it can't navigate a second time.
+              if (recapTimerRef.current) {
+                clearTimeout(recapTimerRef.current);
+                recapTimerRef.current = null;
+              }
               setShowRecap(false);
               navigation.navigate('Home');
             }}

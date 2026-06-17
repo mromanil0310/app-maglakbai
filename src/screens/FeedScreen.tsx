@@ -108,7 +108,13 @@ export default function FeedScreen() {
     />
   );
 
-  const FeedCoachingBanner = () => (
+  // HIGH-004: render as element-returning functions, not inner components. Passing
+  // `<FeedCoachingBanner />` / `<ListHeader />` to FlatList gives the element a NEW
+  // component type every render (the function is redefined each render), so React
+  // unmounts and remounts the whole header — losing the filter ScrollView's scroll
+  // position and flickering on every filter tap. Returning a tree of intrinsic
+  // <View>/<Text> elements keeps the root type stable, so it reconciles in place.
+  const renderCoachingBanner = () => (
     <TouchableOpacity
       style={styles.coachingBanner}
       onPress={() => navigation.navigate('Log')}
@@ -127,7 +133,7 @@ export default function FeedScreen() {
     </TouchableOpacity>
   );
 
-  const EmptyFilter = () => {
+  const renderEmptyFilter = () => {
     if (activeFilter === 'saved') {
       return (
         <View style={styles.emptyFilter}>
@@ -206,7 +212,7 @@ export default function FeedScreen() {
     return communityFeed.filter(p => p.pathId === filterId).length;
   };
 
-  const ListHeader = () => (
+  const renderListHeader = () => (
     <View>
       {/* Filter chips with post count */}
       {/* RES-003: wrap in a relative container so the right-edge fade can overlay it */}
@@ -265,7 +271,7 @@ export default function FeedScreen() {
         </View>
       </View>
       {/* Coaching banner only when no personal post and viewing all */}
-      {!hasPersonalPost && activeFilter === 'all' && <FeedCoachingBanner />}
+      {!hasPersonalPost && activeFilter === 'all' && renderCoachingBanner()}
     </View>
   );
 
@@ -343,10 +349,9 @@ export default function FeedScreen() {
         renderItem={renderItem}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
-        ListHeaderComponent={<ListHeader />}
-        ListEmptyComponent={activeFilter !== 'all' ? <EmptyFilter /> : null}
-
-        ListFooterComponent={filteredFeed.length > 0 ? () => (
+        ListHeaderComponent={renderListHeader()}
+        ListEmptyComponent={activeFilter !== 'all' ? renderEmptyFilter() : null}
+        ListFooterComponent={filteredFeed.length > 0 ? (
           <View style={styles.footer}>
             <Text style={styles.footerText}>You're all caught up 🎉</Text>
             <Text style={styles.footerSub}>
