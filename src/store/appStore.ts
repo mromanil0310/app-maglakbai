@@ -39,6 +39,7 @@ import {
   getCareerMastery,
   CAREER_MASTERY_LADDER,
   OUTCOME_XP,
+  ONBOARDING_XP_GRANT,
 } from '../domain/progression';
 import type {
   DecayStage,
@@ -91,7 +92,7 @@ import { fetchMarketDemand, submitMarketSignal as dbSubmitSignal } from '../lib/
 
 // Re-exported so existing `from '../store/appStore'` imports keep working.
 export { CAREER_PATHS, ALL_SKILLS, ALL_ACHIEVEMENTS };
-import { reconcileAchievementsAndXP } from '../domain/hydration';
+import { reconcileAchievementsAndXP, healPhantomSkillProgress } from '../domain/hydration';
 import { loadFromStorage, attachPersistence } from './persistence';
 import { createCoreSlice } from './slices/coreSlice';
 import { createRoadmapSlice } from './slices/roadmapSlice';
@@ -193,14 +194,19 @@ const saved = loadFromStorage();
 
 // Re-evaluate achievements + heal XP against restored state (see src/domain/hydration.ts).
 const _savedUser            = saved?.user ?? null;
-const _savedUserSkills      = saved?.userSkills ?? {};
 // Heal NaN in xpGained on stored outputs (guard against corrupt data)
 const _savedOutputsHealed: Output[] = (saved?.outputs ?? []).map((o) => ({
   ...o,
   xpGained: Number.isFinite(o.xpGained) ? o.xpGained : 0,
 }));
+const _hasOutputs = _savedOutputsHealed.length > 0;
 
-const { achievements: _rehydratedAchievements, healedXP: _healedXP } = _savedUser
+// Phantom-progress heal: an account with zero logged outputs cannot hold any
+// legitimately completed/in-progress skill. Strip unearned skill progress (old
+// experience-level pre-credit) before anything else reads it. No-op if outputs exist.
+const _savedUserSkills      = healPhantomSkillProgress(saved?.userSkills ?? {}, _savedOutputsHealed.length);
+
+const _reconciled = _savedUser
   ? reconcileAchievementsAndXP({
       savedUnlocked: saved?.unlockedAchievementIds ?? [],
       outputCount: _savedOutputsHealed.length,
@@ -208,9 +214,15 @@ const { achievements: _rehydratedAchievements, healedXP: _healedXP } = _savedUse
       xp: _savedUser.xp,
       streak: _savedUser.streak,
       longestStreak: _savedUser.longestStreak,
-      hasOutputs: _savedOutputsHealed.length > 0,
+      hasOutputs: _hasOutputs,
     })
   : { achievements: saved?.unlockedAchievementIds ?? [], healedXP: 0 };
+
+// For a no-output account, the only legitimate XP is the onboarding grant and there
+// can be no earned achievements — floor both so phantom pre-credit XP/badges don't persist.
+const _emptyAccount = !!_savedUser && !_hasOutputs;
+const _healedXP = _emptyAccount ? Math.min(_reconciled.healedXP, ONBOARDING_XP_GRANT) : _reconciled.healedXP;
+const _rehydratedAchievements = _emptyAccount ? [] : _reconciled.achievements;
 
 import { createAuthSlice } from './slices/authSlice';
 

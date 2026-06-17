@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { reconcileAchievementsAndXP } from '../hydration';
+import { reconcileAchievementsAndXP, healPhantomSkillProgress } from '../hydration';
+import type { UserSkill } from '../../types';
 
 // Grants (from src/data/achievements.ts): first-steps 25, builder 75,
 // skill-mastered 100, consistent 150, on-fire 300, evolution 100,
@@ -68,5 +69,40 @@ describe('reconcileAchievementsAndXP', () => {
       ...base, savedUnlocked: ['first-steps', 'skill-mastered', 'consistent', 'evolution'], xp: 695,
     });
     expect(r.healedXP).toBe(695); // not capped — has outputs + streak
+  });
+});
+
+describe('healPhantomSkillProgress', () => {
+  const skills = (over: Record<string, UserSkill>): Record<string, UserSkill> => over;
+
+  it('strips phantom completed/in-progress skills when there are no outputs', () => {
+    const input = skills({
+      a: { skillId: 'a', status: 'completed', outputCount: 2, completedAt: '2026-01-01' },
+      b: { skillId: 'b', status: 'in_progress', outputCount: 1 },
+      c: { skillId: 'c', status: 'available', outputCount: 0 },
+      d: { skillId: 'd', status: 'locked', outputCount: 0 },
+    });
+    const out = healPhantomSkillProgress(input, 0);
+    expect(out.a).toEqual({ skillId: 'a', status: 'available', outputCount: 0 }); // demoted, completedAt dropped
+    expect(out.b).toEqual({ skillId: 'b', status: 'available', outputCount: 0 }); // demoted
+    expect(out.c).toEqual({ skillId: 'c', status: 'available', outputCount: 0 }); // untouched
+    expect(out.d).toEqual({ skillId: 'd', status: 'locked', outputCount: 0 });    // untouched
+  });
+
+  it('is a strict no-op when the account has any output', () => {
+    const input = skills({
+      a: { skillId: 'a', status: 'completed', outputCount: 2, completedAt: '2026-01-01' },
+    });
+    const out = healPhantomSkillProgress(input, 1);
+    expect(out).toBe(input); // same reference — untouched
+  });
+
+  it('returns the same reference when there is nothing to heal', () => {
+    const input = skills({
+      a: { skillId: 'a', status: 'available', outputCount: 0 },
+      b: { skillId: 'b', status: 'locked', outputCount: 0 },
+    });
+    const out = healPhantomSkillProgress(input, 0);
+    expect(out).toBe(input); // no phantom progress → no new object
   });
 });

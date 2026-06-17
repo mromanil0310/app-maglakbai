@@ -94,8 +94,18 @@ export const createAuthSlice = (set: Set, get: Get): Pick<
       // ── Skill progress merge ─────────────────────────────────────────────
       // Remote wins on completed status; local wins on in-progress counts.
       if (Object.keys(remoteSkills).length > 0) {
+        // Phantom-skill guard: only import a remote completed/in-progress skill if
+        // it is backed by at least one real output in the merged set. Old builds
+        // pre-credited skills with no outputs; without this guard those phantom
+        // completions would round-trip back from Cloud Backup and re-appear as
+        // milestones the user never earned. Output-backed progress imports normally.
+        const backedSkillIds = new Set(get().outputs.map((o) => o.skillId));
         const merged = { ...get().userSkills };
         Object.entries(remoteSkills).forEach(([skillId, remote]) => {
+          const remoteHasProgress = remote.status === 'completed' || remote.status === 'in_progress';
+          if (remoteHasProgress && !backedSkillIds.has(skillId)) {
+            return; // unbacked phantom progress — do not import
+          }
           const local = merged[skillId];
           if (!local) {
             merged[skillId] = remote;

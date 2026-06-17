@@ -13,8 +13,36 @@
 //        - for accounts with no outputs and no streak history, cap XP to what the
 //          held achievements can account for (strip phantom output XP).
 
+import type { UserSkill } from '../types';
 import { ALL_ACHIEVEMENTS } from '../data/achievements';
 import { checkAchievements } from './skillGraph';
+
+// ─── Phantom skill-progress heal ────────────────────────────────────────────────
+// An account that has logged ZERO outputs cannot hold any legitimately completed
+// or in-progress skill — progress requires logged proof. Older builds pre-credited
+// skills (status 'completed'/'in_progress') and XP directly from the experience-level
+// onboarding step, producing "milestones" with no backing output that also round-trip
+// through Cloud Backup. This strips that phantom progress back to a clean, accessible
+// state. It is a strict no-op the moment any real output exists, so it can never
+// touch a user with genuine progress. Pure + idempotent.
+export function healPhantomSkillProgress(
+  userSkills: Record<string, UserSkill>,
+  outputCount: number,
+): Record<string, UserSkill> {
+  if (outputCount > 0) return userSkills;
+  let changed = false;
+  const healed: Record<string, UserSkill> = {};
+  for (const [id, us] of Object.entries(userSkills)) {
+    if (us.status === 'completed' || us.status === 'in_progress') {
+      // Demote unearned progress; keep the node accessible, drop proof markers.
+      healed[id] = { skillId: us.skillId, status: 'available', outputCount: 0 };
+      changed = true;
+    } else {
+      healed[id] = us;
+    }
+  }
+  return changed ? healed : userSkills;
+}
 
 const grantOf = (id: string): number =>
   ALL_ACHIEVEMENTS.find((a) => a.id === id)?.xpGranted ?? 0;
