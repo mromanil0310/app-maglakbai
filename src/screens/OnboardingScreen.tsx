@@ -823,14 +823,14 @@ const EXPERIENCE_OPTIONS: Array<{
     icon: '⚡',
     title: 'Some Foundation',
     subtitle: 'I know the basics already.',
-    credit: 'Skill 1 pre-credited — start building.',
+    credit: 'First 2 skills unlocked — log proof to earn XP.',
   },
   {
     level: 'experienced',
     icon: '🏆',
     title: 'Bringing Experience',
     subtitle: 'I\'ve done most of this before.',
-    credit: 'First 2 skills credited — jump to advanced.',
+    credit: 'First 3 skills unlocked — XP comes from what you log.',
   },
 ];
 

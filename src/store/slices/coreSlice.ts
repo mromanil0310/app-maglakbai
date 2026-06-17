@@ -68,61 +68,30 @@ export const createCoreSlice = (set: Set, get: Get): Pick<AppState, 'completeOnb
     // onboarding flow) so we don't wipe out the custom skill entries.
     let userSkills = isBuiltInPath ? initUserSkills(pathId as CareerPathId) : { ...get().userSkills };
 
-    // ── Pre-credit skills based on experience level (built-in paths only) ────
-    // 'building': mark first skill in_progress (half-way) — they have some foundation
-    // 'experienced': mark first 2 skills completed — prior experience credited
+    // ── Pre-UNLOCK early skills based on experience level (built-in paths only) ──
+    // Experience level no longer pre-COMPLETES skills or grants XP. Pre-completing
+    // produced unearned XP and phantom completion %, and — because completeOnboarding
+    // does not record achievements — the hydration heal would later detect the
+    // "skill-mastered" achievement as missed and re-grant its XP on the next load,
+    // recreating the UX-025 XP-Sources inconsistency. Instead we pre-UNLOCK the early
+    // skills so experienced users can immediately log against what they already know,
+    // while honoring the product thesis: XP and completion come from logged proof only.
+    // Everyone starts at ONBOARDING_XP_GRANT and earns the rest by logging outputs.
     if (isBuiltInPath && pathMeta && (experienceLevel === 'building' || experienceLevel === 'experienced')) {
-      const orderedSkillIds = pathMeta.skillIds;
-      const now = new Date().toISOString();
-
-      if (experienceLevel === 'building') {
-        // Pre-credit skill 1 as in_progress (1 output logged)
-        const skill1Id = orderedSkillIds[0];
-        if (skill1Id && userSkills[skill1Id]) {
-          userSkills = {
-            ...userSkills,
-            [skill1Id]: { skillId: skill1Id, status: 'in_progress', outputCount: 1 },
-          };
+      // building: open the first 2 skills; experienced: open the first 3.
+      const unlockCount = experienceLevel === 'experienced' ? 3 : 2;
+      pathMeta.skillIds.slice(0, unlockCount).forEach((sid) => {
+        const existing = userSkills[sid];
+        // Only open locked/undefined entries — never downgrade real progress.
+        if (!existing || existing.status === 'locked') {
+          userSkills = { ...userSkills, [sid]: { skillId: sid, status: 'available', outputCount: 0 } };
         }
-      } else {
-        // 'experienced': pre-complete first 2 skills, unlock their dependents
-        const toPrecredit = orderedSkillIds.slice(0, 2);
-        for (const skillId of toPrecredit) {
-          if (!userSkills[skillId]) continue;
-          const skill = ALL_SKILLS.find((s) => s.id === skillId);
-          userSkills = {
-            ...userSkills,
-            [skillId]: {
-              skillId,
-              status: 'completed',
-              outputCount: skill?.requiredOutputs ?? 1,
-              completedAt: now,
-            },
-          };
-          userSkills = unlockDependentSkills(skillId, pathId as CareerPathId, userSkills);
-        }
-      }
+      });
     }
 
-    // UX-029: credit XP for pre-completed skills so experienced users don't start
-    // with completed skills but 0 XP. Each completed skill grants its xpReward;
-    // in-progress skills grant one output's worth of base XP.
-    let precreditXP = 0;
-    if (isBuiltInPath && pathMeta) {
-      if (experienceLevel === 'building') {
-        precreditXP = 50; // one output's base XP for the in-progress first skill
-      } else if (experienceLevel === 'experienced') {
-        const toPrecredit = pathMeta.skillIds.slice(0, 2);
-        toPrecredit.forEach((skillId) => {
-          const skill = ALL_SKILLS.find((s) => s.id === skillId);
-          precreditXP += skill?.xpReward ?? 75;
-        });
-      }
-    }
-    const finalXP = ONBOARDING_XP_GRANT + precreditXP;
-    const finalUser: User = precreditXP > 0
-      ? { ...user, xp: finalXP, level: getLevelFromXP(finalXP) }
-      : user;
+    // XP is always just the journey-started grant (set on `user` above). No
+    // pre-credit: experienced/building users earn all further XP by logging proof.
+    const finalUser: User = user;
 
     const initialRoadmap: RoadmapEntry = {
       pathId,

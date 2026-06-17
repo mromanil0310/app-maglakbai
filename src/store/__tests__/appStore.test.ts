@@ -40,13 +40,29 @@ describe('completeOnboarding', () => {
     expect(s.roadmaps[0].priorityStatus).toBe('PRIORITY');
   });
 
-  it("pre-completes the first two skills for an 'experienced' user", () => {
+  it("pre-unlocks early skills (no XP, no completion) for an 'experienced' user", () => {
     reset();
     onboard('experienced');
     const s = get();
-    expect(s.userSkills['sql-foundations'].status).toBe('completed');
-    expect(s.userSkills['python-automation'].status).toBe('completed');
-    expect(s.userSkills['snowflake-engineering'].status).toBe('available'); // unlocked dependent
+    // No XP windfall — experienced users start at the journey-started grant only.
+    expect(s.user!.xp).toBe(ONBOARDING_XP_GRANT);
+    // First 3 skills are opened for pacing, but none are completed (proof not yet logged).
+    expect(s.userSkills['sql-foundations'].status).toBe('available');
+    expect(s.userSkills['python-automation'].status).toBe('available');
+    expect(s.userSkills['snowflake-engineering'].status).toBe('available');
+    const completed = Object.values(s.userSkills).filter((u: any) => u.status === 'completed').length;
+    expect(completed).toBe(0);
+  });
+
+  it("grants no XP windfall for a 'building' user (earns by logging)", () => {
+    reset();
+    onboard('building');
+    const s = get();
+    expect(s.user!.xp).toBe(ONBOARDING_XP_GRANT);
+    expect(s.userSkills['sql-foundations'].status).toBe('available');
+    expect(s.userSkills['python-automation'].status).toBe('available');
+    const completed = Object.values(s.userSkills).filter((u: any) => u.status === 'completed').length;
+    expect(completed).toBe(0);
   });
 });
 
