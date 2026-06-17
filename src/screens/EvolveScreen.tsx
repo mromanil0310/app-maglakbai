@@ -30,8 +30,10 @@ import { useContext } from 'react';
 import { page, track } from '../utils/analytics';
 import CareerNode from '../components/CareerNode';
 import DemandBadge from '../components/DemandBadge';
+import ValidationChallengeModal from '../components/ValidationChallengeModal';
 import { CustomSkill, Skill, UserSkill } from '../types';
 import { pathHasProgress } from '../domain/skillGraph';
+import { VALIDATION_BONUS_XP } from '../domain/progression';
 import { getPathDemandLabel, DEMAND_SOURCE_LABEL } from '../data/marketDemand';
 
 const PALETTE = ['#7C3AED', '#06B6D4', '#10B981', '#F59E0B', '#EF4444', '#EC4899', '#8B5CF6', '#F97316'];
@@ -1108,6 +1110,7 @@ export default function EvolveScreen() {
   const roadmaps = useAppStore((s) => s.roadmaps);
   const prioritizedPathId = useAppStore((s) => s.prioritizedPathId);
   const setSelectedSkill = useAppStore((s) => s.setSelectedSkill);
+  const validateSkill = useAppStore((s) => s.validateSkill);
   const pendingCelebration = useAppStore((s) => s.pendingCelebration);
   const clearCelebration = useAppStore((s) => s.clearCelebration);
   const enrollInRoadmap = useAppStore((s) => s.enrollInRoadmap);
@@ -1129,6 +1132,7 @@ export default function EvolveScreen() {
   const [pendingPriorityId, setPendingPriorityId] = useState<string | null>(null);
   const [managingPathId, setManagingPathId] = useState<string | null>(null);
   const [detailSkill, setDetailSkill] = useState<{ skill: Skill; userSkill: UserSkill } | null>(null);
+  const [validateTarget, setValidateTarget] = useState<Skill | null>(null);
   const [showArchived, setShowArchived] = useState(false);
   const [focusCheckPathId, setFocusCheckPathId] = useState<string | null>(null);
   // FEAT-001 edit flows
@@ -1728,8 +1732,10 @@ export default function EvolveScreen() {
                       <Text style={[detail.rarityText, { color: rarity.color }]}>{rarity.label}</Text>
                     </View>
                     {isCompleted && (
-                      <View style={detail.masteredBadge}>
-                        <Text style={detail.masteredText}>✓ MASTERED</Text>
+                      <View style={[detail.masteredBadge, userSkill.validated && { backgroundColor: Colors.gold + '20', borderColor: Colors.gold + '50' }]}>
+                        <Text style={[detail.masteredText, userSkill.validated && { color: Colors.gold }]}>
+                          {userSkill.validated ? '★ VALIDATED' : '✓ MASTERED'}
+                        </Text>
                       </View>
                     )}
                     {isInProgress && !isCompleted && (
@@ -1840,6 +1846,22 @@ export default function EvolveScreen() {
                   >
                     <Text style={detail.ctaBtnText}>Log Work on This Skill ⚡</Text>
                   </TouchableOpacity>
+                ) : userSkill.validated ? (
+                  <View style={detail.masteredCta}>
+                    <Text style={detail.masteredCtaText}>🎓 Knowledge validated. Log more to keep building XP.</Text>
+                  </View>
+                ) : skill.validationQuestions?.length ? (
+                  <TouchableOpacity
+                    style={[detail.ctaBtn, { backgroundColor: skillPathColor.primary }]}
+                    onPress={() => setValidateTarget(skill)}
+                    activeOpacity={0.85}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Test your knowledge on ${skill.name}`}
+                  >
+                    <Text style={detail.ctaBtnText}>
+                      Test Your Knowledge → +{VALIDATION_BONUS_XP} XP 🎓
+                    </Text>
+                  </TouchableOpacity>
                 ) : (
                   <View style={detail.masteredCta}>
                     <Text style={detail.masteredCtaText}>🏆 This skill is mastered. Log more to keep building XP.</Text>
@@ -1853,6 +1875,30 @@ export default function EvolveScreen() {
           );
         })()}
       </Modal>
+
+      {/* Knowledge challenge — lets users validate a COMPLETED skill from the map,
+          not just in the one-time completion celebration (MilestoneScreen). */}
+      {validateTarget?.validationQuestions?.length ? (
+        <ValidationChallengeModal
+          visible={!!validateTarget}
+          skillName={validateTarget.name}
+          skillIcon={validateTarget.icon ?? '⚡'}
+          questions={validateTarget.validationQuestions}
+          pathColor={(PathColors[validateTarget.pathId] ?? { primary: Colors.primary }).primary}
+          onPass={() => {
+            const id = validateTarget.id;
+            validateSkill(id);
+            setValidateTarget(null);
+            // Reflect the new validated state in the open detail panel immediately.
+            setDetailSkill((prev) =>
+              prev && prev.skill.id === id
+                ? { ...prev, userSkill: { ...prev.userSkill, validated: true, validatedAt: new Date().toISOString() } }
+                : prev,
+            );
+          }}
+          onDismiss={() => setValidateTarget(null)}
+        />
+      ) : null}
     </SafeAreaView>
   );
 }

@@ -15,7 +15,7 @@ import { CAREER_PATHS } from '../../data/careerPaths';
 import { ALL_SKILLS } from '../../data/skills';
 import { ALL_ACHIEVEMENTS } from '../../data/achievements';
 import { MOCK_FEED } from '../../data/mockFeed';
-import { getEvidenceTier, OUTCOME_XP, getCareerMastery, calculateOutputXP, CUSTOM_SKILL_COMPLETION_XP, ONBOARDING_XP_GRANT } from '../../domain/progression';
+import { getEvidenceTier, OUTCOME_XP, getCareerMastery, calculateOutputXP, CUSTOM_SKILL_COMPLETION_XP, ONBOARDING_XP_GRANT, VALIDATION_BONUS_XP } from '../../domain/progression';
 import { initUserSkills, unlockDependentSkills, checkAchievements } from '../../domain/skillGraph';
 // ARCH-001: fire-and-forget Supabase sync after local state is updated
 import { upsertProfile, insertOutput, upsertSkillProgress } from '../../lib/db';
@@ -461,7 +461,6 @@ export const createCoreSlice = (set: Set, get: Get): Pick<AppState, 'completeOnb
     if (!state.user) return;
     const us = state.userSkills[skillId];
     if (!us || us.status !== 'completed' || us.validated) return; // guard: must be completed and not already validated
-    const VALIDATION_BONUS_XP = 100;
     const newXP = state.user.xp + VALIDATION_BONUS_XP;
     const newLevel = getLevelFromXP(newXP);
     set({

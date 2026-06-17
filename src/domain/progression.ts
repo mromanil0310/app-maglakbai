@@ -141,6 +141,10 @@ export function getCareerMastery(
 // four zeros, regardless of whether they logged a first output.
 export const ONBOARDING_XP_GRANT = 25;
 
+// Bonus granted when a user passes a skill's knowledge check (the "Validated" tier).
+// Single source of truth shared by the store action and the UI labels.
+export const VALIDATION_BONUS_XP = 100;
+
 // FEAT-001: completion bonus for a user-defined (custom) milestone. Modest + flat
 // — proof (an output) is still required to complete it, but self-defined milestones
 // don't grant curated-skill rewards, to keep the XP economy honest/leaderboard-safe.
