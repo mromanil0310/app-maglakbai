@@ -10,6 +10,7 @@ interface CareerNodeProps {
   isFirst: boolean;
   isLast: boolean;
   onPress: () => void;
+  onTestKnowledge?: () => void; // launches the knowledge check directly from the node nudge
   completedAt?: string;
   skillStreak?: number; // consecutive days with outputs for this skill
   validated?: boolean;  // true when user has passed the knowledge challenge
@@ -22,6 +23,7 @@ export default function CareerNode({
   isFirst,
   isLast,
   onPress,
+  onTestKnowledge,
   completedAt,
   skillStreak = 0,
   validated = false,
@@ -251,9 +253,22 @@ export default function CareerNode({
             </View>
           )}
 
-          {/* Validation nudge for unvalidated completed skills (when questions exist) */}
+          {/* Validation nudge for unvalidated completed skills (when questions exist).
+              Tapping it launches the quiz directly (separate from the node's onPress). */}
           {isCompleted && !validated && (skill as any).validationQuestions?.length > 0 && (
-            <Text style={styles.validateNudge}>Test your knowledge →</Text>
+            onTestKnowledge ? (
+              <TouchableOpacity
+                onPress={onTestKnowledge}
+                activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel={`Test your knowledge on ${skill.name}`}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
+                <Text style={styles.validateNudge}>Test your knowledge →</Text>
+              </TouchableOpacity>
+            ) : (
+              <Text style={styles.validateNudge}>Test your knowledge →</Text>
+            )
           )}
 
           {/* Progress bar */}

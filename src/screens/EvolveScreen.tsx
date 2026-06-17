@@ -1538,6 +1538,7 @@ export default function EvolveScreen() {
                     isFirst={index === 0}
                     isLast={index === viewInfo.skills.length - 1}
                     onPress={() => handleNodePress(skill.id, userSkill.status)}
+                    onTestKnowledge={() => setValidateTarget(skill as Skill)}
                     completedAt={userSkill.completedAt}
                     skillStreak={getSkillStreak(skill.id, outputs)}
                     validated={userSkill.validated ?? false}
@@ -1853,7 +1854,13 @@ export default function EvolveScreen() {
                 ) : skill.validationQuestions?.length ? (
                   <TouchableOpacity
                     style={[detail.ctaBtn, { backgroundColor: skillPathColor.primary }]}
-                    onPress={() => setValidateTarget(skill)}
+                    onPress={() => {
+                      // Close the detail panel before opening the quiz so the two
+                      // modals never stack (a stacked modal blocks interaction on web).
+                      const target = skill;
+                      setDetailSkill(null);
+                      setValidateTarget(target);
+                    }}
                     activeOpacity={0.85}
                     accessibilityRole="button"
                     accessibilityLabel={`Test your knowledge on ${skill.name}`}
