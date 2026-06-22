@@ -816,21 +816,21 @@ const EXPERIENCE_OPTIONS: Array<{
     icon: '🌱',
     title: 'Fresh Start',
     subtitle: 'Just beginning this path.',
-    credit: 'Start from skill 1 — every step guided.',
+    credit: 'Start from skill 1 — log proof to unlock the next.',
   },
   {
     level: 'building',
     icon: '⚡',
     title: 'Some Foundation',
     subtitle: 'I know the basics already.',
-    credit: 'First 2 skills unlocked — log proof to earn XP.',
+    credit: 'Test out of the basics with a quick quiz — or log proof to build.',
   },
   {
     level: 'experienced',
     icon: '🏆',
     title: 'Bringing Experience',
     subtitle: 'I\'ve done most of this before.',
-    credit: 'First 3 skills unlocked — XP comes from what you log.',
+    credit: 'First 3 skills open to test out — pass the quiz to prove it.',
   },
 ];
 

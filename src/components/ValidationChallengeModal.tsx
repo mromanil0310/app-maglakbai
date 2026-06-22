@@ -91,6 +91,14 @@ interface ValidationChallengeModalProps {
   pathColor: string;
   onPass: () => void;   // called after user passes and taps continue
   onDismiss: () => void;
+  // GROW-002 test-out mode (all optional → existing post-build validation unaffected):
+  shuffle?: boolean;            // randomize question order on open + each retry
+  maxAttempts?: number;        // cap retries; once hit, retry is replaced by build-only CTA
+  attemptsUsed?: number;       // failed attempts already spent (persisted across opens)
+  onAttemptFail?: () => void;  // called once per FAILED attempt (to persist the counter)
+  xpReward?: number;           // headline XP shown on pass (defaults to VALIDATION_BONUS_XP)
+  strict?: boolean;            // all-or-nothing: every answer must be correct, and the FIRST
+                               // wrong answer ends the attempt immediately. Also shows the honor code.
 }
 
 type Phase = 'quiz' | 'result';
@@ -103,16 +111,34 @@ export default function ValidationChallengeModal({
   pathColor,
   onPass,
   onDismiss,
+  shuffle = false,
+  maxAttempts,
+  attemptsUsed = 0,
+  onAttemptFail,
+  xpReward = VALIDATION_BONUS_XP,
+  strict = false,
 }: ValidationChallengeModalProps) {
   const Colors = useThemeColors();
   const styles = React.useMemo(() => makeStyles(Colors), [Colors]);
 
+  // GROW-002: in test-out mode each attempt presents a freshly-shuffled question order.
+  const prepareQuestions = React.useCallback(
+    () => (shuffle ? [...questions].sort(() => Math.random() - 0.5) : questions),
+    [shuffle, questions],
+  );
+
+  const [quizQuestions, setQuizQuestions] = useState<ValidationQuestion[]>(prepareQuestions);
   const [questionIndex, setQuestionIndex] = useState(0);
-  const [selectedAnswers, setSelectedAnswers] = useState<(number | null)[]>(Array(questions.length).fill(null));
+  const [selectedAnswers, setSelectedAnswers] = useState<(number | null)[]>(Array(quizQuestions.length).fill(null));
   const [currentSelection, setCurrentSelection] = useState<number | null>(null);
   const [revealed, setRevealed] = useState(false);
   const [phase, setPhase] = useState<Phase>('quiz');
   const [score, setScore] = useState(0);
+  // Failed attempts spent within this open session (added to the persisted attemptsUsed).
+  const [sessionFails, setSessionFails] = useState(0);
+  // Strict (all-or-nothing) mode: set the moment a wrong answer is confirmed → ends the attempt.
+  const [strictFailed, setStrictFailed] = useState(false);
+  const failReportedRef = useRef(false);
 
   const slideAnim = useRef(new Animated.Value(0)).current;
   const resultScale = useRef(new Animated.Value(0.85)).current;
@@ -121,22 +147,33 @@ export default function ValidationChallengeModal({
   // Reset state when modal opens
   useEffect(() => {
     if (visible) {
+      const fresh = prepareQuestions();
+      setQuizQuestions(fresh);
       setQuestionIndex(0);
-      setSelectedAnswers(Array(questions.length).fill(null));
+      setSelectedAnswers(Array(fresh.length).fill(null));
       setCurrentSelection(null);
       setRevealed(false);
       setPhase('quiz');
       setScore(0);
+      setSessionFails(0);
+      setStrictFailed(false);
+      failReportedRef.current = false;
       slideAnim.setValue(0);
     }
   }, [visible]);
 
-  const question = questions[questionIndex];
+  const question = quizQuestions[questionIndex];
   if (!question) return null;
 
-  const isLastQuestion = questionIndex === questions.length - 1;
-  const passThreshold = passThresholdFor(questions.length);
+  const isLastQuestion = questionIndex === quizQuestions.length - 1;
+  // Strict (test-out) requires every answer correct; otherwise the existing 70% bar.
+  const passThreshold = strict ? quizQuestions.length : passThresholdFor(quizQuestions.length);
   const passed = score >= passThreshold;
+  // In strict mode a single wrong answer ends the attempt — the next tap goes to the result.
+  const attemptOver = isLastQuestion || (strict && strictFailed);
+  // Attempts remaining after the current (failed) attempt is counted.
+  const attemptsRemaining = maxAttempts != null ? Math.max(0, maxAttempts - attemptsUsed - sessionFails) : Infinity;
+  const canRetry = attemptsRemaining > 0;
 
   const handleSelect = (choiceIndex: number) => {
     if (revealed) return;
@@ -154,11 +191,20 @@ export default function ValidationChallengeModal({
     setSelectedAnswers(newAnswers);
     setScore(newScore);
     setRevealed(true);
+    // Strict (all-or-nothing): one wrong answer ends the attempt — no point continuing.
+    if (strict && !isCorrect) setStrictFailed(true);
   };
 
   const handleNext = () => {
-    if (isLastQuestion) {
-      // Show result
+    if (attemptOver) {
+      // Show result. If this attempt failed, count it once and notify the parent so the
+      // attempt counter persists (GROW-002). `score` is current here (set last confirm).
+      const didPass = score >= passThreshold;
+      if (!didPass && !failReportedRef.current) {
+        failReportedRef.current = true;
+        setSessionFails((n) => n + 1);
+        onAttemptFail?.();
+      }
       setPhase('result');
       Animated.parallel([
         Animated.spring(resultScale, { toValue: 1, tension: 55, friction: 8, useNativeDriver: false }),
@@ -177,18 +223,22 @@ export default function ValidationChallengeModal({
   };
 
   const handleRetry = () => {
+    if (!canRetry) return; // attempts exhausted → build-only (parent shows the fallback)
+    const fresh = prepareQuestions(); // re-shuffle for the next attempt
+    setQuizQuestions(fresh);
     setQuestionIndex(0);
-    setSelectedAnswers(Array(questions.length).fill(null));
+    setSelectedAnswers(Array(fresh.length).fill(null));
     setCurrentSelection(null);
     setRevealed(false);
     setScore(0);
     setPhase('quiz');
+    failReportedRef.current = false;
     resultScale.setValue(0.85);
     resultOpacity.setValue(0);
     slideAnim.setValue(0);
   };
 
-  const progressPct = ((questionIndex + (revealed ? 1 : 0)) / questions.length) * 100;
+  const progressPct = ((questionIndex + (revealed ? 1 : 0)) / quizQuestions.length) * 100;
 
   return (
     <Modal
@@ -232,8 +282,20 @@ export default function ValidationChallengeModal({
                 />
               </View>
               <Text style={styles.progressLabel}>
-                Question {questionIndex + 1} of {questions.length}
+                Question {questionIndex + 1} of {quizQuestions.length}
               </Text>
+
+              {/* GROW-002 strict test-out: state the stakes + honor code, always visible. */}
+              {strict && (
+                <View style={styles.honorBanner}>
+                  <Text style={styles.honorTitle}>🤝 All or nothing · honor code</Text>
+                  <Text style={styles.honorText}>
+                    Every answer must be correct — one wrong answer ends this attempt. Answer from your
+                    own knowledge: no looking things up or searching online. This is how you honestly
+                    prove what you already know.
+                  </Text>
+                </View>
+              )}
 
               {/* Question */}
               <Animated.View
@@ -310,7 +372,7 @@ export default function ValidationChallengeModal({
                   accessibilityRole="button"
                 >
                   <Text style={styles.actionBtnText}>
-                    {isLastQuestion ? 'See Results →' : 'Next Question →'}
+                    {attemptOver ? 'See Results →' : 'Next Question →'}
                   </Text>
                 </TouchableOpacity>
               )}
@@ -322,26 +384,32 @@ export default function ValidationChallengeModal({
                 {passed ? '🎓' : '📚'}
               </Text>
               <Text style={[styles.resultTitle, { color: passed ? Colors.success : Colors.text }]}>
-                {passed ? 'Knowledge Validated!' : 'Almost there!'}
+                {passed ? 'Knowledge Validated!' : strict ? 'Not this time' : 'Almost there!'}
               </Text>
               <Text style={styles.resultScore}>
-                {score} / {questions.length} correct
+                {strict && !passed
+                  ? 'One wrong answer'
+                  : `${score} / ${quizQuestions.length} correct`}
               </Text>
               <Text style={styles.resultSub}>
                 {passed
                   ? `You've proved you understand ${skillName}. Validated badge added to your profile.`
-                  : `You got ${score} out of ${questions.length}. Review the answers and try again when ready.`}
+                  : canRetry
+                    ? `${strict
+                        ? 'All-or-nothing: one wrong answer ends the attempt.'
+                        : `You got ${score} out of ${quizQuestions.length}.`}${maxAttempts != null ? ` ${attemptsRemaining} ${attemptsRemaining === 1 ? 'attempt' : 'attempts'} left.` : ''} Try again when ready.`
+                    : `${strict ? 'No attempts left.' : `You got ${score} out of ${quizQuestions.length}.`} Build this skill by logging real outputs instead.`}
               </Text>
 
               {passed && (
                 <View style={[styles.xpBadge, { borderColor: Colors.gold + '40', backgroundColor: Colors.goldDim }]}>
-                  <Text style={styles.xpBadgeText}>+{VALIDATION_BONUS_XP} XP · Validated ✓</Text>
+                  <Text style={styles.xpBadgeText}>+{xpReward} XP · Validated ✓</Text>
                 </View>
               )}
 
               {/* Score breakdown */}
               <View style={styles.scoreRow}>
-                {questions.map((q, i) => {
+                {quizQuestions.map((q, i) => {
                   const ans = selectedAnswers[i];
                   const correct = ans === q.correctIndex;
                   return (
@@ -366,7 +434,7 @@ export default function ValidationChallengeModal({
                   >
                     <Text style={styles.actionBtnText}>Continue ⚡</Text>
                   </TouchableOpacity>
-                ) : (
+                ) : canRetry ? (
                   <>
                     <TouchableOpacity
                       style={[styles.actionBtn, { backgroundColor: pathColor, flex: 1 }]}
@@ -385,6 +453,16 @@ export default function ValidationChallengeModal({
                       <Text style={styles.secondaryBtnText}>Later</Text>
                     </TouchableOpacity>
                   </>
+                ) : (
+                  // GROW-002: attempts exhausted → no more retries; route to build-only.
+                  <TouchableOpacity
+                    style={[styles.actionBtn, { backgroundColor: pathColor, width: '100%' }]}
+                    onPress={onDismiss}
+                    activeOpacity={0.85}
+                    accessibilityRole="button"
+                  >
+                    <Text style={styles.actionBtnText}>Build it instead →</Text>
+                  </TouchableOpacity>
                 )}
               </View>
             </Animated.View>
@@ -475,6 +553,26 @@ const makeStyles = (Colors: ColorsType) => StyleSheet.create({
     fontSize: FontSize.xs,
     color: Colors.textMuted,
     marginBottom: Spacing.md,
+  },
+  honorBanner: {
+    borderWidth: 1,
+    borderColor: Colors.gold + '40',
+    backgroundColor: Colors.goldDim,
+    borderRadius: Radius.lg,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    marginBottom: Spacing.md,
+  },
+  honorTitle: {
+    fontSize: FontSize.sm,
+    fontWeight: '700',
+    color: Colors.gold,
+    marginBottom: 2,
+  },
+  honorText: {
+    fontSize: FontSize.xs,
+    color: Colors.textSub,
+    lineHeight: 17,
   },
   questionWrap: {
     marginBottom: Spacing.md,

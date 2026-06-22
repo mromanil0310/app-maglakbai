@@ -33,7 +33,10 @@ export function healPhantomSkillProgress(
   let changed = false;
   const healed: Record<string, UserSkill> = {};
   for (const [id, us] of Object.entries(userSkills)) {
-    if (us.status === 'completed' || us.status === 'in_progress') {
+    // GROW-002: a skill tested-out via assessment is LEGITIMATE progress even with zero
+    // outputs (proof by knowledge check). Keep it intact; only strip phantom pre-credit.
+    const isAssessment = us.validated && us.validationSource === 'assessment';
+    if ((us.status === 'completed' || us.status === 'in_progress') && !isAssessment) {
       // Demote unearned progress; keep the node accessible, drop proof markers.
       healed[id] = { skillId: us.skillId, status: 'available', outputCount: 0 };
       changed = true;
@@ -70,6 +73,7 @@ export interface ReconcileInput {
 export interface ReconcileResult {
   achievements: string[];
   healedXP: number;
+  validAchievementXP: number; // Σ grant of the still-valid achievements (for XP flooring)
 }
 
 export function reconcileAchievementsAndXP(input: ReconcileInput): ReconcileResult {
@@ -94,5 +98,5 @@ export function reconcileAchievementsAndXP(input: ReconcileInput): ReconcileResu
   const hasNoHistory = !hasOutputs && (streak ?? 0) === 0 && (longestStreak ?? 0) === 0;
   const healedXP = hasNoHistory ? Math.min(afterAdjust, validAchievementXP) : afterAdjust;
 
-  return { achievements, healedXP };
+  return { achievements, healedXP, validAchievementXP };
 }
