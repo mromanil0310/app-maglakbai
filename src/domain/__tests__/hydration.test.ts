@@ -105,4 +105,14 @@ describe('healPhantomSkillProgress', () => {
     const out = healPhantomSkillProgress(input, 0);
     expect(out).toBe(input); // no phantom progress → no new object
   });
+
+  it('GROW-002: preserves assessment-validated (tested-out) skills with zero outputs', () => {
+    const input = skills({
+      tested: { skillId: 'tested', status: 'completed', outputCount: 0, validated: true, validationSource: 'assessment', completedAt: '2026-06-22' },
+      phantom: { skillId: 'phantom', status: 'completed', outputCount: 0 }, // no provenance → phantom
+    });
+    const out = healPhantomSkillProgress(input, 0);
+    expect(out.tested).toEqual(input.tested);                                       // kept intact
+    expect(out.phantom).toEqual({ skillId: 'phantom', status: 'available', outputCount: 0 }); // demoted
+  });
 });

@@ -59,10 +59,60 @@ describe('completeOnboarding', () => {
     onboard('building');
     const s = get();
     expect(s.user!.xp).toBe(ONBOARDING_XP_GRANT);
+    // GROW-002: building opens only the FIRST skill for pacing (test-out eligible);
+    // the second stays locked until the first is completed (built or tested out).
     expect(s.userSkills['sql-foundations'].status).toBe('available');
-    expect(s.userSkills['python-automation'].status).toBe('available');
+    expect(s.userSkills['python-automation'].status).toBe('locked');
     const completed = Object.values(s.userSkills).filter((u: any) => u.status === 'completed').length;
     expect(completed).toBe(0);
+  });
+});
+
+// ─── testOutSkill (GROW-002) ──────────────────────────────────────────────────────
+import { VALIDATION_BONUS_XP } from '../../domain/progression';
+
+describe('testOutSkill', () => {
+  it('completes an available foundational skill by assessment for an experienced user', () => {
+    reset();
+    onboard('experienced'); // opens first 3 skills
+    const before = get().user!.xp;
+    get().testOutSkill('sql-foundations');
+    const s = get();
+    const us = s.userSkills['sql-foundations'];
+    expect(us.status).toBe('completed');
+    expect(us.validated).toBe(true);
+    expect(us.validationSource).toBe('assessment');
+    expect(us.outputCount).toBe(0); // no proof logged — tested out
+    // At least the flat validation bonus; first completion may also unlock skill-mastered.
+    expect(s.user!.xp).toBeGreaterThanOrEqual(before + VALIDATION_BONUS_XP);
+    // dependents unlock
+    expect(s.userSkills['python-automation'].status).not.toBe('locked');
+    // celebration fires for the tested-out skill, and the session delta reconciles exactly.
+    expect(s.pendingCelebration?.skillId).toBe('sql-foundations');
+    expect(s.pendingCelebration?.sessionXpGained).toBe(s.user!.xp - before);
+  });
+
+  it('is a no-op for a beginner (build-only)', () => {
+    reset();
+    onboard('beginner');
+    const before = get().user!.xp;
+    get().testOutSkill('sql-foundations');
+    const s = get();
+    expect(s.userSkills['sql-foundations'].status).toBe('available');
+    expect(s.user!.xp).toBe(before);
+  });
+
+  it('is a no-op once attempts are exhausted; recordTestOutAttempt counts fails', () => {
+    reset();
+    onboard('building');
+    get().recordTestOutAttempt('sql-foundations');
+    get().recordTestOutAttempt('sql-foundations');
+    get().recordTestOutAttempt('sql-foundations');
+    expect(get().userSkills['sql-foundations'].testOutAttempts).toBe(3);
+    const before = get().user!.xp;
+    get().testOutSkill('sql-foundations'); // exhausted → build-only
+    expect(get().userSkills['sql-foundations'].status).toBe('available');
+    expect(get().user!.xp).toBe(before);
   });
 });
 

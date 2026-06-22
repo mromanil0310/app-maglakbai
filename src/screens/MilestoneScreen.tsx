@@ -263,6 +263,20 @@ export default function MilestoneScreen() {
     }
   }, []);
 
+  // BUG-E2E-001: a milestone modal that can't resolve its skill must never strand
+  // the user on a blank screen. If the celebrated skill is missing (stale skillId,
+  // or its custom path was deleted before the celebration rendered), dismiss back
+  // to the app instead of rendering nothing.
+  const milestoneDataMissing = !skill || !user;
+  useEffect(() => {
+    if (!milestoneDataMissing) return;
+    const t = setTimeout(() => {
+      if (navigation.canGoBack()) navigation.goBack();
+      else navigation.navigate('Main');
+    }, 0);
+    return () => clearTimeout(t);
+  }, [milestoneDataMissing]);
+
   const pathName = path?.name ?? 'Custom';
   const generatedPost = skill && user
     ? `⚡ Milestone Unlocked: ${skill.name}\n\nCompleted ${skill.name} on my ${pathName} evolution path.\n\n${skill.description}\n\nCurrent Evolution: ${pathName} Path\nStreak: ${user.streak} days 🔥\n\n#${pathName.replace(/\s/g, '')} #MaglakbAI #CareerGrowth #TechEvolution`
@@ -276,7 +290,24 @@ export default function MilestoneScreen() {
 
   // Guard: only bail if core data (user + skill) is missing.
   // Path and pathColor now always resolve via fallback, so they are never null here.
-  if (!skill || !user) return null;
+  // BUG-E2E-001: render a visible, themed shell (not a blank white screen) while
+  // the auto-dismiss effect above navigates the user back.
+  if (milestoneDataMissing) {
+    return (
+      <SafeAreaView style={styles.fallbackContainer}>
+        <Text style={styles.fallbackEmoji}>✨</Text>
+        <Text style={styles.fallbackText}>Taking you back…</Text>
+        <TouchableOpacity
+          style={styles.fallbackBtn}
+          onPress={() => (navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Main'))}
+          accessibilityRole="button"
+          accessibilityLabel="Go back"
+        >
+          <Text style={styles.fallbackBtnText}>Go back</Text>
+        </TouchableOpacity>
+      </SafeAreaView>
+    );
+  }
 
   const resolvedPathColor = pathColor ?? {
     primary: Colors.primary,
@@ -502,6 +533,33 @@ const makeStyles = (Colors: ColorsType) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.bg,
+  },
+  fallbackContainer: {
+    flex: 1,
+    backgroundColor: Colors.bg,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: Spacing.xl,
+    gap: Spacing.md,
+  },
+  fallbackEmoji: { fontSize: 40 },
+  fallbackText: {
+    fontSize: FontSize.md,
+    fontWeight: '700',
+    color: Colors.text,
+    textAlign: 'center',
+  },
+  fallbackBtn: {
+    marginTop: Spacing.sm,
+    backgroundColor: Colors.primary,
+    borderRadius: 999,
+    paddingHorizontal: Spacing.xl,
+    paddingVertical: 12,
+  },
+  fallbackBtnText: {
+    fontSize: FontSize.base,
+    fontWeight: '700',
+    color: Colors.white,
   },
   particleContainer: {
     position: 'absolute',

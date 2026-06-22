@@ -32,8 +32,8 @@ import CareerNode from '../components/CareerNode';
 import DemandBadge from '../components/DemandBadge';
 import ValidationChallengeModal from '../components/ValidationChallengeModal';
 import { CustomSkill, Skill, UserSkill } from '../types';
-import { pathHasProgress } from '../domain/skillGraph';
-import { VALIDATION_BONUS_XP } from '../domain/progression';
+import { pathHasProgress, isTestOutEligible } from '../domain/skillGraph';
+import { VALIDATION_BONUS_XP, MAX_TESTOUT_ATTEMPTS, TESTOUT_QUESTION_COUNT } from '../domain/progression';
 import { getPathDemandLabel, DEMAND_SOURCE_LABEL } from '../data/marketDemand';
 
 const PALETTE = ['#7C3AED', '#06B6D4', '#10B981', '#F59E0B', '#EF4444', '#EC4899', '#8B5CF6', '#F97316'];
@@ -1133,6 +1133,14 @@ export default function EvolveScreen() {
   const [managingPathId, setManagingPathId] = useState<string | null>(null);
   const [detailSkill, setDetailSkill] = useState<{ skill: Skill; userSkill: UserSkill } | null>(null);
   const [validateTarget, setValidateTarget] = useState<Skill | null>(null);
+  // GROW-002: when true the knowledge check is a "test out" (caps attempts, shuffles,
+  // grants completion on pass) vs. the post-build validation of an already-completed skill.
+  const [validateIsTestOut, setValidateIsTestOut] = useState(false);
+  // Snapshot of persisted failed attempts at modal-open time (stable during the session
+  // so it doesn't double-count with the modal's own in-session fail tracking).
+  const [validateAttemptsUsed, setValidateAttemptsUsed] = useState(0);
+  const testOutSkill = useAppStore((s) => s.testOutSkill);
+  const recordTestOutAttempt = useAppStore((s) => s.recordTestOutAttempt);
   const [showArchived, setShowArchived] = useState(false);
   const [focusCheckPathId, setFocusCheckPathId] = useState<string | null>(null);
   // FEAT-001 edit flows
@@ -1698,6 +1706,16 @@ export default function EvolveScreen() {
             text: viewInfo?.textColor ?? Colors.primaryLight,
             border: viewInfo?.borderColor ?? Colors.primary + '40',
           };
+          // GROW-002: can the user test out of this (available, foundational) skill?
+          const pathSkillIds = CAREER_PATHS.find((p) => p.id === skill.pathId)?.skillIds ?? [];
+          const canTestOut = isTestOutEligible(skill.id, userSkills, pathSkillIds, user?.experienceLevel);
+          const openTestOut = () => {
+            const target = skill as Skill;
+            setDetailSkill(null);
+            setValidateAttemptsUsed(userSkills[skill.id]?.testOutAttempts ?? 0);
+            setValidateIsTestOut(true);
+            setValidateTarget(target);
+          };
           const prereqSkills = skill.prerequisites.map(pid => ({
             skill: ALL_SKILLS.find(s => s.id === pid),
             done: userSkills[pid]?.status === 'completed',
@@ -1795,7 +1813,9 @@ export default function EvolveScreen() {
                   </View>
                   <Text style={detail.progressHint}>
                     {isCompleted
-                      ? 'Skill mastered ✓'
+                      ? userSkill.validationSource === 'assessment'
+                        ? 'Tested out ✓ — validated by assessment'
+                        : 'Skill mastered ✓'
                       : `${skill.requiredOutputs - userSkill.outputCount} more output${skill.requiredOutputs - userSkill.outputCount !== 1 ? 's' : ''} to master this skill`
                     }
                   </Text>
@@ -1836,17 +1856,39 @@ export default function EvolveScreen() {
 
               <View style={detail.footer}>
                 {!isCompleted ? (
-                  <TouchableOpacity
-                    style={[detail.ctaBtn, { backgroundColor: skillPathColor.primary }]}
-                    onPress={() => {
-                      setDetailSkill(null);
-                      setSelectedSkill(skill.id);
-                      navigation.navigate('Log');
-                    }}
-                    activeOpacity={0.85}
-                  >
-                    <Text style={detail.ctaBtnText}>Log Work on This Skill ⚡</Text>
-                  </TouchableOpacity>
+                  <>
+                    {/* GROW-002: experienced/building users can test out of a foundational
+                        skill instead of building it. Pass the quiz → completed by assessment. */}
+                    {canTestOut && (
+                      <TouchableOpacity
+                        style={[detail.ctaBtn, { backgroundColor: skillPathColor.primary }]}
+                        onPress={openTestOut}
+                        activeOpacity={0.85}
+                        accessibilityRole="button"
+                        accessibilityLabel={`Test out of ${skill.name} with a ${TESTOUT_QUESTION_COUNT}-question quiz`}
+                      >
+                        <Text style={detail.ctaBtnText}>
+                          Test Out · {TESTOUT_QUESTION_COUNT} Questions → +{VALIDATION_BONUS_XP} XP 🎓
+                        </Text>
+                      </TouchableOpacity>
+                    )}
+                    <TouchableOpacity
+                      style={[
+                        canTestOut ? detail.dismissBtn : detail.ctaBtn,
+                        !canTestOut && { backgroundColor: skillPathColor.primary },
+                      ]}
+                      onPress={() => {
+                        setDetailSkill(null);
+                        setSelectedSkill(skill.id);
+                        navigation.navigate('Log');
+                      }}
+                      activeOpacity={0.85}
+                    >
+                      <Text style={canTestOut ? detail.dismissBtnText : detail.ctaBtnText}>
+                        {canTestOut ? 'Or log work to build it ⚡' : 'Log Work on This Skill ⚡'}
+                      </Text>
+                    </TouchableOpacity>
+                  </>
                 ) : userSkill.validated ? (
                   <View style={detail.masteredCta}>
                     <Text style={detail.masteredCtaText}>🎓 Knowledge validated. Log more to keep building XP.</Text>
@@ -1859,6 +1901,7 @@ export default function EvolveScreen() {
                       // modals never stack (a stacked modal blocks interaction on web).
                       const target = skill;
                       setDetailSkill(null);
+                      setValidateIsTestOut(false); // post-build validation, not a test-out
                       setValidateTarget(target);
                     }}
                     activeOpacity={0.85}
@@ -1883,8 +1926,10 @@ export default function EvolveScreen() {
         })()}
       </Modal>
 
-      {/* Knowledge challenge — lets users validate a COMPLETED skill from the map,
-          not just in the one-time completion celebration (MilestoneScreen). */}
+      {/* Knowledge challenge — two modes:
+          • post-build validation of a COMPLETED skill (validateIsTestOut === false), and
+          • GROW-002 "test out" of an available foundational skill (validateIsTestOut === true:
+            capped attempts, shuffled questions, completion-on-pass). */}
       {validateTarget?.validationQuestions?.length ? (
         <ValidationChallengeModal
           visible={!!validateTarget}
@@ -1892,18 +1937,31 @@ export default function EvolveScreen() {
           skillIcon={validateTarget.icon ?? '⚡'}
           questions={validateTarget.validationQuestions}
           pathColor={(PathColors[validateTarget.pathId] ?? { primary: Colors.primary }).primary}
+          xpReward={VALIDATION_BONUS_XP}
+          shuffle={validateIsTestOut}
+          strict={validateIsTestOut}
+          maxAttempts={validateIsTestOut ? MAX_TESTOUT_ATTEMPTS : undefined}
+          attemptsUsed={validateIsTestOut ? validateAttemptsUsed : 0}
+          onAttemptFail={validateIsTestOut ? () => recordTestOutAttempt(validateTarget.id) : undefined}
           onPass={() => {
             const id = validateTarget.id;
-            validateSkill(id);
+            if (validateIsTestOut) {
+              // Pass the test → complete the skill by assessment (+XP, unlock dependents,
+              // celebration). The pendingCelebration effect routes to MilestoneDetail.
+              testOutSkill(id);
+            } else {
+              validateSkill(id);
+              // Reflect the new validated state in the open detail panel immediately.
+              setDetailSkill((prev) =>
+                prev && prev.skill.id === id
+                  ? { ...prev, userSkill: { ...prev.userSkill, validated: true, validatedAt: new Date().toISOString() } }
+                  : prev,
+              );
+            }
             setValidateTarget(null);
-            // Reflect the new validated state in the open detail panel immediately.
-            setDetailSkill((prev) =>
-              prev && prev.skill.id === id
-                ? { ...prev, userSkill: { ...prev.userSkill, validated: true, validatedAt: new Date().toISOString() } }
-                : prev,
-            );
+            setValidateIsTestOut(false);
           }}
-          onDismiss={() => setValidateTarget(null)}
+          onDismiss={() => { setValidateTarget(null); setValidateIsTestOut(false); }}
         />
       ) : null}
     </SafeAreaView>

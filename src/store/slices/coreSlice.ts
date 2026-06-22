@@ -4,7 +4,7 @@
 import type { StoreApi } from 'zustand';
 import type { AppState, PendingCelebration } from '../appStore';
 import type {
-  User, Output, FeedPost, CareerPathId, CustomPath, CustomSkill,
+  User, UserSkill, Output, FeedPost, CareerPathId, CustomPath, CustomSkill,
   LogOutputPayload, LogOutputResult, SkillStatus, RoadmapEntry,
   RoadmapPriorityStatus, RoadmapStatus, CareerOutcome, LogOutcomePayload,
   OutcomeType, ExperienceLevel, PaceMode,
@@ -16,7 +16,7 @@ import { ALL_SKILLS } from '../../data/skills';
 import { ALL_ACHIEVEMENTS } from '../../data/achievements';
 import { MOCK_FEED } from '../../data/mockFeed';
 import { getEvidenceTier, OUTCOME_XP, getCareerMastery, calculateOutputXP, CUSTOM_SKILL_COMPLETION_XP, ONBOARDING_XP_GRANT, VALIDATION_BONUS_XP } from '../../domain/progression';
-import { initUserSkills, unlockDependentSkills, checkAchievements } from '../../domain/skillGraph';
+import { initUserSkills, unlockDependentSkills, checkAchievements, isTestOutEligible } from '../../domain/skillGraph';
 // ARCH-001: fire-and-forget Supabase sync after local state is updated
 import { upsertProfile, insertOutput, upsertSkillProgress } from '../../lib/db';
 import { signOut } from '../../lib/auth';
@@ -24,7 +24,7 @@ import { signOut } from '../../lib/auth';
 type Set = StoreApi<AppState>['setState'];
 type Get = StoreApi<AppState>['getState'];
 
-export const createCoreSlice = (set: Set, get: Get): Pick<AppState, 'completeOnboarding' | 'logOutput' | 'validateSkill' | 'logCareerOutcome' | 'deleteCareerOutcome' | 'deleteOutput' | 'useStreakFreeze' | 'markMilestoneCelebrated' | 'clearCelebration' | 'setSelectedSkill' | 'dismissWelcomeCard' | 'resetApp' | 'togglePinOutput'> => ({
+export const createCoreSlice = (set: Set, get: Get): Pick<AppState, 'completeOnboarding' | 'logOutput' | 'validateSkill' | 'testOutSkill' | 'recordTestOutAttempt' | 'logCareerOutcome' | 'deleteCareerOutcome' | 'deleteOutput' | 'useStreakFreeze' | 'markMilestoneCelebrated' | 'clearCelebration' | 'setSelectedSkill' | 'dismissWelcomeCard' | 'resetApp' | 'togglePinOutput'> => ({
   completeOnboarding: (name: string, pathId: CareerPathId | string, email?: string, experienceLevel?: ExperienceLevel) => {
     const userId = `user_${Date.now()}`;
     const pathMeta = CAREER_PATHS.find(p => p.id === pathId);
@@ -78,8 +78,10 @@ export const createCoreSlice = (set: Set, get: Get): Pick<AppState, 'completeOnb
     // while honoring the product thesis: XP and completion come from logged proof only.
     // Everyone starts at ONBOARDING_XP_GRANT and earns the rest by logging outputs.
     if (isBuiltInPath && pathMeta && (experienceLevel === 'building' || experienceLevel === 'experienced')) {
-      // building: open the first 2 skills; experienced: open the first 3.
-      const unlockCount = experienceLevel === 'experienced' ? 3 : 2;
+      // GROW-002 pacing: building opens the first 1 skill, experienced the first 3.
+      // These pre-unlocked foundational skills are the ones a building/experienced user
+      // may "test out" of (pass a knowledge check) instead of building from outputs.
+      const unlockCount = experienceLevel === 'experienced' ? 3 : 1;
       pathMeta.skillIds.slice(0, unlockCount).forEach((sid) => {
         const existing = userSkills[sid];
         // Only open locked/undefined entries — never downgrade real progress.
@@ -471,7 +473,93 @@ export const createCoreSlice = (set: Set, get: Get): Pick<AppState, 'completeOnb
           ...us,
           validated: true,
           validatedAt: new Date().toISOString(),
+          validationSource: us.validationSource ?? 'build',
         },
+      },
+    });
+  },
+
+  // GROW-002: complete a foundational skill by PASSING its knowledge check ("test out")
+  // instead of building it. Honest experience weighting — proof by assessment, not by
+  // declaration. Marks the skill completed-by-assessment, grants the flat validation
+  // bonus, unlocks dependents, records any newly-earned achievements, and fires the
+  // standard milestone celebration. No-op unless the skill is currently test-out eligible.
+  testOutSkill: (skillId: string) => {
+    const state = get();
+    if (!state.user) return;
+    const path = CAREER_PATHS.find((p) => p.id === state.user!.careerPathId);
+    if (!path) return; // custom paths have no curated questions → build-only
+    if (!isTestOutEligible(skillId, state.userSkills, path.skillIds, state.user.experienceLevel)) return;
+
+    const nowIso = new Date().toISOString();
+    const prev = state.userSkills[skillId];
+    let updatedUserSkills: Record<string, UserSkill> = {
+      ...state.userSkills,
+      [skillId]: {
+        ...prev,
+        status: 'completed',
+        outputCount: prev?.outputCount ?? 0,
+        completedAt: nowIso,
+        validated: true,
+        validatedAt: nowIso,
+        validationSource: 'assessment',
+      },
+    };
+    updatedUserSkills = unlockDependentSkills(skillId, path.id as CareerPathId, updatedUserSkills);
+
+    const oldLevel = state.user.level;
+    let newXP = state.user.xp + VALIDATION_BONUS_XP;
+
+    // Achievements that may newly unlock from the assessment completion (skill-mastered /
+    // triple-master). Output-count achievements are unaffected (outputs unchanged).
+    const completedCount = Object.values(updatedUserSkills).filter((u) => u.status === 'completed').length;
+    const newAchievementIds = checkAchievements(
+      state.outputs.length, completedCount, newXP, state.user.streak, state.unlockedAchievementIds,
+    );
+    const bonusXP = newAchievementIds.reduce((sum, id) => sum + (ALL_ACHIEVEMENTS.find((a) => a.id === id)?.xpGranted ?? 0), 0);
+    newXP += bonusXP;
+    const newLevel = getLevelFromXP(newXP);
+    const newAchievements = newAchievementIds.map((id) => {
+      const a = ALL_ACHIEVEMENTS.find((x) => x.id === id)!;
+      return { id, title: a.title, xpGranted: a.xpGranted };
+    });
+    const updatedUser: User = { ...state.user, xp: newXP, level: newLevel };
+
+    set({
+      user: updatedUser,
+      userSkills: updatedUserSkills,
+      unlockedAchievementIds: [...state.unlockedAchievementIds, ...newAchievementIds],
+      pendingCelebration: {
+        skillId,
+        xpGained: VALIDATION_BONUS_XP,
+        sessionXpGained: VALIDATION_BONUS_XP + bonusXP,
+        newAchievements,
+        leveledUp: newLevel > oldLevel,
+        newLevel,
+      },
+    });
+
+    track('skill_tested_out', { skill_id: skillId, career_path: state.user.careerPathId, xp_gained: VALIDATION_BONUS_XP });
+
+    // ARCH-001: fire-and-forget cloud sync (validation_source is not yet a remote column
+    // — Phase 2 — but status/completed_at round-trip so the skill reads completed remotely).
+    const uid = state.supabaseUserId;
+    if (uid) {
+      upsertSkillProgress(uid, skillId, path.id, updatedUserSkills[skillId]).catch(() => {});
+      upsertProfile(uid, updatedUser).catch(() => {});
+    }
+  },
+
+  // GROW-002: record a FAILED test-out attempt. At MAX_TESTOUT_ATTEMPTS the skill is no
+  // longer test-out eligible (isTestOutEligible returns false) and becomes build-only.
+  recordTestOutAttempt: (skillId: string) => {
+    const state = get();
+    const us = state.userSkills[skillId];
+    if (!us) return;
+    set({
+      userSkills: {
+        ...state.userSkills,
+        [skillId]: { ...us, testOutAttempts: (us.testOutAttempts ?? 0) + 1 },
       },
     });
   },

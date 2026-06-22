@@ -145,6 +145,20 @@ export const ONBOARDING_XP_GRANT = 25;
 // Single source of truth shared by the store action and the UI labels.
 export const VALIDATION_BONUS_XP = 100;
 
+// ── Experience test-out (GROW-002) ──────────────────────────────────────────────
+// A self-declared experience level never mints XP/completion by itself ("proof, not
+// promises"). Instead, building/experienced users may convert prior knowledge into
+// completion by PASSING a knowledge check ("test out") on the path's foundational
+// skills — proof by assessment. Fresh Start (beginner) is build-only.
+//
+// FOUNDATIONAL_WINDOW: only the first N skills of a path are test-out eligible;
+// everything beyond is build-only (no shortcuts for advanced skills).
+export const FOUNDATIONAL_WINDOW = 3;
+// Up to N attempts to pass a skill's test; exhaust them and the skill is build-only.
+export const MAX_TESTOUT_ATTEMPTS = 3;
+// Questions presented per test attempt (drawn/shuffled from the skill's bank).
+export const TESTOUT_QUESTION_COUNT = 10;
+
 // FEAT-001: completion bonus for a user-defined (custom) milestone. Modest + flat
 // — proof (an output) is still required to complete it, but self-defined milestones
 // don't grant curated-skill rewards, to keep the XP economy honest/leaderboard-safe.
