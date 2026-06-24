@@ -87,8 +87,20 @@ function WeeklyDots({ dots, pathColor }: { dots: readonly DotItem[]; pathColor: 
 
   return (
     <View style={dotStyles.row}>
-      {dots.map((d, i) => (
-        <View key={i} style={dotStyles.col}>
+      {dots.map((d, i) => {
+        // MED-004: announce each day's activity state to screen readers.
+        const status = d.isToday && d.logged ? 'logged today'
+          : d.isToday ? 'today, not logged yet'
+          : d.logged ? 'active'
+          : d.isFuture ? 'upcoming'
+          : 'no activity';
+        return (
+        <View
+          key={i}
+          style={dotStyles.col}
+          accessibilityRole="image"
+          accessibilityLabel={`${d.label}: ${status}`}
+        >
           {d.isToday && d.logged ? (
             <View style={[dotStyles.dot, { backgroundColor: pathColor }]}>
               <Text style={dotStyles.check}>✓</Text>
@@ -108,7 +120,8 @@ function WeeklyDots({ dots, pathColor }: { dots: readonly DotItem[]; pathColor: 
             {d.label}
           </Text>
         </View>
-      ))}
+        );
+      })}
     </View>
   );
 }

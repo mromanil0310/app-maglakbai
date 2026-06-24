@@ -21,6 +21,22 @@ import { useToast } from '../components/Toast';
 import LevelUpOverlay from '../components/LevelUpOverlay';
 import { page, track } from '../utils/analytics';
 
+// MED-008: only a syntactically valid http(s) URL counts as evidence. A bare
+// "github/myrepo" is dropped so it isn't badged "Verified" with a dead, non-navigable
+// link in the user's portfolio.
+const isValidUrl = (u: string): boolean => {
+  try {
+    const x = new URL(u);
+    return x.protocol === 'http:' || x.protocol === 'https:';
+  } catch {
+    return false;
+  }
+};
+const toEvidenceLink = (link: string): string | undefined => {
+  const t = link.trim();
+  return t && isValidUrl(t) ? t : undefined;
+};
+
 const OUTPUT_TYPES: {
   id: OutputType;
   icon: string;
@@ -398,7 +414,7 @@ export default function LogOutputScreen() {
         type: outputType,
         title: title.trim(),
         description: description.trim(),
-        link: link.trim() || undefined,
+        link: toEvidenceLink(link),
         keyTakeaway: keyTakeaway.trim() || undefined,
       });
 
@@ -414,7 +430,9 @@ export default function LogOutputScreen() {
 
       // If the user hit a streak milestone (7/14/30 days), celebrate it with a bonus toast
       if (result.streakBonusXP && result.streakBonusXP > 0) {
-        const streakDays = result.newStreak ?? (result.streakBonusXP === 25 ? 7 : result.streakBonusXP === 50 ? 14 : 30);
+        // MED-005: trust the authoritative newStreak from the action, not a fragile
+        // reverse-map of the bonus XP amount (which breaks if the XP knobs change).
+        const streakDays = result.newStreak;
         setTimeout(() => {
           showToast({
             message: `${streakDays}-Day Streak Bonus!`,
@@ -619,7 +637,7 @@ export default function LogOutputScreen() {
             // Evidence gate check — mirrors the logic in the evidence meter below.
             // If this output would complete the skill but neither the current entry
             // nor any prior output provides quality proof, warn the user up front.
-            const currentTier = getEvidenceTier(link, description);
+            const currentTier = getEvidenceTier(toEvidenceLink(link), description);
             const hasExistingQuality = outputs.some((o) => {
               if (o.skillId !== skillId) return false;
               const t = o.evidenceTier ?? getEvidenceTier(o.link, o.description);
@@ -733,10 +751,15 @@ export default function LogOutputScreen() {
             keyboardType="url"
             accessibilityLabel="Link to your work (optional)"
           />
+          {link.trim() && !isValidUrl(link.trim()) ? (
+            <Text style={{ color: Colors.gold, fontSize: FontSize.sm, marginTop: 4 }}>
+              Start with https:// — otherwise this link won't count as verified evidence.
+            </Text>
+          ) : null}
 
           {/* Evidence Meter — live quality tier + gate warning */}
           {(() => {
-            const tier = getEvidenceTier(link, description);
+            const tier = getEvidenceTier(toEvidenceLink(link), description);
             const builtInSkill = ALL_SKILLS.find((s) => s.id === skillId);
             const us = skillId ? userSkills[skillId] : null;
             const willComplete = builtInSkill && us && (us.outputCount + 1 >= builtInSkill.requiredOutputs);

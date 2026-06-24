@@ -117,6 +117,7 @@ export interface AppState {
   supabaseUserId: string | null;
   supabaseEmail: string | null;
   supabaseSyncing: boolean; // true while an initial sync is in progress
+  supabaseProfileDirty: boolean; // MED-006: a profile push failed; re-push on next sync
   user: User | null;
   userSkills: Record<string, UserSkill>;
   outputs: Output[];
@@ -254,6 +255,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   supabaseUserId: null,
   supabaseEmail: null,
   supabaseSyncing: false,
+  supabaseProfileDirty: false,
   user: saved?.user
     ? { ...saved.user, xp: _healedXP, level: getLevelFromXP(_healedXP) }
     : null,
