@@ -117,6 +117,7 @@ export interface AppState {
   supabaseUserId: string | null;
   supabaseEmail: string | null;
   supabaseSyncing: boolean; // true while an initial sync is in progress
+  supabaseProfileDirty: boolean; // MED-006: a profile push failed; re-push on next sync
   user: User | null;
   userSkills: Record<string, UserSkill>;
   outputs: Output[];
@@ -184,6 +185,7 @@ export interface AppState {
   updateEmail: (email: string) => void;
   deleteOutput: (outputId: string) => void;
   addComment: (postId: string, text: string) => void;
+  shuffleFeed: () => void; // HIGH-005: reorder seed posts for pull-to-refresh feedback
   setColorScheme: (scheme: 'dark' | 'light') => void;
   setFontScale: (scale: number) => void;
   // ARCH-001: auth actions
@@ -253,6 +255,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   supabaseUserId: null,
   supabaseEmail: null,
   supabaseSyncing: false,
+  supabaseProfileDirty: false,
   user: saved?.user
     ? { ...saved.user, xp: _healedXP, level: getLevelFromXP(_healedXP) }
     : null,

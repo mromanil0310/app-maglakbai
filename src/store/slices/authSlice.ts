@@ -122,10 +122,18 @@ export const createAuthSlice = (set: Set, get: Get): Pick<
         set({ userSkills: merged });
       }
 
-      // Push local-only data back up so the remote stays current
+      // Push local-only data back up so the remote stays current. MED-006: track a
+      // dirty flag instead of silently dropping a failed push, so the next successful
+      // sync (sign-in / logOutput) re-pushes and the staleness is observable.
       const currentUser = get().user;
       if (currentUser) {
-        await upsertProfile(userId, currentUser);
+        try {
+          await upsertProfile(userId, currentUser);
+          set({ supabaseProfileDirty: false });
+        } catch (pushErr) {
+          console.warn('[authSlice] upsertProfile failed — marking profile dirty:', pushErr);
+          set({ supabaseProfileDirty: true });
+        }
       }
     } catch (err) {
       console.warn('[authSlice] syncFromSupabase error:', err);

@@ -128,7 +128,10 @@ export function loadFromStorage(): Partial<PersistedState> | null {
     }
 
     return result;
-  } catch {
+  } catch (err) {
+    // MED-007: don't fail silently — a read/parse error (corrupt storage, quota,
+    // Safari ITP purge) should be visible when debugging "my progress vanished".
+    console.warn('[persistence] loadFromStorage failed — starting fresh:', err);
     return null;
   }
 }
