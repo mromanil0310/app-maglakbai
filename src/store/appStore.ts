@@ -184,6 +184,7 @@ export interface AppState {
   updateEmail: (email: string) => void;
   deleteOutput: (outputId: string) => void;
   addComment: (postId: string, text: string) => void;
+  shuffleFeed: () => void; // HIGH-005: reorder seed posts for pull-to-refresh feedback
   setColorScheme: (scheme: 'dark' | 'light') => void;
   setFontScale: (scale: number) => void;
   // ARCH-001: auth actions

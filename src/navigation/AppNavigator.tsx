@@ -3,7 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Text, View, Animated, TouchableOpacity, StyleSheet } from 'react-native';
-import { useThemeColors, Colors, FontSize, Spacing } from '../utils/theme';
+import { useThemeColors, ColorsType, Colors, FontSize, Spacing } from '../utils/theme';
 
 import { useAppStore } from '../store/appStore';
 // ARCH-001: auth session listener
@@ -20,6 +20,26 @@ import LogOutputScreen from '../screens/LogOutputScreen';
 import MilestoneScreen from '../screens/MilestoneScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import PortfolioScreen from '../screens/PortfolioScreen';
+
+// HIGH-006: themed fallback so the crash screen respects dark mode (was static Colors,
+// which rendered a white screen with near-invisible text for dark-mode users). A function
+// component is needed to call useThemeColors() from the class boundary below.
+function ScreenErrorFallback({ screenName, message, onRetry }: {
+  screenName: string; message: string; onRetry: () => void;
+}) {
+  const Colors = useThemeColors();
+  const s = React.useMemo(() => makeScreenErrorStyles(Colors), [Colors]);
+  return (
+    <View style={s.container}>
+      <Text style={s.emoji}>⚠️</Text>
+      <Text style={s.title}>{screenName} failed to load</Text>
+      <Text style={s.msg}>{message}</Text>
+      <TouchableOpacity style={s.retryBtn} onPress={onRetry} accessibilityRole="button" accessibilityLabel="Try again">
+        <Text style={s.retryText}>Try Again</Text>
+      </TouchableOpacity>
+    </View>
+  );
+}
 
 // OPS-002: per-screen error boundaries so one crashing tab doesn't kill the whole app
 interface ScreenErrorState { error: Error | null }
@@ -40,17 +60,11 @@ class ScreenErrorBoundary extends React.Component<
   render() {
     if (this.state.error) {
       return (
-        <View style={screenErrorStyles.container}>
-          <Text style={screenErrorStyles.emoji}>⚠️</Text>
-          <Text style={screenErrorStyles.title}>{this.props.screenName} failed to load</Text>
-          <Text style={screenErrorStyles.msg}>{this.state.error.message}</Text>
-          <TouchableOpacity
-            style={screenErrorStyles.retryBtn}
-            onPress={() => this.setState({ error: null })}
-          >
-            <Text style={screenErrorStyles.retryText}>Try Again</Text>
-          </TouchableOpacity>
-        </View>
+        <ScreenErrorFallback
+          screenName={this.props.screenName}
+          message={this.state.error.message}
+          onRetry={() => this.setState({ error: null })}
+        />
       );
     }
     return this.props.children;
@@ -333,7 +347,7 @@ export default function AppNavigator() {
   );
 }
 
-const screenErrorStyles = StyleSheet.create({
+const makeScreenErrorStyles = (Colors: ColorsType) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.bg,

@@ -180,6 +180,8 @@ function SessionRecap({ data, onDismiss }: { data: RecapData; onDismiss: () => v
 export default function LogOutputScreen() {
   const Colors = useThemeColors();
   const styles = React.useMemo(() => makeStyles(Colors), [Colors]);
+  // HIGH-001: themed signal-modal styles so it respects dark mode (was static Colors).
+  const signalStyles = React.useMemo(() => makeSignalStyles(Colors), [Colors]);
   const navigation = useNavigation<any>();
   const { showToast } = useToast();
   const user = useAppStore((s) => s.user);
@@ -1566,7 +1568,7 @@ const makeStyles = (Colors: ColorsType) => StyleSheet.create({
 });
 
 // ── Market signal prompt styles ──────────────────────────────────────────────
-const signalStyles = StyleSheet.create({
+const makeSignalStyles = (Colors: ColorsType) => StyleSheet.create({
   backdrop: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.75)',

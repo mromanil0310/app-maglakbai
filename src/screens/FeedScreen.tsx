@@ -25,6 +25,7 @@ export default function FeedScreen() {
   const addComment = useAppStore((s) => s.addComment);
   const savedPostIds = useAppStore((s) => s.savedPostIds);
   const toggleSavePost = useAppStore((s) => s.toggleSavePost);
+  const shuffleFeed = useAppStore((s) => s.shuffleFeed);
   const user = useAppStore((s) => s.user);
   const customPaths = useAppStore((s) => s.customPaths);
   const outputs = useAppStore((s) => s.outputs);
@@ -91,11 +92,12 @@ export default function FeedScreen() {
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-    // Simulate a brief network delay, then re-order mock posts (shuffle non-user posts)
+    // HIGH-005: actually change the feed so the gesture has a visible effect.
     setTimeout(() => {
+      shuffleFeed();
       setRefreshing(false);
     }, 800);
-  }, []);
+  }, [shuffleFeed]);
 
   const renderItem = ({ item, index }: { item: FeedPost; index: number }) => (
     <FeedCard
