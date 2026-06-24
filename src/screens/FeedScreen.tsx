@@ -177,34 +177,37 @@ export default function FeedScreen() {
     );
   };
 
-  // Leaderboard: use this week's XP (outputs from last 7 days) for the current user.
-  // Seed leaders show fixed weekly XP for a realistic competitive feel.
-  const weekStart = new Date();
-  weekStart.setDate(weekStart.getDate() - 7);
-  const weekStartIso = weekStart.toISOString();
-  const weeklyUserXP = outputs
-    .filter((o) => o.createdAt >= weekStartIso)
-    .reduce((sum, o) => sum + o.xpGained, 0);
+  // Leaderboard (LOW-003: memoized — recomputes only when outputs/user change, not on
+  // every filter tap / scroll). Uses this week's XP (outputs from last 7 days).
+  const { leaderboard, userLeaderEntry } = React.useMemo(() => {
+    const weekStart = new Date();
+    weekStart.setDate(weekStart.getDate() - 7);
+    const weekStartIso = weekStart.toISOString();
+    const weeklyUserXP = outputs
+      .filter((o) => o.createdAt >= weekStartIso)
+      .reduce((sum, o) => sum + o.xpGained, 0);
 
-  // ISSUE-007: isSeed flags these as benchmark examples, not real users
-  const SEED_LEADERS = [
-    { id: 'seed_1', name: 'Priya Nair', xp: 390, emoji: '⚡', isCurrentUser: false, isSeed: true },
-    { id: 'seed_2', name: 'Marcus Webb', xp: 340, emoji: '🧠', isCurrentUser: false, isSeed: true },
-    { id: 'seed_3', name: 'Sofia Chen', xp: 275, emoji: '🚀', isCurrentUser: false, isSeed: true },
-  ];
-  const leaderboardPool = user
-    ? [...SEED_LEADERS, { id: user.id, name: user.name, xp: weeklyUserXP, emoji: user.avatarEmoji, isCurrentUser: true }]
-    : SEED_LEADERS;
-  const RANK_EMOJIS = ['🥇', '🥈', '🥉'];
-  const sortedPool = [...leaderboardPool].sort((a, b) => b.xp - a.xp);
-  const leaderboard = sortedPool
-    .slice(0, 3)
-    .map((e, i) => ({ ...e, rank: i + 1, rankEmoji: RANK_EMOJIS[i] }));
-  const userRank = sortedPool.findIndex((e) => e.isCurrentUser) + 1;
-  const userInTop3 = userRank > 0 && userRank <= 3;
-  const userLeaderEntry = user && !userInTop3
-    ? { ...sortedPool.find((e) => e.isCurrentUser)!, rank: userRank, rankEmoji: `#${userRank}` }
-    : null;
+    // ISSUE-007: isSeed flags these as benchmark examples, not real users
+    const SEED_LEADERS = [
+      { id: 'seed_1', name: 'Priya Nair', xp: 390, emoji: '⚡', isCurrentUser: false, isSeed: true },
+      { id: 'seed_2', name: 'Marcus Webb', xp: 340, emoji: '🧠', isCurrentUser: false, isSeed: true },
+      { id: 'seed_3', name: 'Sofia Chen', xp: 275, emoji: '🚀', isCurrentUser: false, isSeed: true },
+    ];
+    const leaderboardPool = user
+      ? [...SEED_LEADERS, { id: user.id, name: user.name, xp: weeklyUserXP, emoji: user.avatarEmoji, isCurrentUser: true }]
+      : SEED_LEADERS;
+    const RANK_EMOJIS = ['🥇', '🥈', '🥉'];
+    const sortedPool = [...leaderboardPool].sort((a, b) => b.xp - a.xp);
+    const lb = sortedPool
+      .slice(0, 3)
+      .map((e, i) => ({ ...e, rank: i + 1, rankEmoji: RANK_EMOJIS[i] }));
+    const userRank = sortedPool.findIndex((e) => e.isCurrentUser) + 1;
+    const userInTop3 = userRank > 0 && userRank <= 3;
+    const ule = user && !userInTop3
+      ? { ...sortedPool.find((e) => e.isCurrentUser)!, rank: userRank, rankEmoji: `#${userRank}` }
+      : null;
+    return { leaderboard: lb, userLeaderEntry: ule };
+  }, [outputs, user]);
 
   // Count badge for each path
   const getFilterCount = (filterId: string) => {

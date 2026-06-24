@@ -114,6 +114,7 @@ const GuardedLog = withScreenBoundary(LogOutputScreen, 'Log');
 const GuardedEvolve = withScreenBoundary(EvolveScreen, 'Evolve');
 const GuardedProfile = withScreenBoundary(ProfileScreen, 'Profile');
 const GuardedSettings = withScreenBoundary(SettingsScreen, 'Settings');
+const GuardedPortfolio = withScreenBoundary(PortfolioScreen, 'Portfolio'); // LOW-004
 
 function TabIcon({
   icon,
@@ -315,7 +316,7 @@ export default function AppNavigator() {
       }
     });
     return unsub;
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [setSupabaseSession, syncFromSupabase]); // LOW-002: Zustand action refs are stable
 
   return (
     <NavigationContainer>
@@ -337,7 +338,7 @@ export default function AppNavigator() {
             />
             <Stack.Screen
               name="Portfolio"
-              component={PortfolioScreen}
+              component={GuardedPortfolio}
               options={{ animation: 'slide_from_right' }}
             />
           </>
