@@ -239,7 +239,7 @@ function ScreenErrorFallback({ screenName, message, onRetry }: ...) {
 
 ---
 
-### [MED-001] OnboardingScreen finishOnboarding fires despite back-navigation (setTimeout race)
+### [MED-001] OnboardingScreen finishOnboarding fires despite back-navigation (setTimeout race) ✅ RESOLVED 2026-06-24 (timer ref + cleanup)
 
 **File:** `src/screens/OnboardingScreen.tsx` — `ExperienceLevelStep.onSelect` handler  
 **Symptom:** When a user selects an experience level and immediately taps Back within 320ms, `finishOnboarding()` still fires 320ms later. This can commit an onboarding with mismatched or incomplete data.
@@ -263,7 +263,7 @@ useEffect(() => () => {
 
 ---
 
-### [MED-002] Email field in OnboardingScreen has no format validation
+### [MED-002] Email field in OnboardingScreen has no format validation ✅ RESOLVED 2026-06-24 (validate + inline error)
 
 **File:** `src/screens/OnboardingScreen.tsx` — email input in step 4  
 **Symptom:** Users can enter "abc" or "notanemail" and proceed. When Magic Link auth launches, Supabase will reject the malformed address, but the error is surfaced only then — after onboarding is complete — with no guidance to return and fix it.
@@ -282,7 +282,7 @@ if (email && !isValidEmail(email)) {
 
 ---
 
-### [MED-003] Custom path skill IDs can collide
+### [MED-003] Custom path skill IDs can collide ✅ RESOLVED 2026-06-24 (crypto.randomUUID)
 
 **File:** `src/screens/OnboardingScreen.tsx` — custom skill generation  
 **Symptom:** Custom path skills use `__skill_${i}_${Date.now()}` as IDs. If two skills are created in the same millisecond (programmatic rapid creation, or future batch-import feature), IDs collide. The second skill's progress will overwrite the first in `userSkills`.
@@ -294,7 +294,7 @@ id: `__skill_${crypto.randomUUID()}`,
 
 ---
 
-### [MED-004] WeeklyDots individual dots have no accessibility annotation
+### [MED-004] WeeklyDots individual dots have no accessibility annotation ✅ RESOLVED 2026-06-24 (accessibilityLabel per dot)
 
 **File:** `src/screens/DashboardScreen.tsx` — `WeeklyDots` component  
 **Symptom:** Screen reader users hear nothing when focusing the activity dots strip. There are no `accessibilityLabel` or `accessibilityHint` attributes on individual dot views.
@@ -311,7 +311,7 @@ id: `__skill_${crypto.randomUUID()}`,
 
 ---
 
-### [MED-005] Streak bonus XP display uses brittle reverse-mapping
+### [MED-005] Streak bonus XP display uses brittle reverse-mapping ✅ RESOLVED 2026-06-24 (use result.newStreak)
 
 **File:** `src/screens/LogOutputScreen.tsx:407`  
 **Symptom:** The streak-bonus toast infers the streak day count from the bonus XP amount using hardcoded reverse logic:
@@ -329,7 +329,7 @@ if (!streakDays) return; // guard before showing toast
 
 ---
 
-### [MED-006] authSlice silently drops upsertProfile failure after sync
+### [MED-006] authSlice silently drops upsertProfile failure after sync ✅ RESOLVED 2026-06-24 (supabaseProfileDirty flag)
 
 **File:** `src/store/slices/authSlice.ts:118–124`  
 **Symptom:** After a successful remote→local merge, `upsertProfile` is called to push local data back up. If it fails (network drop, Supabase outage), the outer `catch` logs a warning but the remote profile goes stale indefinitely. The user sees no indication that their remote profile is out of sync.
@@ -344,7 +344,7 @@ set({ supabaseProfileDirty: true });
 
 ---
 
-### [MED-007] persistence.ts loadFromStorage silent catch with no logging
+### [MED-007] persistence.ts loadFromStorage silent catch with no logging ✅ RESOLVED 2026-06-24 (console.warn)
 
 **File:** `src/store/persistence.ts:131`  
 **Symptom:** If `localStorage.getItem` or `JSON.parse` throws (corrupted storage, quota errors on read, Safari ITP purge), the entire function returns `null` silently. The app starts fresh without any indication that user data was present but unreadable. Debugging storage corruption in production is impossible without a logged error.
@@ -359,7 +359,7 @@ set({ supabaseProfileDirty: true });
 
 ---
 
-### [MED-008] LogOutputScreen link field has no URL validation
+### [MED-008] LogOutputScreen link field has no URL validation ✅ RESOLVED 2026-06-24 (isValidUrl/toEvidenceLink + hint)
 
 **File:** `src/screens/LogOutputScreen.tsx:712–723`  
 **Symptom:** The link field accepts any text. A user typing `github/myrepo` (missing `https://`) will submit it as evidence, but the `getEvidenceTier` function counts it as "verified" (has a link value), even though the URL is non-navigable. Portfolio viewers see a dead link badge.
@@ -380,7 +380,7 @@ const effectiveLink = link && isValidUrl(link.trim()) ? link.trim() : undefined;
 
 ---
 
-### [LOW-001] Expo dependency is unused in the PWA target
+### [LOW-001] Expo dependency is unused in the PWA target 🔶 DEFERRED — mobile-strategy decision (lockfile impact)
 
 **File:** `package.json:17`  
 **Symptom:** `expo: ^55.0.24` is listed as a production dependency, but the app compiles entirely through Vite for web. The `ios`/`android` npm scripts invoke Expo, but no iOS/Android build is currently maintained. Expo and its transitive dependencies add to `node_modules` size, slow `npm ci`, and may introduce peer-dep conflicts on CI.
@@ -393,7 +393,7 @@ const effectiveLink = link && isValidUrl(link.trim()) ? link.trim() : undefined;
 
 ---
 
-### [LOW-002] AppNavigator suppresses react-hooks/exhaustive-deps warning
+### [LOW-002] AppNavigator suppresses react-hooks/exhaustive-deps warning ✅ RESOLVED 2026-06-24 (explicit deps)
 
 **File:** `src/navigation/AppNavigator.tsx:304`  
 **Symptom:** `// eslint-disable-line react-hooks/exhaustive-deps` on the auth `useEffect`. While the Zustand action functions are stable references (safe), this suppression will silently hide future dependency issues if the effect is modified.
@@ -416,7 +416,7 @@ useEffect(() => {
 
 ---
 
-### [LOW-003] FeedScreen leaderboard/pool computed on every render without memoization
+### [LOW-003] FeedScreen leaderboard/pool computed on every render without memoization ✅ RESOLVED 2026-06-24 (useMemo)
 
 **File:** `src/screens/FeedScreen.tsx:172–199`  
 **Symptom:** `SEED_LEADERS`, `leaderboardPool`, `sortedPool`, `leaderboard`, and `userLeaderEntry` are all recalculated on every `FeedScreen` render (including filter chip taps, scroll events, and other state updates). While not a correctness issue, it's unnecessary computation on the highest-activity screen component.
@@ -433,7 +433,7 @@ const leaderboard = useMemo(() => {
 
 ---
 
-### [LOW-004] PortfolioScreen not wrapped in ScreenErrorBoundary
+### [LOW-004] PortfolioScreen not wrapped in ScreenErrorBoundary ✅ RESOLVED 2026-06-24 (GuardedPortfolio)
 
 **File:** `src/navigation/AppNavigator.tsx:326–328`  
 **Symptom:** Every tab screen is wrapped with `withScreenBoundary()` (e.g. `GuardedDashboard`, `GuardedProfile`). `PortfolioScreen` is registered directly — if it crashes, the entire app tree crashes instead of showing the isolated error fallback.
