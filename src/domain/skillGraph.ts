@@ -3,9 +3,10 @@
 // catalog (CAREER_PATHS / ALL_SKILLS) + plain state, with no store/React deps, so
 // they can be unit-tested in isolation.
 
-import type { UserSkill, CareerPathId } from '../types';
+import type { UserSkill, CareerPathId, ExperienceLevel } from '../types';
 import { CAREER_PATHS } from '../data/careerPaths';
 import { ALL_SKILLS } from '../data/skills';
+import { FOUNDATIONAL_WINDOW, MAX_TESTOUT_ATTEMPTS } from './progression';
 
 export function initUserSkills(pathId: CareerPathId): Record<string, UserSkill> {
   const path = CAREER_PATHS.find((p) => p.id === pathId)!;
@@ -19,6 +20,29 @@ export function initUserSkills(pathId: CareerPathId): Record<string, UserSkill> 
     };
   });
   return result;
+}
+
+// GROW-002: can the user "test out" of this skill instead of building it?
+// True only when ALL hold: (1) experience level is building/experienced (beginner is
+// build-only); (2) the skill sits in the path's foundational window (first N); (3) it
+// is currently `available` (not locked/in-progress/already completed); (4) it still has
+// test-out attempts left; (5) a curated question bank exists for it (custom-path skills
+// have none → naturally build-only). Pure, so it can be unit-tested + reused by the UI.
+export function isTestOutEligible(
+  skillId: string,
+  userSkills: Record<string, UserSkill>,
+  pathSkillIds: string[],
+  experienceLevel: ExperienceLevel | undefined,
+): boolean {
+  if (experienceLevel !== 'building' && experienceLevel !== 'experienced') return false;
+  const idx = pathSkillIds.indexOf(skillId);
+  if (idx < 0 || idx >= FOUNDATIONAL_WINDOW) return false;
+  const us = userSkills[skillId];
+  if (!us || us.status !== 'available') return false;
+  if ((us.testOutAttempts ?? 0) >= MAX_TESTOUT_ATTEMPTS) return false;
+  const skill = ALL_SKILLS.find((s) => s.id === skillId);
+  if (!skill?.validationQuestions?.length) return false;
+  return true;
 }
 
 export function unlockDependentSkills(

@@ -110,6 +110,13 @@ export interface UserSkill {
   completedAt?: string;
   validated?: boolean;
   validatedAt?: string;
+  // Experience test-out (GROW-002): provenance of a validated/completed skill.
+  // 'build' = earned by logging outputs (default when absent); 'assessment' = tested
+  // out via the knowledge check. Assessment skills are legitimate progress with 0 outputs.
+  validationSource?: 'build' | 'assessment';
+  // Count of FAILED test-out attempts. At MAX_TESTOUT_ATTEMPTS the skill becomes
+  // build-only (the user must log outputs to complete it).
+  testOutAttempts?: number;
 }
 
 export interface Output {

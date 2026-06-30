@@ -1,6 +1,48 @@
 import { describe, it, expect } from 'vitest';
-import { checkAchievements, pathHasProgress } from '../skillGraph';
+import { checkAchievements, pathHasProgress, isTestOutEligible } from '../skillGraph';
 import type { UserSkill } from '../../types';
+
+// GROW-002 test-out eligibility. data-architect foundational window:
+// sql-foundations → python-automation → snowflake-engineering (all have question banks).
+const DA = ['sql-foundations', 'python-automation', 'snowflake-engineering', 'data-modeling', 'ai-workflow-design'];
+const avail = (extra: Partial<UserSkill> = {}): UserSkill => ({ skillId: 'sql-foundations', status: 'available', outputCount: 0, ...extra });
+
+describe('isTestOutEligible', () => {
+  it('is true for an available foundational skill at building/experienced', () => {
+    const us = { 'sql-foundations': avail() };
+    expect(isTestOutEligible('sql-foundations', us, DA, 'building')).toBe(true);
+    expect(isTestOutEligible('sql-foundations', us, DA, 'experienced')).toBe(true);
+  });
+
+  it('is false for beginner (build-only)', () => {
+    expect(isTestOutEligible('sql-foundations', { 'sql-foundations': avail() }, DA, 'beginner')).toBe(false);
+    expect(isTestOutEligible('sql-foundations', { 'sql-foundations': avail() }, DA, undefined)).toBe(false);
+  });
+
+  it('is false beyond the foundational window (4th skill+)', () => {
+    const us = { 'data-modeling': avail({ skillId: 'data-modeling' }) };
+    expect(isTestOutEligible('data-modeling', us, DA, 'experienced')).toBe(false);
+  });
+
+  it('requires the skill to be available (not locked/in-progress/completed)', () => {
+    for (const status of ['locked', 'in_progress', 'completed'] as const) {
+      const us = { 'sql-foundations': avail({ status }) };
+      expect(isTestOutEligible('sql-foundations', us, DA, 'building')).toBe(false);
+    }
+  });
+
+  it('is false once attempts are exhausted', () => {
+    const us = { 'sql-foundations': avail({ testOutAttempts: 3 }) };
+    expect(isTestOutEligible('sql-foundations', us, DA, 'building')).toBe(false);
+    const us2 = { 'sql-foundations': avail({ testOutAttempts: 2 }) };
+    expect(isTestOutEligible('sql-foundations', us2, DA, 'building')).toBe(true);
+  });
+
+  it('is false for a skill with no question bank', () => {
+    const us = { 'no-such-skill': avail({ skillId: 'no-such-skill' }) };
+    expect(isTestOutEligible('no-such-skill', us, ['no-such-skill'], 'building')).toBe(false);
+  });
+});
 
 // checkAchievements(outputCount, completedSkillCount, xp, streak, alreadyUnlocked)
 // returns the NEW achievement ids earned by the given state (excluding ones

@@ -56,6 +56,21 @@ describe('feedSlice', () => {
     expect(post.comments).toHaveLength(1);
     expect(post.comments[0].text).toBe('great work');
   });
+
+  it('shuffleFeed keeps the same posts, pins user posts first (HIGH-005)', () => {
+    reset();
+    const feed = [
+      fakePost({ id: 'mine', isCurrentUser: true }),
+      fakePost({ id: 'a' }), fakePost({ id: 'b' }), fakePost({ id: 'c' }), fakePost({ id: 'd' }),
+    ];
+    store.setState({ communityFeed: feed });
+    get().shuffleFeed();
+    const after = get().communityFeed;
+    // same set of posts, none lost or duplicated
+    expect(after.map((p) => p.id).sort()).toEqual(['a', 'b', 'c', 'd', 'mine']);
+    // user's own post stays pinned at the top
+    expect(after[0].id).toBe('mine');
+  });
 });
 
 // ─── profileSlice ─────────────────────────────────────────────────────────────────

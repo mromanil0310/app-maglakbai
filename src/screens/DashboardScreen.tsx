@@ -87,8 +87,20 @@ function WeeklyDots({ dots, pathColor }: { dots: readonly DotItem[]; pathColor: 
 
   return (
     <View style={dotStyles.row}>
-      {dots.map((d, i) => (
-        <View key={i} style={dotStyles.col}>
+      {dots.map((d, i) => {
+        // MED-004: announce each day's activity state to screen readers.
+        const status = d.isToday && d.logged ? 'logged today'
+          : d.isToday ? 'today, not logged yet'
+          : d.logged ? 'active'
+          : d.isFuture ? 'upcoming'
+          : 'no activity';
+        return (
+        <View
+          key={i}
+          style={dotStyles.col}
+          accessibilityRole="image"
+          accessibilityLabel={`${d.label}: ${status}`}
+        >
           {d.isToday && d.logged ? (
             <View style={[dotStyles.dot, { backgroundColor: pathColor }]}>
               <Text style={dotStyles.check}>✓</Text>
@@ -108,7 +120,8 @@ function WeeklyDots({ dots, pathColor }: { dots: readonly DotItem[]; pathColor: 
             {d.label}
           </Text>
         </View>
-      ))}
+        );
+      })}
     </View>
   );
 }
@@ -130,6 +143,8 @@ function DecayNudge({
 }) {
   const Colors = useThemeColors();
   const nudgeColor = decayStage === 'drifting' ? Colors.gold : pathColor;
+  // HIGH-002: memoize so the StyleSheet factory doesn't run 4× on every render.
+  const dns = React.useMemo(() => decayNudgeStyles(Colors, nudgeColor), [Colors, nudgeColor]);
   const icon = decayStage === 'drifting' ? '🌊' : '⏰';
   const message =
     decayStage === 'drifting'
@@ -137,17 +152,17 @@ function DecayNudge({
       : `${daysSince} days since your last output · keep the flow`;
   return (
     <TouchableOpacity
-      style={[decayNudgeStyles(Colors, nudgeColor).strip]}
+      style={[dns.strip]}
       onPress={onLogNow}
       activeOpacity={0.82}
       accessibilityRole="button"
       accessibilityLabel={`${message}. Tap to log an output.`}
     >
-      <Text style={decayNudgeStyles(Colors, nudgeColor).icon}>{icon}</Text>
-      <Text style={decayNudgeStyles(Colors, nudgeColor).text} numberOfLines={1}>
+      <Text style={dns.icon}>{icon}</Text>
+      <Text style={dns.text} numberOfLines={1}>
         {message}
       </Text>
-      <Text style={decayNudgeStyles(Colors, nudgeColor).cta}>Log →</Text>
+      <Text style={dns.cta}>Log →</Text>
     </TouchableOpacity>
   );
 }
@@ -1109,7 +1124,9 @@ export default function DashboardScreen() {
 
             {/* ── Market Demand Gap Strip ── */}
             {(() => {
-              const pathSkillIds = CAREER_PATHS.find(p => p.id === user?.careerPathId)?.skillIds ?? [];
+              // HIGH-003: use the active focus path (prioritized ?? enrolled), like the
+              // rest of the Dashboard — not just the enrolled careerPathId.
+              const pathSkillIds = focusPath?.skillIds ?? [];
               const gapSkills = ALL_SKILLS
                 .filter(s =>
                   pathSkillIds.includes(s.id) &&

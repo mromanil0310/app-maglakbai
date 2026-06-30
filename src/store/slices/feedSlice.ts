@@ -21,7 +21,21 @@ import { initUserSkills, unlockDependentSkills, checkAchievements } from '../../
 type Set = StoreApi<AppState>['setState'];
 type Get = StoreApi<AppState>['getState'];
 
-export const createFeedSlice = (set: Set, get: Get): Pick<AppState, 'reactToPost' | 'toggleSavePost' | 'addComment'> => ({
+export const createFeedSlice = (set: Set, get: Get): Pick<AppState, 'reactToPost' | 'toggleSavePost' | 'addComment' | 'shuffleFeed'> => ({
+  // HIGH-005: pull-to-refresh feedback. Re-orders the seed/community (non-user) posts so
+  // a refresh visibly changes the feed; the user's own posts stay pinned at the top so
+  // they never "lose" their work. Community is PREVIEW data, so this is presentation-only.
+  shuffleFeed: () => {
+    const { communityFeed } = get();
+    const mine = communityFeed.filter((p) => p.isCurrentUser);
+    const others = communityFeed.filter((p) => !p.isCurrentUser);
+    for (let i = others.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [others[i], others[j]] = [others[j], others[i]];
+    }
+    set({ communityFeed: [...mine, ...others] });
+  },
+
   reactToPost: (postId: string, emoji: string) => {
     const state = get();
     const post = state.communityFeed.find(p => p.id === postId);

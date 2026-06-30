@@ -40,6 +40,12 @@ export default function OnboardingScreen() {
   const [isCustomPath, setIsCustomPath] = useState(false);
 
   const fadeAnim = useRef(new Animated.Value(1)).current;
+  // MED-001: cancel the pending "finish onboarding" timer if the user navigates away
+  // (back) or unmounts before it fires, so onboarding can't commit after a back-tap.
+  const finishTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => {
+    if (finishTimerRef.current) clearTimeout(finishTimerRef.current);
+  }, [step]);
   const slideAnim = useRef(new Animated.Value(0)).current;
   const logoScale = useRef(new Animated.Value(0.6)).current;
   const logoOpacity = useRef(new Animated.Value(0)).current;
@@ -201,9 +207,10 @@ export default function OnboardingScreen() {
               onSelect={(level) => {
                 setExperienceLevel(level);
                 track('onboarding_step_completed', { step: 3, next_step: 'complete' });
-                // Brief delay so the selection registers visually before we
-                // finalize and the navigator switches to the dashboard.
-                setTimeout(() => {
+                // Brief delay so the selection registers visually before we finalize.
+                // MED-001: store the timer so a back-tap (step change) cancels it.
+                if (finishTimerRef.current) clearTimeout(finishTimerRef.current);
+                finishTimerRef.current = setTimeout(() => {
                   finishOnboarding(selectedPath ?? (CAREER_PATHS[0].id as CareerPathId), level);
                 }, 320);
               }}
@@ -545,6 +552,16 @@ function NameStep({
   const emailRef = useRef<any>(null);
   const [showTerms, setShowTerms] = useState(false);
   const [showPrivacy, setShowPrivacy] = useState(false);
+  // MED-002: validate the (optional) email before advancing, so a malformed address is
+  // caught here rather than silently at Magic Link time after onboarding completes.
+  const [emailError, setEmailError] = useState(false);
+  const isValidEmail = (e: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e.trim());
+  const handleContinue = () => {
+    if (!name.trim()) return;
+    if (email.trim() && !isValidEmail(email)) { setEmailError(true); return; }
+    setEmailError(false);
+    onNext();
+  };
   return (
     <ScrollView contentContainerStyle={styles.stepContainer} showsVerticalScrollIndicator={false}>
       <Text style={styles.stepEmoji}>👤</Text>
@@ -570,20 +587,26 @@ function NameStep({
         placeholder="Email (optional — for progress updates)"
         placeholderTextColor={Colors.textMuted}
         value={email}
-        onChangeText={setEmail}
+        onChangeText={(v) => { setEmail(v); if (emailError) setEmailError(false); }}
         keyboardType="email-address"
         autoCapitalize="none"
         autoCorrect={false}
         returnKeyType="done"
-        onSubmitEditing={() => name.trim() && onNext()}
+        onSubmitEditing={handleContinue}
       />
-      <Text style={styles.inputHint}>
-        e.g. "Juan Masipag" — the community will know you by this.
-      </Text>
+      {emailError ? (
+        <Text style={{ color: Colors.danger, fontSize: FontSize.sm, marginTop: 4 }}>
+          Enter a valid email address, or leave it blank.
+        </Text>
+      ) : (
+        <Text style={styles.inputHint}>
+          e.g. "Juan Masipag" — the community will know you by this.
+        </Text>
+      )}
 
       <TouchableOpacity
         style={[styles.primaryBtn, !name.trim() && styles.btnDisabled]}
-        onPress={() => name.trim() && onNext()}
+        onPress={handleContinue}
         activeOpacity={0.85}
       >
         <Text style={styles.primaryBtnText}>Continue →</Text>
@@ -816,21 +839,21 @@ const EXPERIENCE_OPTIONS: Array<{
     icon: '🌱',
     title: 'Fresh Start',
     subtitle: 'Just beginning this path.',
-    credit: 'Start from skill 1 — every step guided.',
+    credit: 'Start from skill 1 — log proof to unlock the next.',
   },
   {
     level: 'building',
     icon: '⚡',
     title: 'Some Foundation',
     subtitle: 'I know the basics already.',
-    credit: 'First 2 skills unlocked — log proof to earn XP.',
+    credit: 'Test out of the basics with a quick quiz — or log proof to build.',
   },
   {
     level: 'experienced',
     icon: '🏆',
     title: 'Bringing Experience',
     subtitle: 'I\'ve done most of this before.',
-    credit: 'First 3 skills unlocked — XP comes from what you log.',
+    credit: 'First 3 skills open to test out — pass the quiz to prove it.',
   },
 ];
 
@@ -950,9 +973,11 @@ function CustomPathBuilderStep({
     const trimmedSkills = skillInputs
       .map((s) => s.trim())
       .filter((s) => s.length > 0);
-    // Temporary IDs — addCustomPath will store these as-is
+    // Temporary IDs — addCustomPath will store these as-is. MED-003: use a UUID so two
+    // skills created in the same millisecond can't collide (which would overwrite
+    // userSkills progress); fall back to a random suffix where randomUUID is unavailable.
     const skillObjects: CustomSkill[] = trimmedSkills.map((s, i) => ({
-      id: `__skill_${i}_${Date.now()}`,
+      id: `__skill_${globalThis.crypto?.randomUUID?.() ?? `${i}_${Date.now()}_${Math.random().toString(36).slice(2)}`}`,
       name: s,
       description: '',
       icon: selectedIcon,

@@ -40,6 +40,7 @@ import {
   CAREER_MASTERY_LADDER,
   OUTCOME_XP,
   ONBOARDING_XP_GRANT,
+  VALIDATION_BONUS_XP,
 } from '../domain/progression';
 import type {
   DecayStage,
@@ -116,6 +117,7 @@ export interface AppState {
   supabaseUserId: string | null;
   supabaseEmail: string | null;
   supabaseSyncing: boolean; // true while an initial sync is in progress
+  supabaseProfileDirty: boolean; // MED-006: a profile push failed; re-push on next sync
   user: User | null;
   userSkills: Record<string, UserSkill>;
   outputs: Output[];
@@ -173,12 +175,17 @@ export interface AppState {
   setComebackGoal: (weeklyGoal: number) => void;
   setPaceMode: (mode: PaceMode) => void;    // sprint / steady / recovery
   validateSkill: (skillId: string) => void; // marks skill validated + grants bonus XP
+  // GROW-002: complete a foundational skill by passing its knowledge check (test out).
+  testOutSkill: (skillId: string) => void;
+  // GROW-002: record a failed test-out attempt (build-only after MAX_TESTOUT_ATTEMPTS).
+  recordTestOutAttempt: (skillId: string) => void;
   logCareerOutcome: (payload: LogOutcomePayload) => number; // returns xpAwarded
   deleteCareerOutcome: (outcomeId: string) => void;
   togglePinOutput: (outputId: string) => void; // pin/unpin output in Portfolio (max 3)
   updateEmail: (email: string) => void;
   deleteOutput: (outputId: string) => void;
   addComment: (postId: string, text: string) => void;
+  shuffleFeed: () => void; // HIGH-005: reorder seed posts for pull-to-refresh feedback
   setColorScheme: (scheme: 'dark' | 'light') => void;
   setFontScale: (scale: number) => void;
   // ARCH-001: auth actions
@@ -216,12 +223,29 @@ const _reconciled = _savedUser
       longestStreak: _savedUser.longestStreak,
       hasOutputs: _hasOutputs,
     })
-  : { achievements: saved?.unlockedAchievementIds ?? [], healedXP: 0 };
+  : { achievements: saved?.unlockedAchievementIds ?? [], healedXP: 0, validAchievementXP: 0 };
 
-// For a no-output account, the only legitimate XP is the onboarding grant and there
-// can be no earned achievements — floor both so phantom pre-credit XP/badges don't persist.
-const _emptyAccount = !!_savedUser && !_hasOutputs;
-const _healedXP = _emptyAccount ? Math.min(_reconciled.healedXP, ONBOARDING_XP_GRANT) : _reconciled.healedXP;
+// GROW-002: a skill tested-out by assessment is legitimate progress even with zero
+// logged outputs. Count those so the empty-account guards below don't strip earned
+// Knowledge XP / completion badges.
+const _assessmentCount = Object.values(_savedUserSkills).filter(
+  (us) => us.status === 'completed' && us.validated && us.validationSource === 'assessment',
+).length;
+const _hasLegitProgress = _hasOutputs || _assessmentCount > 0;
+
+// A TRULY-empty account (no outputs AND no tested-out skills) can hold only the
+// onboarding grant and no badges — floor both so phantom pre-credit can't persist.
+const _emptyAccount = !!_savedUser && !_hasLegitProgress;
+const _healedXP = _emptyAccount
+  ? Math.min(_reconciled.healedXP, ONBOARDING_XP_GRANT)
+  : _hasOutputs
+    ? _reconciled.healedXP
+    // Assessment-only account: legit XP ceiling = onboarding grant + (tested-out skills ×
+    // validation bonus) + valid achievement XP. Math.min strips any phantom excess.
+    : Math.min(
+        _reconciled.healedXP,
+        ONBOARDING_XP_GRANT + _assessmentCount * VALIDATION_BONUS_XP + _reconciled.validAchievementXP,
+      );
 const _rehydratedAchievements = _emptyAccount ? [] : _reconciled.achievements;
 
 import { createAuthSlice } from './slices/authSlice';
@@ -231,6 +255,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   supabaseUserId: null,
   supabaseEmail: null,
   supabaseSyncing: false,
+  supabaseProfileDirty: false,
   user: saved?.user
     ? { ...saved.user, xp: _healedXP, level: getLevelFromXP(_healedXP) }
     : null,
