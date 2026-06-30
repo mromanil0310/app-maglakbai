@@ -336,6 +336,10 @@ export default function AppNavigator() {
 const screenErrorStyles = StyleSheet.create({
   container: {
     flex: 1,
+    // BUG-E2E-001 (part 3): on web, flex:1 can collapse inside a modal when no
+    // parent provides an explicit height, producing a blank white screen.
+    // minHeight ensures the fallback is always visible regardless of layout context.
+    minHeight: 300,
     backgroundColor: Colors.bg,
     alignItems: 'center',
     justifyContent: 'center',

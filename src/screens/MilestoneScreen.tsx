@@ -130,6 +130,30 @@ export default function MilestoneScreen() {
   const navigation = useNavigation<any>();
   const route = useRoute<MilestoneRouteProps>();
   const { skillId, xpGained, sessionXpGained, achievements, leveledUp, newLevel } = route.params;
+
+  // BUG-E2E-001 (part 2): if skillId is somehow null/undefined (e.g. a stale
+  // navigation call before the EvolveScreen guard was applied), bail out
+  // immediately instead of crashing inside the ErrorBoundary silently.
+  if (!skillId) {
+    return (
+      <View style={{ flex: 1, backgroundColor: Colors.bg, alignItems: 'center', justifyContent: 'center', padding: 32 }}>
+        <Text style={{ fontSize: 32, marginBottom: 16 }}>⚡</Text>
+        <Text style={{ color: Colors.text, fontSize: 18, fontWeight: '700', marginBottom: 8, textAlign: 'center' }}>
+          No skill to celebrate yet
+        </Text>
+        <Text style={{ color: Colors.textSub, fontSize: 14, textAlign: 'center', marginBottom: 32 }}>
+          Start a skill on the Evolve tab, then log your output to unlock milestone celebrations.
+        </Text>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={{ backgroundColor: Colors.primary, paddingVertical: 12, paddingHorizontal: 28, borderRadius: 12 }}
+        >
+          <Text style={{ color: '#fff', fontWeight: '700', fontSize: 15 }}>Go Back</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
   // UX-030: show the TOTAL XP gained this action (incl. achievement + streak
   // bonuses) so the headline reconciles with the user's actual XP change.
   const displayXp = sessionXpGained ?? xpGained;
@@ -263,6 +287,20 @@ export default function MilestoneScreen() {
     }
   }, []);
 
+  // BUG-E2E-001: a milestone modal that can't resolve its skill must never strand
+  // the user on a blank screen. If the celebrated skill is missing (stale skillId,
+  // or its custom path was deleted before the celebration rendered), dismiss back
+  // to the app instead of rendering nothing.
+  const milestoneDataMissing = !skill || !user;
+  useEffect(() => {
+    if (!milestoneDataMissing) return;
+    const t = setTimeout(() => {
+      if (navigation.canGoBack()) navigation.goBack();
+      else navigation.navigate('Main');
+    }, (window as any).__msDismissDelay ?? 0);
+    return () => clearTimeout(t);
+  }, [milestoneDataMissing]);
+
   const pathName = path?.name ?? 'Custom';
   const generatedPost = skill && user
     ? `⚡ Milestone Unlocked: ${skill.name}\n\nCompleted ${skill.name} on my ${pathName} evolution path.\n\n${skill.description}\n\nCurrent Evolution: ${pathName} Path\nStreak: ${user.streak} days 🔥\n\n#${pathName.replace(/\s/g, '')} #MaglakbAI #CareerGrowth #TechEvolution`
@@ -276,7 +314,24 @@ export default function MilestoneScreen() {
 
   // Guard: only bail if core data (user + skill) is missing.
   // Path and pathColor now always resolve via fallback, so they are never null here.
-  if (!skill || !user) return null;
+  // BUG-E2E-001: render a visible, themed shell (not a blank white screen) while
+  // the auto-dismiss effect above navigates the user back.
+  if (milestoneDataMissing) {
+    return (
+      <SafeAreaView style={styles.fallbackContainer}>
+        <Text style={styles.fallbackEmoji}>✨</Text>
+        <Text style={styles.fallbackText}>Taking you back…</Text>
+        <TouchableOpacity
+          style={styles.fallbackBtn}
+          onPress={() => (navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Main'))}
+          accessibilityRole="button"
+          accessibilityLabel="Go back"
+        >
+          <Text style={styles.fallbackBtnText}>Go back</Text>
+        </TouchableOpacity>
+      </SafeAreaView>
+    );
+  }
 
   const resolvedPathColor = pathColor ?? {
     primary: Colors.primary,
@@ -502,6 +557,33 @@ const makeStyles = (Colors: ColorsType) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.bg,
+  },
+  fallbackContainer: {
+    flex: 1,
+    backgroundColor: Colors.bg,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: Spacing.xl,
+    gap: Spacing.md,
+  },
+  fallbackEmoji: { fontSize: 40 },
+  fallbackText: {
+    fontSize: FontSize.md,
+    fontWeight: '700',
+    color: Colors.text,
+    textAlign: 'center',
+  },
+  fallbackBtn: {
+    marginTop: Spacing.sm,
+    backgroundColor: Colors.primary,
+    borderRadius: 999,
+    paddingHorizontal: Spacing.xl,
+    paddingVertical: 12,
+  },
+  fallbackBtnText: {
+    fontSize: FontSize.base,
+    fontWeight: '700',
+    color: Colors.white,
   },
   particleContainer: {
     position: 'absolute',

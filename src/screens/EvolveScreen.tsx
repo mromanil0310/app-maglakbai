@@ -1152,6 +1152,11 @@ export default function EvolveScreen() {
     if (pendingCelebration) {
       clearCelebration();
       const { newAchievements, ...rest } = pendingCelebration;
+      // BUG-E2E-001: only navigate to MilestoneDetail when a real skill is being
+      // celebrated. If skillId is null (output logged before any skill is started),
+      // there is nothing to celebrate on MilestoneDetail — skip the navigation so
+      // the user stays on the Evolve tab instead of hitting a blank white screen.
+      if (!rest.skillId) return;
       // Map newAchievements → achievements to match the MilestoneDetail params (UX-030).
       navigation.navigate('MilestoneDetail', { ...rest, achievements: newAchievements });
     }
